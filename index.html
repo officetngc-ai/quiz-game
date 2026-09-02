@@ -63,8 +63,14 @@
     @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
     .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.85); pointer-events: none; animation: none; box-shadow: 0 5px 0 rgba(0,0,0,0.2); }
 
+    /* 【修正重點】：強化 range input 相容性，加入 -webkit-appearance 與 touch-action */
     #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1; background: rgba(255,255,255,0.9); border-radius: 20px; padding: 20px; margin-bottom: 80px;}
-    input[type=range] { width: 90%; margin: 30px 0; height: 15px; border-radius: 10px; background: #d3d3d3; outline: none; }
+    input[type=range] { 
+      -webkit-appearance: none; /* 強制覆寫原生樣式，允許自訂軌道 */
+      appearance: none;
+      width: 90%; margin: 30px 0; height: 15px; border-radius: 10px; background: #d3d3d3; outline: none; 
+      touch-action: none; /* 防止滑動時觸發網頁原生拖曳 */
+    }
     input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 40px; height: 40px; border-radius: 50%; background: #3498db; cursor: pointer; box-shadow: 0 5px 10px rgba(0,0,0,0.3);}
     #sliderValue { font-size: 60px; font-weight: 900; color: #e74c3c; }
 
@@ -276,12 +282,19 @@
             isBountyMode = (data.type === 'BOUNTY_PHASE');
             isAuctionMode = (data.type === 'AUCTION_PHASE');
             
+            // 【修正】確保押注拉桿可以被拖曳
+            const wSlider = document.getElementById('wagerSlider');
+            wSlider.disabled = false;
+            wSlider.max = myScore > 0 ? myScore : 0; 
+            wSlider.value = 0; 
+            document.getElementById('wagerAmount').innerText = "0";
+
             if(isAuctionMode) {
                 document.getElementById('gameStatus').innerText = "⚖️ 搶答拍賣開始！";
                 document.getElementById('wagerTitle').innerText = "出價爭奪唯一作答權：";
             } else {
                 document.getElementById('gameStatus').innerText = isBountyMode ? "🎯 賞金獵人時刻！" : "💰 盲注時刻！";
-                document.getElementById('wagerTitle').innerText = isBountyMode ? "選擇要詛咒的隊伍或對手" : "你要押注多少積分？";
+                document.getElementById('wagerTitle').innerText = isBountyMode ? "選擇要詛咒的對手或隊伍" : "你要押注多少積分？";
             }
             
             const tgtSelect = document.getElementById('bountyTarget');
@@ -291,9 +304,6 @@
                  if(t.name !== document.getElementById('playerName').value) tgtSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
               });
             } else { tgtSelect.style.display = 'none'; }
-
-            const wSlider = document.getElementById('wagerSlider');
-            wSlider.max = myScore > 0 ? myScore : 0; wSlider.value = 0; document.getElementById('wagerAmount').innerText = "0";
           }
           else if (data.type === 'ENABLE_BUTTONS') {
             vibrate(100); selectedAnswers.clear(); selectedOrder = []; currentQuestionType = data.qType; 
@@ -344,9 +354,11 @@
                }
             }
             
+            // ========== 進階題型渲染 ==========
             if (data.qType === 'slider') {
               btnGrid.style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; document.getElementById('sliderBox').style.display = 'flex';
               const sld = document.getElementById('ansSlider');
+              sld.disabled = false; // 【修正】強制重置解鎖滑桿
               sld.min = data.min || 0; sld.max = data.max || 100; sld.value = Math.floor((parseInt(sld.min)+parseInt(sld.max))/2);
               document.getElementById('sliderValue').innerText = sld.value;
             } 
@@ -409,6 +421,8 @@
             document.getElementById('gameStatus').style.background = "#89609e"; document.getElementById('gameStatus').style.color = "white";
             document.getElementById('submitBtn').style.display = 'none'; document.getElementById('skillBar').style.display = 'none';
             document.querySelectorAll('.ans-btn').forEach(b => { b.classList.remove('active', 'selected', 'chameleon-fx'); b.classList.add('locked'); b.querySelector('.opt-text')?.classList.remove('memory-hide'); });
+            
+            // 【修正】確保時間到時鎖死滑桿，以防偷作弊
             document.getElementById('ansSlider').disabled = true;
           }
         });
@@ -501,7 +515,9 @@
           b.classList.remove('active'); b.classList.add('locked');
           if(!ansArray.includes(i)) b.style.opacity = '0.1';
         });
-      } else if (currentQuestionType === 'slider') { document.getElementById('ansSlider').disabled = true; }
+      } else if (currentQuestionType === 'slider') { 
+        document.getElementById('ansSlider').disabled = true; 
+      }
       
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.innerText = "🚀 答案已在路上！"; submitBtn.style.opacity = '0.5'; submitBtn.style.pointerEvents = 'none';
