@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>P2P 主畫面 - 綜藝大廳升級版</title>
+  <title>P2P 主畫面 - 綜藝果凍大廳版</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -45,22 +45,40 @@
     .setup-row { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; font-size: 20px; font-weight: bold; background: rgba(0,0,0,0.05); padding: 10px 15px; border-radius: 15px;}
     .setup-input, .setup-select { font-size: 18px; padding: 5px; border-radius: 10px; border: 2px solid #ccc; font-weight: bold; font-family: inherit;}
 
-    /* ========== 大廳與玩家名牌 (新增呼吸與頭像特效) ========== */
+    /* ========== 大廳與隨機變形果凍名牌 ========== */
     #teamBuckets { display: flex; justify-content: space-around; margin-top: 20px; flex-wrap: wrap; gap: 15px;}
     .team-bucket { flex: 1 1 calc(25% - 15px); min-width: 150px; min-height: 200px; border-radius: 20px; padding: 15px; color: white; box-shadow: 0 10px 20px rgba(0,0,0,0.2); transition: 0.3s; }
     .team-title { font-size: 24px; font-weight: 900; margin-bottom: 10px; border-bottom: 3px solid rgba(255,255,255,0.5); padding-bottom: 5px; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);}
     
-    .player-tag { background: white; color: #333; font-size: 22px; padding: 8px 20px; border-radius: 30px; margin: 8px; display: inline-flex; align-items: center; gap: 8px; font-weight: 900; animation: superBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, lobbyWiggle 3s infinite ease-in-out alternate 0.6s; box-shadow: 0 8px 15px rgba(0,0,0,0.15), 0 5px 0 #bdc3c7; border: 2px solid #eee; }
-    @keyframes superBounce { 0% { transform: scale(0) translateY(100px); } 100% { transform: scale(1) translateY(0); } }
-    @keyframes lobbyWiggle { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-5px) rotate(3deg); } }
+    .player-tag { 
+      color: #333; font-size: 22px; padding: 12px 25px; margin: 10px; 
+      display: inline-flex; align-items: center; gap: 8px; font-weight: 900; 
+      box-shadow: 0 8px 15px rgba(0,0,0,0.15), inset 0 -4px 5px rgba(0,0,0,0.1); 
+      border: 3px solid rgba(255,255,255,0.6); 
+    }
+    @keyframes jellyTag {
+      0%, 100% { transform: scale(1, 1) rotate(0deg); }
+      25% { transform: scale(1.05, 0.95) rotate(3deg); }
+      50% { transform: scale(0.95, 1.05) rotate(-3deg); }
+      75% { transform: scale(1.02, 0.98) rotate(1deg); }
+    }
+    @keyframes superBounceTag { 
+      0% { transform: scale(0) translateY(100px); opacity:0; } 
+      60% { transform: scale(1.1) translateY(-10px); opacity:1; }
+      100% { transform: scale(1) translateY(0); opacity:1; } 
+    }
     
     .fire-streak { box-shadow: 0 0 10px #e74c3c, 0 0 20px #f1c40f !important; border: 2px solid #e74c3c !important; } 
     .ghost-tag { opacity: 0.5; filter: grayscale(100%); text-decoration: line-through; }
 
-    /* ========== 綜藝感大廳倒數計時器 ========== */
-    .lobby-timer-box { font-size: 32px; font-weight: 900; color: #4a3472; margin-top: 15px; background: rgba(255,255,255,0.9); padding: 10px 30px; border-radius: 50px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); display: inline-block; border: 4px solid #f1c40f; }
-    #groupTimerText { color:#e74c3c; font-size:65px; display: inline-block; animation: lobbyTimerPulse 1s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 4px 10px rgba(231,76,60,0.4); margin: 0 10px;}
-    @keyframes lobbyTimerPulse { 0% { transform: scale(1); } 50% { transform: scale(1.3) rotate(5deg); color: #ff9ff3; } 100% { transform: scale(1); } }
+    /* ========== 深色高對比大廳倒數計時器 ========== */
+    .lobby-timer-box { font-size: 36px; font-weight: 900; color: #4a3472; margin-top: 15px; background: rgba(255,255,255,0.95); padding: 15px 40px; border-radius: 50px; box-shadow: 0 15px 25px rgba(0,0,0,0.2); display: inline-block; border: 5px solid #f1c40f; }
+    #groupTimerText { color: #c0392b; font-size: 80px; display: inline-block; animation: lobbyTimerPulse 0.8s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 4px 10px rgba(192,57,43,0.3); margin: 0 15px;}
+    @keyframes lobbyTimerPulse { 
+      0% { transform: scale(1); color: #c0392b; } 
+      50% { transform: scale(1.25) rotate(5deg); color: #900C3F; } /* 深寶石紅 */
+      100% { transform: scale(1); color: #c0392b; } 
+    }
 
     #headerContainer { display: inline-flex; justify-content: center; align-items: center; gap: 40px; margin-bottom: 20px;}
     #qrcode { background: white; padding: 15px; border-radius: 20px; border: 6px dashed #ff6b6b; transform: rotate(-3deg);}
@@ -93,6 +111,7 @@
     @keyframes floatOpt { 0%, 100% { transform: translateY(0px) rotate(0deg); } 33% { transform: translateY(-8px) rotate(1deg); } 66% { transform: translateY(5px) rotate(-1deg); } }
 
     .option.dimmed { opacity: 0.2; transform: scale(0.9); filter: grayscale(100%) blur(2px); animation: none !important;}
+    
     .option.highlight { 
         transform: scale(1.15) !important; 
         box-shadow: 0 0 60px rgba(255, 215, 0, 1), 0 15px 0 rgba(0,0,0,0.3) !important; 
@@ -176,7 +195,7 @@
       </div>
       
       <div style="flex:1; background: rgba(46, 204, 113, 0.2); border-left: 5px solid #2ecc71; padding: 20px; border-radius: 15px;">
-        <h3 style="margin-top:0; color:#27ae60;">🔥 遊戲擴充模組</h3>
+        <h3 style="margin-top:0; color:#27ae60;">🔥 七大神級擴充模組</h3>
         <label style="display:flex; align-items:center; margin: 10px 0; font-size: 18px; cursor:pointer;"><input type="checkbox" id="cfgMedia" checked style="width:20px; height:20px; margin-right:10px;"> 👁️ 迷霧解析 & 多媒體圖片</label>
         <label style="display:flex; align-items:center; margin: 10px 0; font-size: 18px; cursor:pointer;"><input type="checkbox" id="cfgAdvType" checked style="width:20px; height:20px; margin-right:10px;"> 🧩 進階題型 (連連看/拉桿/排序)</label>
         <label style="display:flex; align-items:center; margin: 10px 0; font-size: 18px; cursor:pointer;"><input type="checkbox" id="cfgEconomy" checked style="width:20px; height:20px; margin-right:10px;"> 💰 賞金獵人 & 盲注 & 連對加成</label>
@@ -192,7 +211,7 @@
     <div style="display: flex; justify-content: center; align-items: center; gap: 30px;">
       <div id="qrcode"></div>
       <div style="text-align: left;">
-        <h2 style="color:#ff4b2b; margin:0; text-shadow: 0 4px 10px rgba(0,0,0,0.1);" id="lobbyWaitText">✨ 掃描 QR Code 加入英雄榜！</h2>
+        <h2 style="color:#ff4b2b; margin:0;" id="lobbyWaitText">✨ 掃描 QR Code 選擇陣營！</h2>
         <div class="lobby-timer-box" id="lobbyTimerBox">
           倒數開始遊戲：<span id="groupTimerText">60</span> 秒
         </div>
@@ -233,11 +252,9 @@
   </div>
 
   <script>
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSChl0vRMFeEVPH4K5T8OC6R4EXWDsoqwJA68DQxQc58IH1zxaG-A1uly4lZT1jr6x8rJIMGPjJ0vRU/pub?output=csv"; 
+    const SHEET_CSV_URL = ""; 
 
-    // ========== 隨機趣味頭像庫 ==========
-    const avatarsList = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿','🦔','🐉','🐲'];
-
+    // ========== 音效與程序化背景音樂引擎 ==========
     let audioCtx;
     let bgmOsc = null; let bgmGain = null; let bgmLfo = null;
 
@@ -288,6 +305,36 @@
 
     const roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
     let peer;
+
+    // 隨機果凍名牌生成器
+    function createPlayerTagElement(name, avatar, idStr = "") {
+      const tag = document.createElement('div'); 
+      tag.className = 'player-tag'; 
+      if(idStr) tag.id = idStr;
+      tag.innerHTML = `<span style="font-size:28px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));">${avatar}</span> <span style="text-shadow: 0 1px 2px rgba(255,255,255,0.8);">${name}</span>`;
+      
+      const blobs = [
+        '30% 70% 70% 30% / 30% 30% 70% 70%', '60% 40% 30% 70% / 60% 30% 70% 40%',
+        '40% 60% 70% 30% / 40% 50% 60% 50%', '70% 30% 40% 60% / 50% 70% 30% 50%',
+        '50% 50% 20% 80% / 25% 80% 20% 75%', '20px', '25px', '50px' 
+      ];
+      const colors = [
+        'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)', 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
+        'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)', 'linear-gradient(135deg, #cfd9df 0%, #e2ebf0 100%)',
+        'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)', 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
+        'linear-gradient(135deg, #fccb90 0%, #d57eeb 100%)', 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)',
+        'linear-gradient(135deg, #ff0844 0%, #ffb199 100%)', 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+        'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)', 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+      ];
+      
+      tag.style.borderRadius = blobs[Math.floor(Math.random() * blobs.length)];
+      tag.style.background = colors[Math.floor(Math.random() * colors.length)];
+      const animDelay = (Math.random() * 0.5).toFixed(2);
+      const animDur = (2 + Math.random()).toFixed(2);
+      tag.style.animation = `superBounceTag 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) both, jellyTag ${animDur}s infinite ease-in-out alternate ${animDelay}s`;
+      
+      return tag;
+    }
 
     function generateTeamStyles(count) {
       let cssString = ""; teamsData = [];
@@ -355,20 +402,31 @@
         conn.on('data', (data) => {
           if (data.type === 'JOIN') {
             playJoin(); conn.playerName = data.name;
-            if(!playerStats[data.name]) {
-              let randomAvatar = avatarsList[Math.floor(Math.random() * avatarsList.length)];
-              playerStats[data.name] = { teamId: -1, score: 0, correctCount: 0, fastWins: 0, fastScore: 0, streak: 0, hasShield: false, isGhost: false, isTraitor: false, avatar: randomAvatar };
-            }
+            if(!playerStats[data.name]) playerStats[data.name] = { teamId: -1, score: 0, correctCount: 0, fastWins: 0, fastScore: 0, streak: 0, hasShield: false, isGhost: false, isTraitor: false, avatar: '👤' };
             
             if (gameConfig.isTeamMode) {
               conn.send({ type: 'TEAM_SELECTION_START', teams: teamsData, max: gameConfig.maxPerTeam, css: document.getElementById('dynamicTeamStyles').innerHTML, cfg: gameConfig });
             } else {
-              const tag = document.createElement('div'); tag.className = 'player-tag';
-              tag.innerHTML = `<span style="font-size:24px;">${playerStats[data.name].avatar}</span> ${data.name}`;
+              // 個人戰模式大廳加入玩家，使用果凍名牌
+              const tag = createPlayerTagElement(data.name, '👤');
               bucketsContainer.appendChild(tag);
               conn.send({ type: 'INDIVIDUAL_MODE_WAIT', cfg: gameConfig });
             }
-          } 
+          }
+          else if (data.type === 'SYNC_AVATAR') {
+             // 接收手機端產生的專屬頭像
+             if(playerStats[conn.playerName]) {
+                 playerStats[conn.playerName].avatar = data.avatar;
+                 // 如果大廳已有這個人的標籤，更新頭像
+                 let ptag = document.getElementById(`ptag-${conn.playerName}`);
+                 if(ptag) ptag.innerHTML = `<span style="font-size:28px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));">${data.avatar}</span> <span style="text-shadow: 0 1px 2px rgba(255,255,255,0.8);">${conn.playerName}</span>`;
+                 else {
+                    // 個人戰時的更新
+                    let tags = document.querySelectorAll('.player-tag');
+                    tags.forEach(t => { if(t.innerText.includes(conn.playerName)) t.innerHTML = `<span style="font-size:28px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));">${data.avatar}</span> <span style="text-shadow: 0 1px 2px rgba(255,255,255,0.8);">${conn.playerName}</span>`; });
+                 }
+             }
+          }
           else if (data.type === 'SELECT_TEAM' && gameConfig.isTeamMode) { handleTeamSelection(conn, data.teamId); }
           else if (data.type === 'ANSWER') { handleAnswer(conn, data); }
           else if (data.type === 'USE_SKILL' && gameConfig.useSabotage) { handleSkill(conn, data.skill); }
@@ -380,6 +438,7 @@
         });
       });
 
+      // 個人戰與團隊戰共用倒數計時器邏輯
       let timeLeft = gameConfig.groupTime; 
       const timerTextEl = document.getElementById('groupTimerText');
       if(timerTextEl) timerTextEl.innerText = timeLeft;
@@ -396,9 +455,10 @@
       if (team && team.players.length < gameConfig.maxPerTeam && playerStats[pName].teamId === -1) {
         team.players.push(pName); playerStats[pName].teamId = teamId;
         document.getElementById(`bucket-${teamId}`).querySelector('.team-title').innerText = `${team.name} (${team.players.length}/${gameConfig.maxPerTeam})`;
-        const pTag = document.createElement('div'); pTag.className = 'player-tag'; pTag.id = `ptag-${pName}`; 
-        pTag.innerHTML = `<span style="font-size:24px;">${playerStats[pName].avatar}</span> ${pName}`;
+        
+        const pTag = createPlayerTagElement(pName, playerStats[pName].avatar, `ptag-${pName}`);
         document.getElementById(`players-${teamId}`).appendChild(pTag);
+        
         conn.send({ type: 'TEAM_ASSIGNED', teamName: team.name, teamClass: team.class, teamGrad: team.gradient, cfg: gameConfig });
         broadcast({ type: 'TEAM_UPDATED', teams: teamsData, max: gameConfig.maxPerTeam }); playJoin();
       }
@@ -859,7 +919,8 @@
       else {
         const options = document.querySelectorAll('.option');
         options.forEach((opt, i) => {
-          opt.classList.remove('floating-opt'); opt.style.animation = 'none'; 
+          opt.classList.remove('floating-opt');
+          opt.style.animation = 'none'; 
           if(currentMode === 'memory') opt.querySelector('.opt-text').innerText = questions[currentQIndex].options[i];
           if (correctAns.includes(i)) opt.classList.add('highlight'); else opt.classList.add('dimmed');
         });
