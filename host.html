@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>P2P 主畫面 - 實境秀光影極致版</title>
+  <title>P2P 主畫面 - 實境秀錦標賽版</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -48,25 +48,31 @@
     .panel-shake { animation: boxShake 0.4s infinite !important; }
     @keyframes boxShake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-0.5vw) rotate(-1deg); } 75% { transform: translateX(0.5vw) rotate(1deg); } }
 
-    /* ========== 🚨 最後五秒：紅色警戒光影引擎 ========== */
-    body.panic-lighting::after {
-      content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      box-shadow: inset 0 0 15vh 5vh rgba(255, 0, 0, 0.6); pointer-events: none; z-index: 9998;
-      animation: panicFlash 0.5s infinite alternate;
+    /* ========== 🚨 最後五秒：霓虹派對光影引擎 ========== */
+    .emergency-light { animation: partyPulse 0.5s infinite alternate !important; }
+    @keyframes partyPulse {
+      0% { box-shadow: inset 0 0 5vh rgba(255, 0, 255, 0.4), 0 2vh 5vh rgba(0,0,0,0.15); background-color: rgba(255, 240, 255, 0.95); }
+      50% { box-shadow: inset 0 0 15vh rgba(0, 255, 255, 0.6), 0 2vh 8vh rgba(0,255,255,0.4); background-color: rgba(240, 255, 255, 0.95); }
+      100% { box-shadow: inset 0 0 25vh rgba(255, 255, 0, 0.6), 0 2vh 10vh rgba(255,255,0,0.4); background-color: rgba(255, 255, 240, 0.95); }
     }
-    @keyframes panicFlash { 0% { box-shadow: inset 0 0 5vh 1vh rgba(255, 0, 0, 0.2); } 100% { box-shadow: inset 0 0 20vh 8vh rgba(255, 0, 0, 0.8); } }
 
-    /* ========== 中央巨大化倒數特效 ========== */
+    /* ========== 中央巨大化倒數特效 (派對歡樂版) ========== */
     #giantTimerOverlay {
         display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
         z-index: 9000; pointer-events: none; font-size: 60vh; font-weight: 900;
-        color: rgba(255, 50, 50, 0.8); text-shadow: 0 0 10vh rgba(255,0,0,0.8);
-        animation: giantPulse 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; line-height: 1; margin:0; padding:0;
+        background: linear-gradient(45deg, #ff0844, #ffb199, #fbc2eb, #a18cd1, #8fd3f4); 
+        -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
+        filter: drop-shadow(0 2vh 5vh rgba(255, 105, 180, 0.6));
+        animation: giantPartyPop 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; line-height: 1; margin:0; padding:0;
     }
-    @keyframes giantPulse { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } }
+    @keyframes giantPartyPop { 
+        0% { transform: translate(-50%, -50%) scale(0.5) rotate(-10deg); opacity: 0; } 
+        50% { transform: translate(-50%, -50%) scale(1.2) rotate(10deg); opacity: 1; } 
+        100% { transform: translate(-50%, -50%) scale(0.8) rotate(0deg); opacity: 0; } 
+    }
 
-    .setup-row { display: flex; justify-content: space-between; align-items: center; margin: 1vh 0; font-size: clamp(14px, 2.5vh, 26px); font-weight: bold; background: rgba(0,0,0,0.05); padding: 1vh 2vw; border-radius: 2vh;}
-    .setup-input, .setup-select { font-size: clamp(14px, 2.5vh, 26px); padding: 0.5vh; border-radius: 1vh; border: 0.2vh solid #ccc; font-weight: bold; font-family: inherit;}
+    .setup-row { display: flex; justify-content: space-between; align-items: center; margin: 1vh 0; font-size: clamp(14px, 2vh, 22px); font-weight: bold; background: rgba(0,0,0,0.05); padding: 1vh 2vw; border-radius: 2vh;}
+    .setup-input, .setup-select { font-size: clamp(14px, 1.8vh, 18px); padding: 0.5vh; border-radius: 1vh; border: 0.2vh solid #ccc; font-weight: bold; font-family: inherit;}
 
     /* ========== 大廳與隨機變形果凍名牌 ========== */
     #teamBuckets { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 2vh; flex: 1; min-height: 0; align-items: stretch; overflow: hidden;}
@@ -89,8 +95,8 @@
     #qrcode { background: white; padding: 1.5vh; border-radius: 2vh; border: 0.6vh dashed #ff6b6b; transform: rotate(-3deg);}
     
     /* ========== 題目與選項排版防破版機制 ========== */
-    #questionBox h2 { font-size: clamp(30px, 6vh, 80px); margin: 0 0 1vh 0; line-height: 1.3; flex-shrink: 0; color: #2c3e50; font-weight: 900; }
-    .mode-badge { background: linear-gradient(45deg, #f093fb, #f5576c); color: white; padding: 1vh 2vw; border-radius: 3vh; font-size: clamp(20px, 4vh, 40px); vertical-align: middle; margin-left: 1vw; box-shadow: 0 0.5vh 0 #c0392b;}
+    #questionBox h2 { font-size: clamp(30px, 6vh, 60px); margin: 0 0 1vh 0; line-height: 1.3; flex-shrink: 0; color: #2c3e50; font-weight: 900; }
+    .mode-badge { background: linear-gradient(45deg, #f093fb, #f5576c); color: white; padding: 1vh 2vw; border-radius: 3vh; font-size: clamp(16px, 3vh, 32px); vertical-align: middle; margin-left: 1vw; box-shadow: 0 0.5vh 0 #c0392b;}
     
     #qMedia { max-height: 25vh; max-width: 100%; object-fit: contain; border-radius: 2vh; display: none; margin: 1vh auto; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); border: 0.5vh solid white; flex-shrink: 0;}
     .fog-anim { animation: fogClear var(--fog-time) linear forwards; }
@@ -104,7 +110,7 @@
 
     /* 網格選項自適應排版 */
     #optionsContainer { display: grid; gap: 2vh 2vw; margin-top: 2vh; flex: 1; min-height: 0; width: 100%; box-sizing: border-box; }
-    .option { width: 100%; height: 100%; padding: 2vh 2vw; font-size: clamp(24px, 5vh, 70px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .option { width: 100%; height: 100%; padding: 2vh 2vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     .opt-text { word-break: break-word; line-height: 1.2; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); }
 
     .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1vh 0 #b32a18;} 
@@ -123,13 +129,13 @@
     .option.dimmed { opacity: 0.15; transform: scale(0.85); filter: grayscale(100%); animation: none !important; box-shadow: none !important; z-index: 1;}
     .option.highlight { transform: scale(1.02) !important; box-shadow: 0 0 5vh rgba(255, 215, 0, 1), inset 0 0 2vh rgba(255,255,255,0.8) !important; border: 0.8vh solid #FFD700; z-index: 20; animation: none !important; background: linear-gradient(135deg, #f1c40f, #f39c12) !important; color: #000; text-shadow: 0 0.2vh 0.5vh rgba(255,255,255,0.8); }
 
-    #sliderResult { display: none; font-size: clamp(40px, 8vh, 100px); font-weight: 900; color: #2ecc71; margin-top: 2vh; background: rgba(255,255,255,0.9); padding: 1vh 3vw; border-radius: 2vh; flex-shrink: 0;}
+    #sliderResult { display: none; font-size: clamp(30px, 6vh, 80px); font-weight: 900; color: #2ecc71; margin-top: 2vh; background: rgba(255,255,255,0.9); padding: 1vh 3vw; border-radius: 2vh; flex-shrink: 0;}
 
     /* ========== 答題即時進場區 (防溢出設計) ========== */
     #answeredContainer { margin-top: 1.5vh; padding-top: 1.5vh; border-top: 0.3vh dashed rgba(0,0,0,0.1); flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; width: 100%;}
     #answeredCountTitle { font-size: clamp(16px, 2.5vh, 26px); font-weight: 900; color: #555; margin: 0 0 1vh 0; flex-shrink: 0;}
     #answeredGrid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 1vh; overflow: hidden; max-height: 12vh; }
-    .answered-tag { font-size: clamp(14px, 2.2vh, 24px); padding: 0.5vh 1.5vw; border-radius: 3vh; background: rgba(255,255,255,0.9); color: #333; font-weight: 900; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.15); display: inline-flex; align-items: center; gap: 0.6vw; animation: popInAnswer 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0); }
+    .answered-tag { font-size: clamp(12px, 2vh, 22px); padding: 0.5vh 1vw; border-radius: 3vh; background: rgba(255,255,255,0.9); color: #333; font-weight: 900; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.15); display: inline-flex; align-items: center; gap: 0.6vw; animation: popInAnswer 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0); }
     .answered-tag.top-1 { border: 0.3vh solid #f1c40f; background: #fffdf0; transform: scale(1.15) !important; z-index: 3; }
     .answered-tag.top-2 { border: 0.3vh solid #bdc3c7; transform: scale(1.05) !important; z-index: 2; }
     .answered-tag.top-3 { border: 0.3vh solid #cd7f32; transform: scale(1.0) !important; z-index: 1; }
@@ -140,17 +146,20 @@
     #timeBarContainer { flex: 1; height: 3vh; background: #eee; border-radius: 2vh; overflow: hidden; box-shadow: inset 0 0.5vh 1vh rgba(0,0,0,0.1);}
     #timeBar { height: 100%; width: 100%; transition: width 1s linear, background 1s linear; }
     
+    /* 🎉 派對糖果條 (取代恐怖的血紅條) */
     .bar-stripe { background: repeating-linear-gradient(45deg, #00c6ff, #00c6ff 2vw, #0072ff 2vw, #0072ff 4vw) !important; animation: moveStripes 1s linear infinite; }
+    .bar-party { background: repeating-linear-gradient(45deg, #ff9a9e, #ff9a9e 2vw, #fecfef 2vw, #fecfef 4vw) !important; animation: moveStripes 0.5s linear infinite; }
     @keyframes moveStripes { 0% {background-position: 0 0;} 100% {background-position: 5.65vw 0;} }
     
-    #timerText { font-size: clamp(40px, 8vh, 120px); font-weight: 900; margin: 0; line-height: 1; text-shadow: 0.2vh 0.2vh 0 #fff; display: inline-block; flex-shrink: 0; width: 10vw; text-align: right;}
+    #timerText { font-size: clamp(30px, 6vh, 60px); font-weight: 900; color: #333; width: 8vw; text-align: right;}
     .tick-anim { animation: elasticTick 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     @keyframes elasticTick { 0% { transform: scale(0.8); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
     
-    .panic-timer { animation: panicTick 0.3s infinite alternate !important; color: #ff3f34 !important; text-shadow: 0 0 3vh #ff3f34, 0 0.5vh 0 #8a0b0b !important; }
-    @keyframes panicTick { 0% { transform: scale(1.4) rotate(-3deg); } 100% { transform: scale(1.7) rotate(3deg); } }
+    /* 🎉 派對歡樂倒數文字 */
+    .panic-timer { animation: partyTick 0.4s infinite alternate !important; color: #e056fd !important; text-shadow: 0 0 3vh #e056fd, 0 0.5vh 0 #686de0 !important; }
+    @keyframes partyTick { 0% { transform: scale(1.2) rotate(-5deg); } 100% { transform: scale(1.5) rotate(5deg); } }
     
-    .ctrl-btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1.5vh 4vw; font-size: clamp(24px, 4vh, 48px); font-weight: 900; border: none; border-radius: 5vh; cursor: pointer; box-shadow: 0 1vh 0 #4a3472; transition: 0.2s; font-family: inherit; margin-top:1vh; flex-shrink: 0;}
+    .ctrl-btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1.5vh 4vw; font-size: clamp(20px, 3.5vh, 40px); font-weight: 900; border: none; border-radius: 5vh; cursor: pointer; box-shadow: 0 1vh 0 #4a3472; transition: 0.2s; font-family: inherit; margin-top:1vh; flex-shrink: 0;}
     .ctrl-btn:active { transform: translateY(1vh); box-shadow: 0 0 0 #4a3472; }
 
     /* ========== 結算與排行榜 ========== */
@@ -161,19 +170,23 @@
     .r-card.r-1 { transform: scale(1.15); z-index: 3; background: linear-gradient(135deg, #ff0844, #ffb199); border: 0.4vh solid #fff; box-shadow: 0 0 3vh rgba(255,8,68,0.5);}
     .r-card.r-2 { transform: scale(1); z-index: 2; background: linear-gradient(135deg, #a18cd1, #fbc2eb); }
     .r-card.r-3 { transform: scale(0.9); z-index: 1; background: linear-gradient(135deg, #84fab0, #8fd3f4); }
-    .r-name { font-size: clamp(24px, 5vh, 50px); font-weight: 900; margin-bottom: 1vh; text-shadow: 0.2vh 0.2vh 0.4vh rgba(0,0,0,0.3);}
-    .r-time { font-size: clamp(30px, 6vh, 60px); font-family: monospace; font-weight: 900; background: rgba(0,0,0,0.4); padding: 0.5vh 1.5vw; border-radius: 1.5vh;}
+    .r-name { font-size: clamp(20px, 4vh, 40px); font-weight: 900; margin-bottom: 1vh; text-shadow: 0.2vh 0.2vh 0.4vh rgba(0,0,0,0.3);}
+    .r-time { font-size: clamp(24px, 5vh, 50px); font-family: monospace; font-weight: 900; background: rgba(0,0,0,0.4); padding: 0.5vh 1.5vw; border-radius: 1.5vh;}
     
     #scoreList { list-style: none; padding: 0; overflow-y: hidden; display: flex; flex-direction: column; gap: 1vh; flex: 1; justify-content: center;}
-    .rank-item { background: linear-gradient(90deg, #fff, #f8f9fa); padding: 1.5vh 2.5vw; border-radius: 2vh; box-shadow: 0 0.8vh 1.5vh rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; font-size: clamp(24px, 4.5vh, 50px); border-left: 0.8vh solid #ff4b2b; animation: slideInLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+    .rank-item { background: linear-gradient(90deg, #fff, #f8f9fa); padding: 1.5vh 2.5vw; border-radius: 2vh; box-shadow: 0 0.8vh 1.5vh rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; font-size: clamp(20px, 3.5vh, 40px); border-left: 0.8vh solid #ff4b2b; animation: slideInLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+    /* 💀 淘汰顯示特效 */
+    .eliminated-item { background: linear-gradient(90deg, #555, #333) !important; color: #fff; text-decoration: line-through; opacity: 0.8; border-left: 0.8vh solid #000; filter: grayscale(80%); }
+    .eliminated-item .rank-score { color: #aaa !important; }
+
     @keyframes slideInLeft { from { transform: translateX(-10vw); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-    .rank-score { color: #ff4b2b; font-family: monospace; font-size: clamp(30px, 5.5vh, 60px); font-weight: 900;}
+    .rank-score { color: #ff4b2b; font-family: monospace; font-size: clamp(24px, 4.5vh, 50px); font-weight: 900;}
 
     #podiumContainer { flex-direction: row; justify-content: center; align-items: flex-end; height: 100%; width: 100%; gap: 3vw;}
     .podium-place { display: flex; flex-direction: column; align-items: center; width: 25%; animation: riseUp 1.2s forwards;}
     @keyframes riseUp { from { transform: translateY(100vh); opacity: 0;} to { transform: translateY(0); opacity: 1;} }
-    .podium-name { font-size: clamp(30px, 5.5vh, 60px); font-weight: 900; color: white; margin-bottom: 1.5vh; text-shadow: 0 0.4vh 1vh rgba(0,0,0,0.5);}
-    .podium-score { font-size: clamp(20px, 4vh, 40px); color: #fff; background: rgba(0,0,0,0.5); padding: 0.8vh 2vw; border-radius: 3vh; margin-bottom: 1.5vh;}
+    .podium-name { font-size: clamp(24px, 4.5vh, 50px); font-weight: 900; color: white; margin-bottom: 1.5vh; text-shadow: 0 0.4vh 1vh rgba(0,0,0,0.5);}
+    .podium-score { font-size: clamp(16px, 3vh, 32px); color: #fff; background: rgba(0,0,0,0.5); padding: 0.8vh 2vw; border-radius: 3vh; margin-bottom: 1.5vh;}
     .podium-block { width: 100%; border-radius: 2vh 2vh 0 0; display: flex; justify-content: center; font-size: 8vh; font-weight: 900; color: rgba(255,255,255,0.9); padding-top: 3vh; box-shadow: inset 0 2vh 3vh rgba(255,255,255,0.4), 0 1vh 2vh rgba(0,0,0,0.5);}
     .place-1 .podium-block { height: 40vh; background: linear-gradient(to bottom, #FFD700, #F39C12); }
     .place-2 .podium-block { height: 30vh; background: linear-gradient(to bottom, #E0E0E0, #95A5A6); }
@@ -185,55 +198,74 @@
   <div id="pauseOverlay">
     <div class="pause-icon">⏸️</div>
     <div class="pause-text">遊戲暫停中</div>
-    <div style="font-size: 5vh; color: #f1c40f; font-weight: bold;">(再次按下空白鍵恢復遊戲)</div>
+    <div style="font-size: 4vh; color: #f1c40f; font-weight: bold;">(再次按下空白鍵恢復遊戲)</div>
   </div>
 
+  <!-- 🎉 巨大化彩虹倒數特效 -->
   <div id="giantTimerOverlay">5</div>
 
   <div id="eventWarning">
     <div class="warning-text" id="warningTitle">⚡ 閃電搶答 ⚡</div>
-    <div style="font-size: 6vh; color: #fff; margin-top:2vh; font-weight:bold; white-space:pre-line;" id="warningSub"></div>
+    <div style="font-size: 5vh; color: #fff; margin-top:2vh; font-weight:bold; white-space:pre-line;" id="warningSub"></div>
   </div>
 
   <div id="setupScreen" class="glass-panel">
     <h2 style="color: #4a3472; font-size: 7vh; margin-bottom: 2vh; flex-shrink: 0;">⚙️ 建立終極派對聯賽</h2>
     
-    <div style="display:flex; gap:3vw; text-align:left; flex: 1; min-height: 0; overflow: hidden;">
+    <div style="display:flex; gap:2vw; text-align:left; flex: 1; min-height: 0; overflow: hidden;">
+      <!-- 第一欄：基礎賽制 -->
       <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
-        <h3 style="margin:0 0 1vh 0; color:#e67e22; font-size: 3.5vh;">👥 基礎賽制設定</h3>
+        <h3 style="margin:0 0 1vh 0; color:#e67e22; font-size: 3vh;">👥 基礎賽制設定</h3>
         <div class="setup-row"><span>模式：</span><select id="cfgMode" class="setup-select" onchange="toggleTeamInputs()"><option value="individual">👑 個人戰 (不分組)</option><option value="teams" selected>🛡️ 聯盟對抗</option></select></div>
         <div id="teamOptionsBox">
-          <div class="setup-row"><span>分組數：</span><input type="number" id="cfgTeams" class="setup-input" value="4" min="2" style="width: 8vw;"></div>
-          <div class="setup-row"><span>每隊人數：</span><input type="number" id="cfgMax" class="setup-input" value="10" min="1" style="width: 8vw;"></div>
+          <div class="setup-row"><span>分組數：</span><input type="number" id="cfgTeams" class="setup-input" value="4" min="2" style="width: 6vw;"></div>
+          <div class="setup-row"><span>每隊人數：</span><input type="number" id="cfgMax" class="setup-input" value="10" min="1" style="width: 6vw;"></div>
           <div class="setup-row" style="background: rgba(155, 89, 182, 0.2); border-left: 0.5vw solid #8e44ad;">
-            <span>🌀 大風吹 (第幾題後，0為關閉)：</span><input type="number" id="cfgShuffle" class="setup-input" value="0" min="0" style="width: 8vw; text-align:center;">
+            <span>🌀 大風吹 (第幾題後，0為關閉)：</span><input type="number" id="cfgShuffle" class="setup-input" value="0" min="0" style="width: 6vw; text-align:center;">
           </div>
         </div>
-        <div class="setup-row"><span>等候秒數：</span><input type="number" id="cfgTime" class="setup-input" value="60" min="10" style="width: 8vw;"></div>
+        <div class="setup-row"><span>等候秒數：</span><input type="number" id="cfgTime" class="setup-input" value="60" min="10" style="width: 6vw;"></div>
         <div class="setup-row">
           <span>🏆 條件：</span>
-          <select id="cfgWin" class="setup-select" style="font-size: clamp(14px, 2vh, 20px);">
+          <select id="cfgWin" class="setup-select" style="font-size: clamp(12px, 1.8vh, 18px);">
             <option value="1">1. 總積分最高</option><option value="2">2. 總答對數最高</option><option value="3">3. 隊員平均分最高</option>
             <option value="4">4. 隊員平均答對數</option><option value="5">5. 閃電成功數最高</option><option value="6">6. 閃電搶分最高</option>
           </select>
         </div>
       </div>
       
-      <div style="flex:1; background: rgba(46, 204, 113, 0.2); border-left: 0.5vw solid #2ecc71; padding: 2vh; border-radius: 2vh; display:flex; flex-direction:column; justify-content:center;">
-        <h3 style="margin:0 0 1vh 0; color:#27ae60; font-size: 3.5vh;">🔥 七大遊玩擴充模組</h3>
-        <label style="display:flex; align-items:center; margin: 1vh 0; font-size: clamp(16px, 2.5vh, 26px); cursor:pointer;"><input type="checkbox" id="cfgMedia" checked style="width:3vh; height:3vh; margin-right:1vw;"> 👁️ 迷霧解析 & 多媒體圖片</label>
-        <label style="display:flex; align-items:center; margin: 1vh 0; font-size: clamp(16px, 2.5vh, 26px); cursor:pointer;"><input type="checkbox" id="cfgAdvType" checked style="width:3vh; height:3vh; margin-right:1vw;"> 🧩 進階題型 (連連看/拉桿/排序)</label>
-        <label style="display:flex; align-items:center; margin: 1vh 0; font-size: clamp(16px, 2.5vh, 26px); cursor:pointer;"><input type="checkbox" id="cfgEconomy" checked style="width:3vh; height:3vh; margin-right:1vw;"> 💰 賞金獵人 & 盲注 & 連對加成</label>
-        <label style="display:flex; align-items:center; margin: 1vh 0; font-size: clamp(16px, 2.5vh, 26px); cursor:pointer;"><input type="checkbox" id="cfgSabotage" checked style="width:3vh; height:3vh; margin-right:1vw;"> ⚔️ 戰術干擾 (冰凍/洗牌/50-50/護盾)</label>
-        <label style="display:flex; align-items:center; margin: 1vh 0; font-size: clamp(16px, 2.5vh, 26px); cursor:pointer;"><input type="checkbox" id="cfgGhost" checked style="width:3vh; height:3vh; margin-right:1vw;"> ☠️ 靈魂急救 (生存依賴模式)</label>
-        <label style="display:flex; align-items:center; margin: 1vh 0; font-size: clamp(16px, 2.5vh, 26px); cursor:pointer;"><input type="checkbox" id="cfgExtreme" checked style="width:3vh; height:3vh; margin-right:1vw;"> ⚖️ 極限心理戰 (背叛者/拍賣/地雷/閃憶)</label>
+      <!-- 第二欄：七大擴充模組 -->
+      <div style="flex:1; background: rgba(46, 204, 113, 0.2); border-left: 0.5vw solid #2ecc71; padding: 1.5vh; border-radius: 2vh; display:flex; flex-direction:column; justify-content:center;">
+        <h3 style="margin:0 0 1vh 0; color:#27ae60; font-size: 3vh;">🔥 七大遊玩擴充模組</h3>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgMedia" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 👁️ 迷霧解析 & 多媒體圖片</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgAdvType" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 🧩 進階題型 (連連看/拉桿/排序)</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgEconomy" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 💰 賞金獵人 & 盲注 & 連對加成</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgSabotage" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚔️ 戰術干擾 (冰凍/洗牌/50-50/護盾)</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgGhost" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ☠️ 靈魂急救 (生存依賴模式)</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgExtreme" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚖️ 極限心理戰 (背叛者/拍賣/地雷/閃憶)</label>
+      </div>
+
+      <!-- 第三欄：🏆 錦標賽/大逃殺設定 -->
+      <div style="flex:1; background: rgba(241, 196, 15, 0.2); border-left: 0.5vw solid #f1c40f; padding: 1.5vh; border-radius: 2vh; display:flex; flex-direction:column; justify-content:center;">
+        <h3 style="margin:0 0 1vh 0; color:#f39c12; font-size: 3vh;">🏆 殘酷淘汰模式</h3>
+        <label style="display:flex; align-items:center; margin: 1vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;">
+            <input type="checkbox" id="cfgTournament" style="width:3vh; height:3vh; margin-right:1vw;"> 啟動淘汰制 (大逃殺/對戰)
+        </label>
+        <div class="setup-row" style="background:transparent; padding:0;">
+            <span>每幾題結算淘汰：</span>
+            <input type="number" id="cfgTournInterval" class="setup-input" value="3" min="1" style="width: 6vw;">
+        </div>
+        <div class="setup-row" style="background:transparent; padding:0;" id="indivElimRow">
+            <span style="font-size: clamp(12px, 1.8vh, 18px);">(個人)每次淘汰幾人：</span>
+            <input type="number" id="cfgTournElimCount" class="setup-input" value="1" min="1" style="width: 6vw;">
+        </div>
       </div>
     </div>
     <button class="ctrl-btn" onclick="initLobby()">產生遊戲大廳 🚀</button>
   </div>
 
-  <div id="lobbyScreen" class="glass-panel" style="display:none;">
-    <div id="headerContainer">
+  <div id="lobbyScreen" class="glass-panel" style="display:none; width: 95vw;">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 3vw; flex-shrink: 0;">
       <div id="qrcode"></div>
       <div style="text-align: left;">
         <h2 style="color:#ff4b2b; margin:0; text-shadow: 0 0.4vh 1vh rgba(0,0,0,0.1);" id="lobbyWaitText">✨ 掃描 QR Code 選擇陣營！</h2>
@@ -254,6 +286,7 @@
     
     <div id="sliderResult"></div>
 
+    <!-- ⚡ 即時作答進場區 -->
     <div id="answeredContainer">
       <div id="answeredCountTitle">⚡ 已完成作答 <span id="answeredCount">0</span> 人 ⚡</div>
       <div id="answeredGrid"></div>
@@ -285,7 +318,7 @@
     <div class="podium-place place-3" style="order: 3;"><div class="podium-score" id="score-3"></div><div class="podium-name" id="name-3"></div><div class="podium-block">3</div></div>
   </div>
 
-  <!-- ✅ 加入隱藏的 Audio 標籤解決瀏覽器音效預載問題 -->
+  <!-- ✅ 隱藏的 Audio 標籤解決瀏覽器音效預載問題 -->
   <audio id="bgmNormalObj" loop src="https://assets.mixkit.co/music/preview/mixkit-funny-quirky-comedy-track-71.mp3"></audio>
   <audio id="bgmFastObj" loop src="https://assets.mixkit.co/music/preview/mixkit-clapping-comedy-background-music-260.mp3"></audio>
 
@@ -301,7 +334,6 @@
     function initAudio() { 
       if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); } 
       
-      // 使用 HTML Audio Element 綁定播放，徹底解決手機/電腦自動播放限制
       bgmNormal = document.getElementById('bgmNormalObj');
       bgmFast = document.getElementById('bgmFastObj');
       bgmNormal.volume = 0.3; bgmFast.volume = 0.5;
@@ -346,7 +378,7 @@
     function playPopSound() { 
       initAudio(); 
       const randomFreq = 800 + Math.random() * 400; 
-      playTone(randomFreq, 'sine', 0.05, 0.1); 
+      playTone(randomFreq, 'sine', 0.05, 0.08); 
     }
 
     // ========== 全域絕對暫停機制 ==========
@@ -373,6 +405,8 @@
     let currentRoundData = []; let groupTimerInterval;
     let currentScrambledCorrect = []; 
     let highestBidder = null; let highestBid = 0;
+    let currentMatchups = []; // 錦標賽隊伍對戰組合
+    
     const shapeList = ['▲','◆','●','■','★','✚','✦','✖','▼','⬣'];
 
     const roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -417,13 +451,13 @@
         const color1 = `hsl(${hue}, 80%, 60%)`; const color2 = `hsl(${(hue + 20) % 360}, 100%, 40%)`;
         cssString += `.t-${i} { background: linear-gradient(135deg, ${color1}, ${color2}); } .bg-t-${i} { background: linear-gradient(135deg, ${color1}, ${color2}); }`;
         const e = emojis[i % emojis.length]; const n = names[i % names.length] + `聯盟`;
-        teamsData.push({ id: i, name: `${e} ${n}`, class: `t-${i}`, gradient: `linear-gradient(135deg, ${color1}, ${color2})`, players: [] });
+        teamsData.push({ id: i, name: `${e} ${n}`, class: `t-${i}`, gradient: `linear-gradient(135deg, ${color1}, ${color2})`, players: [], isEliminated: false });
       }
       document.getElementById('dynamicTeamStyles').innerHTML = cssString;
     }
 
     function initLobby() {
-      initAudio(); // 初始化音訊環境，解鎖 BGM
+      initAudio();
       let shuffleInput = parseInt(document.getElementById('cfgShuffle').value);
       gameConfig = {
         isTeamMode: document.getElementById('cfgMode').value === 'teams',
@@ -437,7 +471,10 @@
         useEconomy: document.getElementById('cfgEconomy').checked,
         useSabotage: document.getElementById('cfgSabotage').checked,
         useGhost: document.getElementById('cfgGhost').checked,
-        useExtreme: document.getElementById('cfgExtreme').checked
+        useExtreme: document.getElementById('cfgExtreme').checked,
+        useTournament: document.getElementById('cfgTournament').checked,
+        tournInterval: parseInt(document.getElementById('cfgTournInterval').value) || 3,
+        tournElimCount: parseInt(document.getElementById('cfgTournElimCount').value) || 1
       };
 
       generateTeamStyles(gameConfig.teamCount);
@@ -473,7 +510,7 @@
         conn.on('data', (data) => {
           if (data.type === 'JOIN') {
             playJoin(); conn.playerName = data.name;
-            if(!playerStats[data.name]) playerStats[data.name] = { teamId: -1, score: 0, correctCount: 0, fastWins: 0, fastScore: 0, streak: 0, hasShield: false, isGhost: false, isTraitor: false, avatar: '👤' };
+            if(!playerStats[data.name]) playerStats[data.name] = { teamId: -1, score: 0, correctCount: 0, fastWins: 0, fastScore: 0, streak: 0, hasShield: false, isGhost: false, isTraitor: false, avatar: '👤', isEliminated: false };
             
             if (gameConfig.isTeamMode) {
               conn.send({ type: 'TEAM_SELECTION_START', teams: teamsData, max: gameConfig.maxPerTeam, css: document.getElementById('dynamicTeamStyles').innerHTML, cfg: gameConfig });
@@ -510,8 +547,7 @@
         timeLeft--; 
         if(document.getElementById('groupTimerText')) document.getElementById('groupTimerText').innerText = timeLeft;
         
-        // 伺服器每秒同步大廳時間
-        broadcast({ type: 'TIMER_SYNC', timeLeft: timeLeft, isFast: false, maxTime: gameConfig.groupTime });
+        broadcast({ type: 'TIMER_SYNC', timeLeft: timeLeft, isFast: false, maxTime: gameConfig.groupTime, timerStyle: 0 });
 
         if(timeLeft <= 0) { clearInterval(groupTimerInterval); autoAssignAndStart(); }
       }, 1000);
@@ -551,9 +587,9 @@
       } else if ((skillType === 'freeze' || skillType === 'scramble') && stats.score >= 500) {
         let enemies = [];
         if (gameConfig.isTeamMode) {
-           enemies = connections.filter(c => c.playerName && c.playerName !== pName && playerStats[c.playerName].teamId !== stats.teamId && !playerStats[c.playerName].isGhost);
+           enemies = connections.filter(c => c.playerName && c.playerName !== pName && playerStats[c.playerName].teamId !== stats.teamId && !playerStats[c.playerName].isGhost && !playerStats[c.playerName].isEliminated);
         } else {
-           enemies = connections.filter(c => c.playerName && c.playerName !== pName && !playerStats[c.playerName].isGhost);
+           enemies = connections.filter(c => c.playerName && c.playerName !== pName && !playerStats[c.playerName].isGhost && !playerStats[c.playerName].isEliminated);
         }
 
         if(enemies.length > 0) {
@@ -570,6 +606,19 @@
       }
     }
 
+    function buildMatchups(activeTeamIds) {
+        let matchups = [];
+        activeTeamIds.sort(() => Math.random() - 0.5);
+        for(let i=0; i<activeTeamIds.length; i+=2) {
+            if(i+1 < activeTeamIds.length) {
+                matchups.push([activeTeamIds[i], activeTeamIds[i+1]]);
+            } else {
+                matchups.push([activeTeamIds[i]]); // Bye (晉級)
+            }
+        }
+        return matchups;
+    }
+
     function autoAssignAndStart() {
       clearInterval(groupTimerInterval);
       if (gameConfig.isTeamMode) {
@@ -583,6 +632,12 @@
             conn.send({ type: 'TEAM_ASSIGNED', teamName: t.name, teamClass: t.class, teamGrad: t.gradient, cfg: gameConfig });
           }
         });
+
+        // 初始化樹狀淘汰賽名單
+        if(gameConfig.useTournament) {
+            let activeTeamIds = teamsData.map(t => t.id);
+            currentMatchups = buildMatchups(activeTeamIds);
+        }
       }
       document.getElementById('lobbyScreen').style.display = 'none';
       nextQuestion();
@@ -659,7 +714,7 @@
 
       let tagHTML = document.createElement('div');
       tagHTML.className = `answered-tag ${extraClass}`;
-      tagHTML.innerHTML = `<span style="font-size:2.5vh;">${medal}</span> <span style="font-size: 3.5vh; filter: drop-shadow(0 0.2vh 0.2vh rgba(0,0,0,0.2));">${playerAvatar}</span> <span style="text-shadow: 0 0.1vh 0.2vh rgba(255,255,255,0.8);">${conn.playerName}</span>`;
+      tagHTML.innerHTML = `<span style="font-size:2.5vh;">${medal}</span> <span style="font-size: 3vh; filter: drop-shadow(0 0.2vh 0.2vh rgba(0,0,0,0.2));">${playerAvatar}</span> <span>${conn.playerName}</span>`;
       
       let gridEl = document.getElementById('answeredGrid');
       if (gridEl) gridEl.appendChild(tagHTML);
@@ -790,8 +845,7 @@
           if (isGlobalPaused) return; 
           auctionTime--; document.getElementById('warningSub').innerText = `出價最高的隊伍獲得唯一作答權！\n(${auctionTime}s)`;
           
-          // 伺服器同步發送拍賣倒數
-          broadcast({ type: 'TIMER_SYNC', timeLeft: auctionTime, isFast: true, maxTime: 10 });
+          broadcast({ type: 'TIMER_SYNC', timeLeft: auctionTime, isFast: true, maxTime: 10, timerStyle: 0 });
 
           if(auctionTime <= 0) { 
             clearInterval(aInt); warning.style.display = 'none'; 
@@ -831,8 +885,7 @@
           if (isGlobalPaused) return; 
           wagerTime--; document.getElementById('warningSub').innerText = `主題：【${tag}】\n請在手機端操作！ (${wagerTime}s)`;
           
-          // 伺服器同步發送盲注倒數
-          broadcast({ type: 'TIMER_SYNC', timeLeft: wagerTime, isFast: false, maxTime: 10 });
+          broadcast({ type: 'TIMER_SYNC', timeLeft: wagerTime, isFast: false, maxTime: 10, timerStyle: 0 });
 
           if(wagerTime <= 0) { clearInterval(wInt); warning.style.display = 'none'; showQuestionUI(qData, false); }
         }, 1000);
@@ -953,7 +1006,7 @@
       currentRoundData = []; isAcceptingAnswers = true; answeredPlayers.clear(); connections.forEach(c => c.tempResult = null);
       
       connections.forEach(c => {
-        if(c.open && c.playerName) {
+        if(c.open && c.playerName && !playerStats[c.playerName].isEliminated) {
           let role = 'all';
           if(qData.mode === 'coop' && gameConfig.useAdvType && gameConfig.isTeamMode) {
             const team = teamsData.find(t => t.id === playerStats[c.playerName].teamId);
@@ -998,10 +1051,8 @@
 
         timeLeft--; timerEl.innerText = timeLeft; 
         
-        // 🌟 【新增】伺服器強制同步廣播！每秒鐘對全體手機廣播目前時間與風格
         broadcast({ type: 'TIMER_SYNC', timeLeft: timeLeft, maxTime: MAX_TIME, isFast: isFastMode, timerStyle: timerStyle });
         
-        // 計時器變化邏輯
         const pct = timeLeft / MAX_TIME;
         if (timerStyle === 0) {
             timeBar.style.width = `${pct * 100}%`;
@@ -1023,10 +1074,10 @@
         }
 
         if (timeLeft <= 5 && timeLeft > 0) { 
-          timerEl.style.color = "#e74c3c"; timerEl.classList.add('panic-timer');
+          timerEl.style.color = "#e056fd"; timerEl.classList.add('panic-timer');
           document.querySelector('.glass-panel').classList.add('panel-shake');
           document.querySelector('.glass-panel').classList.add('emergency-light');
-          timeBar.style.background = "linear-gradient(90deg, #ff416c, #ff4b2b)";
+          timeBar.style.background = "repeating-linear-gradient(45deg, #ff9a9e, #ff9a9e 2vw, #fecfef 2vw, #fecfef 4vw)";
           
           giantTimerEl.style.display = 'flex';
           giantTimerEl.innerText = timeLeft;
@@ -1048,6 +1099,67 @@
           clearInterval(countdownInterval); isAcceptingAnswers = false; broadcast({ type: 'DISABLE_BUTTONS' }); revealAnswer();
         }
       }, 1000);
+    }
+
+    // 🏆 處理錦標賽/大逃殺淘汰邏輯
+    function processElimination() {
+        if (!gameConfig.useTournament) return;
+        let isElimRound = ((currentQIndex + 1) % gameConfig.tournInterval === 0);
+        if (!isElimRound) return;
+
+        const warning = document.getElementById('eventWarning');
+        const titleEl = document.getElementById('warningTitle');
+        const subEl = document.getElementById('warningSub');
+        
+        warning.style.display = 'flex';
+        titleEl.innerText = "🚨 淘汰結算 🚨";
+        titleEl.className = "warning-text shuffle-anim"; 
+        subEl.innerText = "殘酷時刻！結算淘汰名單...";
+        playWarning();
+
+        setTimeout(() => { warning.style.display = 'none'; }, 4000);
+
+        if (!gameConfig.isTeamMode) {
+            let activePlayers = Object.keys(playerStats).filter(p => !playerStats[p].isEliminated);
+            activePlayers.sort((a, b) => playerStats[b].score - playerStats[a].score);
+            let elimCount = Math.min(gameConfig.tournElimCount, activePlayers.length - 1); 
+            if(elimCount > 0) {
+                for (let i = 0; i < elimCount; i++) {
+                    let loser = activePlayers[activePlayers.length - 1 - i];
+                    playerStats[loser].isEliminated = true;
+                    let conn = connections.find(c => c.playerName === loser);
+                    if (conn && conn.open) conn.send({ type: 'ELIMINATED' });
+                }
+            }
+        } else {
+            let nextActiveTeams = [];
+            currentMatchups.forEach(match => {
+                if (match.length === 2) {
+                    let t1 = match[0], t2 = match[1];
+                    let s1 = getTeamScore(t1), s2 = getTeamScore(t2);
+                    let loserId = s1 > s2 ? t2 : (s2 > s1 ? t1 : (Math.random()>0.5 ? t1 : t2)); 
+                    let winnerId = (loserId === t1) ? t2 : t1;
+                    teamsData.find(t => t.id === loserId).isEliminated = true;
+                    nextActiveTeams.push(winnerId);
+                    
+                    teamsData.find(t => t.id === loserId).players.forEach(p => {
+                        playerStats[p].isEliminated = true;
+                        let conn = connections.find(c => c.playerName === p);
+                        if (conn && conn.open) conn.send({ type: 'ELIMINATED' });
+                    });
+                } else {
+                    nextActiveTeams.push(match[0]); 
+                }
+            });
+            currentMatchups = buildMatchups(nextActiveTeams);
+        }
+    }
+
+    function getTeamScore(teamId) {
+        let team = teamsData.find(t => t.id === teamId);
+        let score = 0;
+        team.players.forEach(p => score += playerStats[p].score);
+        return score;
     }
 
     function revealAnswer() {
@@ -1156,8 +1268,16 @@
 
       setTimeout(() => {
         document.getElementById('questionBox').style.display = 'none';
-        if (currentMode === 'fast_single' || currentMode === 'fast_rank') showRoundRanking(currentMode);
-        else { document.getElementById('leaderboard').style.display = 'flex'; renderLeaderboard(); document.getElementById('nextBtnLeader').style.display = 'inline-block'; }
+        
+        processElimination();
+        
+        let delay = (gameConfig.useTournament && ((currentQIndex + 1) % gameConfig.tournInterval === 0)) ? 4500 : 0;
+
+        setTimeout(() => {
+            if (currentMode === 'fast_single' || currentMode === 'fast_rank') showRoundRanking(currentMode);
+            else { document.getElementById('leaderboard').style.display = 'flex'; renderLeaderboard(); document.getElementById('nextBtnLeader').style.display = 'inline-block'; }
+        }, delay);
+
       }, 3000);
     }
 
@@ -1204,20 +1324,29 @@
       let rankedData = [];
       if (gameConfig.isTeamMode) {
         rankedData = teamsData.map(t => {
-          let score = 0; t.players.forEach(p => score += playerStats[p].score);
-          return { name: `<span style="background:${t.gradient}; padding:0.5vh 1.5vw; border-radius:1vh; color:white;">${t.name}</span>`, score: score };
+          let score = getTeamScore(t.id);
+          return { name: `<span style="background:${t.gradient}; padding:0.5vh 1.5vw; border-radius:1vh; color:white; opacity:${t.isEliminated ? '0.5' : '1'};">${t.name}</span>`, score: score, isEliminated: t.isEliminated };
         });
       } else { 
-        rankedData = Object.keys(playerStats).map(pName => { return { name: pName, score: playerStats[pName].score, avatar: playerStats[pName].avatar }; }); 
+        rankedData = Object.keys(playerStats).map(pName => { return { name: pName, score: playerStats[pName].score, avatar: playerStats[pName].avatar, isEliminated: playerStats[pName].isEliminated }; }); 
       }
       
-      rankedData.sort((a, b) => b.score - a.score);
+      rankedData.sort((a, b) => {
+          if (a.isEliminated === b.isEliminated) return b.score - a.score;
+          return a.isEliminated ? 1 : -1;
+      });
+
       rankedData.slice(0, 10).forEach((item, index) => {
         let li = document.createElement('li'); li.className = 'rank-item'; li.style.animationDelay = `${index * 0.1}s`;
-        let medal = index === 0 ? "👑" : index === 1 ? "💎" : index === 2 ? "🌟" : "🔥";
+        
+        if (item.isEliminated) {
+            li.classList.add('eliminated-item');
+        }
+
+        let medal = index === 0 && !item.isEliminated ? "👑" : index === 1 && !item.isEliminated ? "💎" : index === 2 && !item.isEliminated ? "🌟" : (item.isEliminated ? "💀" : "🔥");
         let streakHtml = ''; let ghostHtml = '';
         if(!gameConfig.isTeamMode && playerStats[item.name]) {
-          if(playerStats[item.name].streak >= 2) streakHtml = `<span class="player-tag fire-streak" style="font-size:2vh; padding: 0.5vh 1vw;">🔥 x${playerStats[item.name].streak}</span>`;
+          if(playerStats[item.name].streak >= 2 && !item.isEliminated) streakHtml = `<span class="player-tag fire-streak" style="font-size:2vh; padding: 0.5vh 1vw;">🔥 x${playerStats[item.name].streak}</span>`;
           if(playerStats[item.name].isGhost) ghostHtml = ` <span style="font-size:3vh;">👻</span>`;
         }
         
@@ -1239,7 +1368,7 @@
           let tScore=0, tCorrect=0, tFastWin=0, tFastScore=0;
           t.players.forEach(p => { tScore += playerStats[p].score; tCorrect += playerStats[p].correctCount; tFastWin += playerStats[p].fastWins; tFastScore += playerStats[p].fastScore; });
           let pCount = Math.max(1, t.players.length);
-          return { name: t.name, metric: 0, display: "", raw: {tScore, tCorrect, tFastWin, tFastScore, pCount} };
+          return { name: t.name, metric: 0, display: "", raw: {tScore, tCorrect, tFastWin, tFastScore, pCount}, isEliminated: t.isEliminated };
         });
         const mode = gameConfig.winMode; 
         finalData.forEach(t => {
@@ -1252,14 +1381,18 @@
         });
       } else {
         titleText = "個人總積分冠軍";
-        finalData = Object.keys(playerStats).map(pName => { return { name: pName, metric: playerStats[pName].score, display: `${playerStats[pName].score} 分`, avatar: playerStats[pName].avatar }; });
+        finalData = Object.keys(playerStats).map(pName => { return { name: pName, metric: playerStats[pName].score, display: `${playerStats[pName].score} 分`, avatar: playerStats[pName].avatar, isEliminated: playerStats[pName].isEliminated }; });
       }
 
-      finalData.sort((a, b) => b.metric - a.metric);
+      finalData.sort((a, b) => {
+          if (a.isEliminated === b.isEliminated) return b.metric - a.metric;
+          return a.isEliminated ? 1 : -1;
+      });
+
       document.getElementById('podiumTitle').innerText = `🏆 ${titleText} 🏆`; document.getElementById('podiumContainer').style.display = 'flex';
       for(let i=0; i<3; i++) {
         const place = i+1;
-        if(finalData[i] && finalData[i].metric > 0) { 
+        if(finalData[i] && finalData[i].metric > 0 && !finalData[i].isEliminated) { 
            let avatarHtml = gameConfig.isTeamMode ? "" : `<div style="font-size:10vh; margin-bottom:1.5vh; filter: drop-shadow(0 0.5vh 0.5vh rgba(0,0,0,0.3));">${finalData[i].avatar}</div>`;
            document.getElementById(`name-${place}`).innerHTML = `${avatarHtml}${finalData[i].name}`; 
            document.getElementById(`score-${place}`).innerText = finalData[i].display; 
