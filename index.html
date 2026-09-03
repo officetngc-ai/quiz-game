@@ -9,9 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap" rel="stylesheet">
   <style id="dynamicTeamStyles"></style>
   <style>
-    /* ========== 全局自適應與防溢出 ========== */
-    *, *::before, *::after { box-sizing: border-box; }
-    body { font-family: 'Nunito', sans-serif; text-align: center; background: #e0e5ec; margin:0; padding:0; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; transition: all 0.5s ease;}
+    body { font-family: 'Nunito', sans-serif; text-align: center; background: #e0e5ec; margin:0; padding:0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; transition: all 0.5s ease;}
     .fast-mode { background: repeating-linear-gradient(45deg, #f1c40f, #f1c40f 20px, #e67e22 20px, #e67e22 40px); background-size: 200% 200%; animation: feverRush 0.8s linear infinite; box-shadow: inset 0 0 50px rgba(211,84,0,0.8); }
     .shuffle-mode { background: repeating-radial-gradient(circle, #8e44ad, #8e44ad 20px, #9b59b6 20px, #9b59b6 40px); animation: spinBg 1s linear infinite; box-shadow: inset 0 0 50px rgba(142, 68, 173, 0.9); }
     @keyframes feverRush { 0% {background-position: 0% 0%;} 100% {background-position: 100% 100%;} }
@@ -22,24 +20,24 @@
     .memory-hide { color: transparent !important; text-shadow: 0 0 10px rgba(255,255,255,0.8); pointer-events: none;}
 
     /* ========== 暫停畫面 (全域絕對控場) ========== */
-    #playerPauseOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 99999; flex-direction: column; justify-content: center; align-items: center; color: white; }
-    .pause-icon-mobile { font-size: clamp(80px, 15vh, 120px); animation: superPop 1s infinite alternate; }
+    #playerPauseOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 99999; flex-direction: column; justify-content: center; align-items: center; color: white; }
+    .pause-icon-mobile { font-size: 100px; animation: superPop 1s infinite alternate; }
 
     /* ========== 登入畫面綜藝感 ========== */
-    #loginScreen { padding: 4vh 4vw; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; position: relative;}
-    #loginScreen h2 { font-size: clamp(32px, 6vh, 48px); margin-bottom: 3vh; text-shadow: 0 4px 10px rgba(0,0,0,0.3); animation: floatBtn 3s infinite alternate; z-index: 10;}
-    .floating-emoji { position: absolute; font-size: clamp(40px, 8vh, 60px); opacity: 0.2; animation: floatAround 10s infinite linear; z-index: 1;}
-    @keyframes floatAround { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(3vw, -5vh) rotate(180deg); } 100% { transform: translate(0, 0) rotate(360deg); } }
+    #loginScreen { padding: 40px 20px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; position: relative;}
+    #loginScreen h2 { font-size: 42px; margin-bottom: 20px; text-shadow: 0 4px 10px rgba(0,0,0,0.3); animation: floatBtn 3s infinite alternate; z-index: 10;}
+    .floating-emoji { position: absolute; font-size: 50px; opacity: 0.2; animation: floatAround 10s infinite linear; z-index: 1;}
+    @keyframes floatAround { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(30px, -50px) rotate(180deg); } 100% { transform: translate(0, 0) rotate(360deg); } }
 
-    .input-field { padding: 2vh; font-size: clamp(20px, 3vh, 32px); width: 85vw; max-width: 400px; margin: 1.5vh 0; border-radius: 20px; border: none; text-align: center; font-weight: 900; color: #333; box-shadow: 0 10px 20px rgba(0,0,0,0.15); font-family: inherit; outline: none; z-index: 10;}
-    .action-btn { padding: 2vh; font-size: clamp(24px, 4vh, 36px); width: 85vw; max-width: 400px; margin-top: 2vh; border-radius: 20px; border: none; font-weight: 900; cursor: pointer; transition: 0.1s; background: #FFD700; color: #d35400; box-shadow: 0 10px 0 #e67e22, 0 15px 20px rgba(0,0,0,0.2); font-family: inherit; z-index: 10;}
-    .action-btn:active { transform: translateY(1vh); box-shadow: 0 0 0 #e67e22; } 
+    .input-field { padding: 25px; font-size: 26px; width: 85%; margin: 15px 0; border-radius: 20px; border: none; text-align: center; font-weight: 900; color: #333; box-shadow: 0 10px 20px rgba(0,0,0,0.15); font-family: inherit; outline: none; z-index: 10;}
+    .action-btn { padding: 25px; font-size: 32px; width: 85%; margin-top: 25px; border-radius: 20px; border: none; font-weight: 900; cursor: pointer; transition: 0.1s; background: #FFD700; color: #d35400; box-shadow: 0 10px 0 #e67e22, 0 15px 20px rgba(0,0,0,0.2); font-family: inherit; z-index: 10;}
+    .action-btn:active { transform: translateY(10px); box-shadow: 0 0 0 #e67e22; } 
 
     /* ========== 玩家身分牌 ========== */
-    #playerTopBar { display: none; background: rgba(255,255,255,0.95); padding: 1vh 4vw; border-radius: 30px; margin: 1vh auto; font-weight: 900; font-size: clamp(18px, 2.5vh, 24px); color: #333; box-shadow: 0 5px 15px rgba(0,0,0,0.15); align-items: center; justify-content: center; gap: 2vw; max-width: 90vw; animation: superPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); flex-shrink: 0;}
+    #playerTopBar { display: none; background: rgba(255,255,255,0.95); padding: 10px 20px; border-radius: 30px; margin: 10px auto 5px auto; font-weight: 900; font-size: 22px; color: #333; box-shadow: 0 5px 15px rgba(0,0,0,0.15); align-items: center; justify-content: center; gap: 10px; max-width: 85%; animation: superPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
     /* ========== 手機端綜藝感碼錶 ========== */
-    #mobileTimer { display: none; font-size: clamp(50px, 10vh, 80px); font-weight: 900; color: #fff; text-shadow: 0 4px 10px rgba(0,0,0,0.3); margin: 1vh 0; flex-shrink: 0;}
+    #mobileTimer { display: none; font-size: 65px; font-weight: 900; color: #fff; text-shadow: 0 4px 10px rgba(0,0,0,0.3); margin: 5px 0; }
     .tick-anim { animation: elasticTick 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     @keyframes elasticTick { 0% { transform: scale(0.8); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
     .panic-timer { animation: panicTick 0.3s infinite alternate !important; color: #ff3f34 !important; text-shadow: 0 0 30px #ff3f34, 0 5px 0 #8a0b0b !important; }
@@ -48,30 +46,29 @@
     .panel-shake { animation: boxShake 0.4s infinite !important; }
     @keyframes boxShake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-3px) rotate(-1deg); } 75% { transform: translateX(3px) rotate(1deg); } }
 
-    #teamScreen { display: none; flex-direction: column; height: 100dvh; justify-content: flex-start; padding: 4vh 4vw; background: rgba(0,0,0,0.1); overflow-y: auto;}
-    #teamList { display: flex; flex-direction: column; gap: 2vh; margin-top: 2vh;}
-    .team-btn { padding: 2vh; font-size: clamp(20px, 3vh, 32px); font-weight: 900; color: white; border: none; border-radius: 20px; cursor: pointer; box-shadow: 0 8px 0 rgba(0,0,0,0.2); transition: 0.2s; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);}
+    #teamScreen { display: none; flex-direction: column; height: 100%; justify-content: flex-start; padding: 40px 20px; background: rgba(0,0,0,0.1); overflow-y: auto;}
+    #teamList { display: flex; flex-direction: column; gap: 15px; margin-top: 20px;}
+    .team-btn { padding: 25px; font-size: 28px; font-weight: 900; color: white; border: none; border-radius: 20px; cursor: pointer; box-shadow: 0 8px 0 rgba(0,0,0,0.2); transition: 0.2s; text-shadow: 1px 1px 3px rgba(0,0,0,0.3);}
     .team-btn:active { transform: translateY(8px); box-shadow: 0 0 0 rgba(0,0,0,0); }
     .team-btn:disabled { opacity: 0.4; filter: grayscale(100%); pointer-events: none;}
 
-    #gameScreen { display: none; flex-direction: column; height: 100dvh; justify-content: flex-start; padding: 1vh 2vw 85px 2vw; position: relative;}
-    #gameStatus { background: white; padding: 1.5vh; border-radius: 20px; font-size: clamp(18px, 2.5vh, 26px); font-weight: 900; color: #333; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 1vh; transition: 0.3s; z-index: 10; flex-shrink: 0;}
-    .status-shuffle { font-size: clamp(24px, 3.5vh, 32px) !important; color: #fff !important; background: #8e44ad !important; animation: popUp 0.5s forwards; }
+    #gameScreen { display: none; flex-direction: column; height: 100%; justify-content: flex-start; padding: 10px; position: relative;}
+    #gameStatus { background: white; padding: 15px; border-radius: 20px; font-size: 22px; font-weight: 900; color: #333; box-shadow: 0 10px 20px rgba(0,0,0,0.1); margin-bottom: 5px; transition: 0.3s; z-index: 10;}
+    .status-shuffle { font-size: 28px !important; color: #fff !important; background: #8e44ad !important; animation: popUp 0.5s forwards; }
     @keyframes popUp { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
 
-    #streakBadge { display:none; background: linear-gradient(45deg, #ff4b2b, #f1c40f); color: white; padding: 0.5vh 3vw; border-radius: 20px; font-size: clamp(14px, 2vh, 20px); margin-bottom: 1vh; animation: popBtn 0.5s infinite alternate; font-weight:bold; box-shadow: 0 5px 10px rgba(0,0,0,0.2);}
+    #streakBadge { display:none; background: linear-gradient(45deg, #ff4b2b, #f1c40f); color: white; padding: 5px 15px; border-radius: 20px; font-size: 18px; margin-bottom: 5px; animation: popBtn 0.5s infinite alternate; font-weight:bold; box-shadow: 0 5px 10px rgba(0,0,0,0.2);}
     @keyframes popBtn { to { transform: scale(1.05); } }
-    #shieldBadge { display:none; background: #3498db; color: white; padding: 0.5vh 3vw; border-radius: 20px; font-size: clamp(14px, 2vh, 20px); margin-bottom: 1vh; font-weight:bold; box-shadow: 0 5px 10px rgba(0,0,0,0.2); margin-left: 2vw;}
+    #shieldBadge { display:none; background: #3498db; color: white; padding: 5px 15px; border-radius: 20px; font-size: 18px; margin-bottom: 5px; font-weight:bold; box-shadow: 0 5px 10px rgba(0,0,0,0.2); margin-left:10px;}
 
     body.ghost-mode #gameScreen { filter: grayscale(100%); opacity: 0.8; pointer-events: none; }
     #ghostOverlay { display: none; position: absolute; top:30%; left:0; width:100%; z-index: 50; flex-direction: column; align-items:center;}
     
-    #traitorWarning { display: none; background: #000; color: #e74c3c; border: 4px solid #c0392b; padding: 1vh; border-radius: 20px; font-size: clamp(16px, 2vh, 22px); font-weight: 900; margin-bottom: 1vh; box-shadow: 0 0 20px rgba(231, 76, 60, 0.8); animation: pulseWin 1s infinite;}
+    #traitorWarning { display: none; background: #000; color: #e74c3c; border: 4px solid #c0392b; padding: 10px; border-radius: 20px; font-size: 20px; font-weight: 900; margin-bottom: 5px; box-shadow: 0 0 20px rgba(231, 76, 60, 0.8); animation: pulseWin 1s infinite;}
 
     /* 按鍵動態數量排版與呼吸感優化 */
-    #btnGrid { display: flex; flex-wrap: wrap; justify-content: center; align-content: stretch; flex: 1; margin-bottom: 1vh; gap: 2vw; min-height: 0;}
-    .ans-btn { width: calc(50% - 1vw); min-height: 0; flex-grow: 1; cursor: pointer; border: none; border-radius: 25px; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.8); box-shadow: 0 15px 0 rgba(0,0,0,0.2), inset 0 5px 15px rgba(255,255,255,0.4); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.8); position: relative; overflow: hidden;}
-    .ans-btn .opt-text { font-size: clamp(24px, 5vh, 48px); }
+    #btnGrid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; flex: 1; margin-bottom: 80px; gap: 10px;}
+    .ans-btn { width: calc(50% - 10px); min-height: 100px; flex-grow: 1; cursor: pointer; border: none; border-radius: 25px; display: flex; justify-content: center; align-items: center; font-size: 48px; color: rgba(255,255,255,0.8); box-shadow: 0 15px 0 rgba(0,0,0,0.2), inset 0 5px 15px rgba(255,255,255,0.4); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.8); position: relative; overflow: hidden;}
     
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
     @keyframes floatOpt { 0%, 100% { transform: translateY(0px) rotate(0deg); } 33% { transform: translateY(-5px) rotate(1deg); } 66% { transform: translateY(3px) rotate(-1deg); } }
@@ -89,35 +86,35 @@
     @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
     .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.85); pointer-events: none; animation: none; box-shadow: 0 5px 0 rgba(0,0,0,0.2); }
 
-    #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1; background: rgba(255,255,255,0.9); border-radius: 20px; padding: 2vh; margin-bottom: 1vh; min-height: 0; overflow-y: auto;}
-    input[type=range] { -webkit-appearance: none; appearance: none; width: 90%; margin: 3vh 0; height: 2vh; border-radius: 10px; background: #d3d3d3; outline: none; touch-action: none; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 5vh; height: 5vh; border-radius: 50%; background: #3498db; cursor: pointer; box-shadow: 0 5px 10px rgba(0,0,0,0.3);}
-    #sliderValue { font-size: clamp(40px, 8vh, 80px); font-weight: 900; color: #e74c3c; }
+    #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1; background: rgba(255,255,255,0.9); border-radius: 20px; padding: 20px; margin-bottom: 80px;}
+    input[type=range] { -webkit-appearance: none; appearance: none; width: 90%; margin: 30px 0; height: 15px; border-radius: 10px; background: #d3d3d3; outline: none; touch-action: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 40px; height: 40px; border-radius: 50%; background: #3498db; cursor: pointer; box-shadow: 0 5px 10px rgba(0,0,0,0.3);}
+    #sliderValue { font-size: 60px; font-weight: 900; color: #e74c3c; }
 
-    #wagerBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1; background: rgba(0,0,0,0.7); border-radius: 20px; padding: 2vh; margin-bottom: 1vh; color: white;}
-    #wagerAmount { font-size: clamp(50px, 10vh, 100px); font-weight: 900; color: #f1c40f; margin: 2vh 0;}
+    #wagerBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1; background: rgba(0,0,0,0.7); border-radius: 20px; padding: 20px; margin-bottom: 20px; color: white;}
+    #wagerAmount { font-size: 80px; font-weight: 900; color: #f1c40f; margin: 20px 0;}
 
-    #orderDisplay { display: none; background: rgba(255,255,255,0.8); padding: 1vh; border-radius: 15px; margin-bottom: 1vh; font-size: clamp(18px, 2.5vh, 26px); font-weight: 900; min-height: 5vh; color: #333; flex-shrink: 0;}
-    #resetOrderBtn { display: none; background: #e74c3c; color: white; border: none; border-radius: 10px; padding: 0.5vh 3vw; font-weight: bold; margin-bottom: 1vh; cursor:pointer; flex-shrink: 0;}
+    #orderDisplay { display: none; background: rgba(255,255,255,0.8); padding: 10px; border-radius: 15px; margin-bottom: 10px; font-size: 24px; font-weight: 900; min-height: 40px; color: #333;}
+    #resetOrderBtn { display: none; background: #e74c3c; color: white; border: none; border-radius: 10px; padding: 5px 15px; font-weight: bold; margin-bottom: 10px; cursor:pointer;}
 
-    #dragBox { display:none; flex-direction:column; align-items:center; flex:1; width:100%; margin-bottom: 1vh; min-height: 0; overflow-y: auto;}
+    #dragBox { display:none; flex-direction:column; align-items:center; flex:1; width:100%; margin-bottom: 80px;}
     #dragList { list-style:none; padding:0; width:95%; margin:0; }
-    #dragList li { background: white; padding: 2vh; margin-bottom: 1.5vh; border-radius: 15px; font-size: clamp(20px, 3vh, 32px); font-weight: 900; color: #333; box-shadow: 0 5px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: grab; border-left: 10px solid #3498db; transition: transform 0.1s;}
+    #dragList li { background: white; padding: 20px; margin-bottom: 12px; border-radius: 15px; font-size: 26px; font-weight: 900; color: #333; box-shadow: 0 5px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: grab; border-left: 10px solid #3498db; transition: transform 0.1s;}
     .sortable-ghost { opacity: 0.4; background: #f1c40f !important; }
 
-    #submitBtn { display: none; width: 100%; margin: 0; background: linear-gradient(135deg, #a18cd1, #fbc2eb); box-shadow: 0 1vh 0 #89609e; color: #fff; flex-shrink: 0; font-size: clamp(24px, 4vh, 36px); padding: 1.5vh;}
-    #submitBtn:active { transform: translateY(1vh); box-shadow: 0 0 0 #89609e; }
+    #submitBtn { display: none; width: 100%; margin: 0; background: linear-gradient(135deg, #a18cd1, #fbc2eb); box-shadow: 0 10px 0 #89609e; color: #fff; margin-bottom: 80px;}
+    #submitBtn:active { transform: translateY(10px); box-shadow: 0 0 0 #89609e; }
 
-    #skillBar { display: none; position: absolute; bottom: 1vh; left: 1vw; right: 1vw; justify-content: space-around; background: rgba(0,0,0,0.6); padding: 1vh; border-radius: 20px; backdrop-filter: blur(5px); height: 75px;}
-    .skill-btn { padding: 0.5vh 1vw; font-size: clamp(12px, 1.8vh, 16px); font-weight: 900; border-radius: 15px; border: none; color: white; cursor: pointer; transition: 0.1s; flex:1; margin:0 1vw;}
+    #skillBar { display: none; position: absolute; bottom: 10px; left: 5px; right: 5px; justify-content: space-around; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 20px; backdrop-filter: blur(5px);}
+    .skill-btn { padding: 10px 5px; font-size: 14px; font-weight: 900; border-radius: 15px; border: none; color: white; cursor: pointer; transition: 0.1s; flex:1; margin:0 5px;}
     .skill-btn:active { transform: translateY(5px); box-shadow: none !important;}
     .btn-freeze { background: #3498db; box-shadow: 0 5px 0 #2980b9; }
     .btn-shield { background: #f39c12; box-shadow: 0 5px 0 #d35400; }
     .btn-5050 { background: #9b59b6; box-shadow: 0 5px 0 #8e44ad; }
     .btn-scramble { background: #e74c3c; box-shadow: 0 5px 0 #c0392b; }
 
-    #freezeOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(173, 216, 230, 0.85); backdrop-filter: blur(10px); z-index: 999; flex-direction: column; justify-content: center; align-items: center; color: #2c3e50; text-shadow: 0 2px 10px rgba(255,255,255,0.8);}
-    .ice-crack { font-size: clamp(80px, 15vh, 150px); animation: shake 0.1s infinite; margin-bottom:2vh;}
+    #freezeOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(173, 216, 230, 0.85); backdrop-filter: blur(10px); z-index: 999; flex-direction: column; justify-content: center; align-items: center; color: #2c3e50; text-shadow: 0 2px 10px rgba(255,255,255,0.8);}
+    .ice-crack { font-size: 120px; animation: shake 0.1s infinite; margin-bottom:20px;}
     @keyframes shake { 0% {transform: translateX(5px) rotate(2deg);} 100% {transform: translateX(-5px) rotate(-2deg);} }
   </style>
 </head>
@@ -126,14 +123,14 @@
   <!-- 手機端全域暫停畫面 -->
   <div id="playerPauseOverlay">
     <div class="pause-icon-mobile">⏸️</div>
-    <h2 style="font-size: clamp(32px, 5vh, 48px); margin: 2vh 0; font-weight: 900;">遊戲暫停中</h2>
-    <p style="font-size: clamp(18px, 3vh, 24px); font-weight: bold; color: #f1c40f;">請等待管理員恢復...</p>
+    <h2 style="font-size: 40px; margin: 10px 0; font-weight: 900;">遊戲暫停中</h2>
+    <p style="font-size: 20px; font-weight: bold; color: #f1c40f;">請等待管理員恢復...</p>
   </div>
 
   <div id="freezeOverlay" onclick="breakIce()">
     <div class="ice-crack">🧊</div>
-    <h2 style="font-size:clamp(24px, 4vh, 40px); font-weight:900;">你被凍結了！</h2>
-    <p style="font-size: clamp(18px, 3vh, 24px); font-weight:bold; background:#fff; padding:1vh 4vw; border-radius:20px;">狂點螢幕來碎冰！</p>
+    <h2 style="font-size:36px; font-weight:900;">你被凍結了！</h2>
+    <p style="font-size: 24px; font-weight:bold; background:#fff; padding:10px 20px; border-radius:20px;">狂點螢幕來碎冰！</p>
   </div>
 
   <div id="loginScreen">
@@ -144,22 +141,22 @@
       <h2>🎉 準備加入榮耀之戰！</h2>
       <input type="text" id="playerName" class="input-field" placeholder="輸入你的大名">
       <button class="action-btn" onclick="joinGame()">即刻登入 🚀</button>
-      <div id="statusText" style="margin-top: 2vh; font-weight:bold; opacity: 0.9;"></div>
+      <div id="statusText" style="margin-top: 20px; font-weight:bold; opacity: 0.9;"></div>
     </div>
   </div>
 
   <div id="teamScreen">
-    <h2 style="color: #333; font-size: clamp(28px, 4.5vh, 40px); text-shadow: 0 2px 5px rgba(255,255,255,0.8); margin: 0; flex-shrink: 0;">選擇你的陣營 🛡️</h2>
+    <h2 style="color: #333; font-size: 38px; text-shadow: 0 2px 5px rgba(255,255,255,0.8); margin: 0;">選擇你的陣營 🛡️</h2>
     <div id="teamList"></div>
   </div>
 
   <div id="gameScreen">
-    <div id="playerTopBar"><span id="myAvatarBadge" style="font-size: clamp(24px, 3.5vh, 36px);"></span> <span id="myNameDisplay"></span></div>
+    <div id="playerTopBar"><span id="myAvatarBadge" style="font-size: 30px;"></span> <span id="myNameDisplay"></span></div>
     
     <div id="gameStatus">👀 備戰中，等待主持人的信號...</div>
     <div id="mobileTimer">--</div>
 
-    <div style="flex-shrink: 0;">
+    <div>
       <span id="streakBadge"></span>
       <span id="shieldBadge">🛡️ 護盾啟動</span>
     </div>
@@ -167,11 +164,11 @@
     <div id="traitorWarning">☠️ 你是本局背叛者！<br>故意答錯並誤導隊友來吸取積分！</div>
 
     <div id="ghostOverlay">
-      <span style="font-size: clamp(60px, 12vh, 100px);">👻</span>
-      <div style="background:#fff; color:#333; padding:1.5vh; border-radius:15px; font-weight:bold; margin-top:2vh; font-size:clamp(16px, 2.5vh, 22px);">靈魂狀態：等待隊伍救援復活</div>
+      <span style="font-size: 80px;">👻</span>
+      <div style="background:#fff; color:#333; padding:10px; border-radius:15px; font-weight:bold; margin-top:10px;">靈魂狀態：等待隊伍救援復活</div>
     </div>
     
-    <div id="coopText" style="display:none; background:#fff; padding:3vh 4vw; border-radius:20px; font-size:clamp(20px, 3.5vh, 32px); font-weight:900; margin-bottom:2vh; flex-shrink: 0;"></div>
+    <div id="coopText" style="display:none; background:#fff; padding:20px; border-radius:20px; font-size:28px; font-weight:900; margin-bottom:20px;"></div>
     
     <div id="orderDisplay"></div>
     <button id="resetOrderBtn" onclick="resetOrder()">重置排序</button>
@@ -179,19 +176,19 @@
     <div id="btnGrid"></div>
 
     <div id="dragBox">
-      <h3 style="color:#333; font-size:clamp(18px, 2.5vh, 28px); margin-top:0;">上下拖曳排列對應順序</h3>
+      <h3 style="color:#333; font-size:24px; margin-top:0;">上下拖曳排列對應順序</h3>
       <ul id="dragList"></ul>
     </div>
 
     <div id="sliderBox">
-      <span style="font-size: clamp(18px, 2.5vh, 28px); color:#666; font-weight:bold;">滑動拉桿選擇精準數值</span>
+      <span style="font-size: 24px; color:#666; font-weight:bold;">滑動拉桿選擇精準數值</span>
       <div id="sliderValue">50</div>
       <input type="range" id="ansSlider" min="0" max="100" value="50" oninput="document.getElementById('sliderValue').innerText = this.value">
     </div>
 
     <div id="wagerBox">
-      <span style="font-size: clamp(20px, 3vh, 32px); font-weight:bold;" id="wagerTitle">你要押注多少積分？</span>
-      <select id="bountyTarget" class="input-field" style="display:none; font-size:clamp(16px, 2.5vh, 24px);"></select>
+      <span style="font-size: 24px; font-weight:bold;" id="wagerTitle">你要押注多少積分？</span>
+      <select id="bountyTarget" class="input-field" style="display:none; font-size:20px;"></select>
       <div id="wagerAmount">0</div>
       <input type="range" id="wagerSlider" min="0" max="0" value="0" oninput="document.getElementById('wagerAmount').innerText = this.value">
       <button class="action-btn" onclick="confirmWager()">確定送出 💰</button>
@@ -261,13 +258,13 @@
     
     let mobileTimerInterval = null;
     let myAvatar = "";
-    let isGlobalPaused = false; 
+    let isGlobalPaused = false; // 手機端判定是否被暫停
 
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
       autoPin = urlParams.get('pin');
       if (!autoPin) {
-        document.getElementById('loginForm').innerHTML = `<h2 style="color: #ffeaa7;">⚠️ 迷路了嗎？</h2><p style="font-size: clamp(16px, 2.5vh, 24px); line-height: 1.5;">請直接掃描大螢幕上的<br>QR Code 來加入派對！</p>`;
+        document.getElementById('loginForm').innerHTML = `<h2 style="color: #ffeaa7;">⚠️ 迷路了嗎？</h2><p style="font-size: 24px; line-height: 1.5;">請直接掃描大螢幕上的<br>QR Code 來加入派對！</p>`;
       } else { document.getElementById('playerName').focus(); }
     };
 
@@ -474,7 +471,7 @@
               data.options.forEach((optText, i) => {
                   let textContent = (data.qType === 'match_click' || data.qType === 'order') ? data.options[i] : shapeList[i % shapeList.length];
                   let btnHTML = `<button class="ans-btn color-${i % 8} active" onclick="toggleSelection(${i}, event)" style="animation-delay: ${i * 0.05}s; order: ${shuffled[i]};">
-                                    <span class="opt-text" style="font-size:clamp(18px, 3vh, 36px);">${textContent}</span>
+                                    <span class="opt-text" style="font-size:32px;">${textContent}</span>
                                  </button>`;
                   btnGrid.innerHTML += btnHTML;
               });
@@ -528,7 +525,7 @@
       
       let timeLeft = maxTime;
       mobileTimerInterval = setInterval(() => {
-        if (isGlobalPaused) return; 
+        if (isGlobalPaused) return; // 全域暫停檢查
 
         timeLeft--; timerEl.innerText = timeLeft;
         timerEl.classList.remove('tick-anim'); void timerEl.offsetWidth; timerEl.classList.add('tick-anim');
@@ -607,7 +604,7 @@
     }
 
     function submitAnswers() {
-      if (isGlobalPaused) return; 
+      if (isGlobalPaused) return; // 全域暫停檢查
 
       let ansArray = [];
       if (currentQuestionType === 'slider') { ansArray = [parseInt(document.getElementById('ansSlider').value)]; }
