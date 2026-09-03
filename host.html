@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>P2P 主畫面 - 綜藝果凍大廳版</title>
+  <title>P2P 主畫面 - 派對實境秀終極版</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -28,7 +28,7 @@
     @keyframes feverBg { 0% {background-position: 0% 0%;} 100% {background-position: 100% 100%;} }
     @keyframes spinBg { from { background-position: 0 0; } to { background-position: 100px 100px; } }
 
-    /* ========== 警告特效動畫 ========== */
+    /* ========== 警告與大風吹動畫 ========== */
     #eventWarning { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
     .warning-text { font-size: 120px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 30px #f39c12, 0 10px 0 #d35400; animation: flashText 0.3s infinite alternate; }
     .shuffle-anim { animation: spinAndZoom 1.5s ease-in-out infinite alternate !important; color: #e056fd; text-shadow: 0 0 40px #be2edd, 0 10px 0 #686de0;}
@@ -87,7 +87,7 @@
     .mode-badge { background: linear-gradient(45deg, #f093fb, #f5576c); color: white; padding: 8px 20px; border-radius: 30px; font-size: 24px; vertical-align: middle; margin-left: 15px; box-shadow: 0 5px 0 #c0392b;}
     
     #qMedia { max-height: 300px; max-width: 100%; border-radius: 15px; display: none; margin: 10px auto; box-shadow: 0 10px 20px rgba(0,0,0,0.2); border: 5px solid white;}
-    .fog-anim { animation: fogClear 15s linear forwards; }
+    .fog-anim { animation: fogClear var(--fog-time) linear forwards; }
     @keyframes fogClear { 0% { filter: blur(30px); } 100% { filter: blur(0px); } }
 
     #matchPromptsContainer { display: none; flex-wrap: wrap; justify-content: center; gap: 20px; margin-top: 20px; }
@@ -111,7 +111,6 @@
     @keyframes floatOpt { 0%, 100% { transform: translateY(0px) rotate(0deg); } 33% { transform: translateY(-8px) rotate(1deg); } 66% { transform: translateY(5px) rotate(-1deg); } }
 
     .option.dimmed { opacity: 0.2; transform: scale(0.9); filter: grayscale(100%) blur(2px); animation: none !important;}
-    
     .option.highlight { 
         transform: scale(1.15) !important; 
         box-shadow: 0 0 60px rgba(255, 215, 0, 1), 0 15px 0 rgba(0,0,0,0.3) !important; 
@@ -161,6 +160,38 @@
     .place-1 .podium-block { height: 350px; background: linear-gradient(to bottom, #FFD700, #F39C12); }
     .place-2 .podium-block { height: 250px; background: linear-gradient(to bottom, #E0E0E0, #95A5A6); }
     .place-3 .podium-block { height: 180px; background: linear-gradient(to bottom, #CD7F32, #A0522D); }
+
+    /* ========== 答題即時進場區 ========== */
+    #answeredContainer {
+      margin-top: 25px;
+      padding-top: 15px;
+      border-top: 3px dashed rgba(0,0,0,0.1);
+      min-height: 80px;
+    }
+    #answeredCountTitle {
+      font-size: 22px; font-weight: 900; color: #555; margin: 0 0 10px 0;
+    }
+    #answeredGrid {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+    }
+    .answered-tag {
+      font-size: 18px; padding: 5px 15px; border-radius: 30px;
+      background: rgba(255,255,255,0.9); color: #333; font-weight: 900;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+      display: inline-flex; align-items: center; gap: 6px;
+      animation: popInAnswer 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      transform: scale(0);
+    }
+    /* 前三名的專屬炫耀樣式 */
+    .answered-tag.top-1 { border: 3px solid #f1c40f; background: #fffdf0; transform: scale(1.15) !important; z-index: 3; }
+    .answered-tag.top-2 { border: 3px solid #bdc3c7; transform: scale(1.05) !important; z-index: 2; }
+    .answered-tag.top-3 { border: 3px solid #cd7f32; transform: scale(1.0) !important; z-index: 1; }
+
+    @keyframes popInAnswer {
+      0% { transform: scale(0) translateY(30px); opacity: 0; }
+      80% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
   </style>
 </head>
 <body class="bg-setup">
@@ -170,7 +201,6 @@
     <div style="font-size: 40px; color: #fff; margin-top:20px; font-weight:bold;" id="warningSub"></div>
   </div>
 
-  <!-- 1. 賽事前置設定面板 -->
   <div id="setupScreen" class="glass-panel" style="max-width: 1000px;">
     <h2 style="color: #4a3472; font-size: 48px; margin-bottom: 20px;">⚙️ 建立終極派對聯賽</h2>
     
@@ -212,9 +242,9 @@
     <div style="display: flex; justify-content: center; align-items: center; gap: 30px;">
       <div id="qrcode"></div>
       <div style="text-align: left;">
-        <h2 style="color:#ff4b2b; margin:0;" id="lobbyWaitText">✨ 掃描 QR Code 選擇陣營！</h2>
+        <h2 style="color:#ff4b2b; margin:0; text-shadow: 0 4px 10px rgba(0,0,0,0.1);" id="lobbyWaitText">✨ 掃描 QR Code 選擇陣營！</h2>
         <div class="lobby-timer-box" id="lobbyTimerBox">
-          倒數自動分組：<span id="groupTimerText">60</span> 秒
+          倒數開始遊戲：<span id="groupTimerText">60</span> 秒
         </div>
       </div>
     </div>
@@ -228,6 +258,11 @@
     <div id="matchPromptsContainer"></div>
     <div id="timeBarContainer"><div id="timeBar"></div></div>
     <div id="timerText">--</div>
+    <!-- 新增：即時作答進場區 -->
+    <div id="answeredContainer">
+      <div id="answeredCountTitle">⚡ 已完成作答 <span id="answeredCount">0</span> 人 ⚡</div>
+      <div id="answeredGrid"></div>
+    </div>
     <div id="optionsContainer"></div>
     <div id="sliderResult"></div>
     <button id="nextBtn" class="ctrl-btn" onclick="nextQuestion()" style="display:none;">下一題 ➡️</button>
@@ -255,42 +290,55 @@
   <script>
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSChl0vRMFeEVPH4K5T8OC6R4EXWDsoqwJA68DQxQc58IH1zxaG-A1uly4lZT1jr6x8rJIMGPjJ0vRU/pub?output=csv"; 
 
-    // ========== 隨機趣味頭像庫 ==========
-    const avatarsList = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿','🦔','🐉','🐲'];
-
+    // ========== 柔和化音樂與真實 BGM 引擎 ==========
     let audioCtx;
-    let bgmOsc = null; let bgmGain = null; let bgmLfo = null;
+    const bgmNormal = new Audio('https://assets.mixkit.co/music/preview/mixkit-funny-quirky-comedy-track-71.mp3'); 
+    bgmNormal.loop = true; bgmNormal.volume = 0.3;
+    const bgmFast = new Audio('https://assets.mixkit.co/music/preview/mixkit-clapping-comedy-background-music-260.mp3'); 
+    bgmFast.loop = true; bgmFast.volume = 0.4;
+    let currentBGM = null;
 
-    function initAudio() { if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); } }
+    function initAudio() { 
+      if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); } 
+    }
     
     function startBGM(type) {
-        stopBGM(); if(!audioCtx) return;
-        bgmOsc = audioCtx.createOscillator(); bgmGain = audioCtx.createGain(); bgmLfo = audioCtx.createOscillator();
-        bgmOsc.type = type === 'fast' ? 'sawtooth' : 'triangle';
-        bgmOsc.frequency.value = type === 'fast' ? 55 : 65; 
-        bgmGain.gain.value = 0.05;
-        bgmOsc.connect(bgmGain); bgmGain.connect(audioCtx.destination);
-        bgmOsc.start();
-        bgmLfo.frequency.value = type === 'fast' ? 4 : 1.5; 
-        bgmLfo.connect(bgmGain.gain); bgmLfo.start();
+        stopBGM();
+        currentBGM = type === 'fast' ? bgmFast : bgmNormal;
+        currentBGM.play().catch(e => console.log("等待互動以播放 BGM"));
     }
     
     function stopBGM() {
-        if(bgmOsc) { bgmOsc.stop(); bgmOsc.disconnect(); bgmOsc=null; }
-        if(bgmLfo) { bgmLfo.stop(); bgmLfo.disconnect(); bgmLfo=null; }
+        if(bgmNormal) { bgmNormal.pause(); bgmNormal.currentTime = 0; }
+        if(bgmFast) { bgmFast.pause(); bgmFast.currentTime = 0; }
     }
 
-    function playTone(freq, type, duration, vol=0.1) { if(!audioCtx) return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime); gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration); }
-    function playJoin() { initAudio(); playTone(880, 'sine', 0.1); setTimeout(()=>playTone(1108.73, 'sine', 0.2), 100); } 
-    function playStart() { initAudio(); playTone(523, 'square', 0.1); setTimeout(() => playTone(659, 'square', 0.1), 150); setTimeout(() => playTone(784, 'square', 0.4), 300); }
-    function playWarning() { initAudio(); playTone(1200, 'square', 0.1, 0.2); setTimeout(()=>playTone(1500, 'square', 0.3, 0.2), 150); } 
-    function playShuffleSound() { initAudio(); playTone(300, 'sawtooth', 0.1); setTimeout(()=>playTone(400, 'sawtooth', 0.1), 100); setTimeout(()=>playTone(500, 'sawtooth', 0.1), 200); setTimeout(()=>playTone(600, 'sawtooth', 0.1), 300); setTimeout(()=>playTone(800, 'sawtooth', 0.5), 400); }
-    function playTickFast() { initAudio(); playTone(1500, 'triangle', 0.05, 0.05); } 
-    function playTick() { initAudio(); playTone(1000, 'triangle', 0.05, 0.05); } 
+    function playTone(freq, type, duration, vol=0.1) { 
+      if(!audioCtx) return; 
+      const osc = audioCtx.createOscillator(); 
+      const gain = audioCtx.createGain(); 
+      osc.type = type; 
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime); 
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime); 
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration); 
+      osc.connect(gain); gain.connect(audioCtx.destination); 
+      osc.start(); osc.stop(audioCtx.currentTime + duration); 
+    }
+    // 俏皮的泡泡破裂音效，頻率隨機產生些微變化，聽起來才不會死板
+    function playPopSound() { 
+      initAudio(); 
+      const randomFreq = 800 + Math.random() * 400; // 800Hz ~ 1200Hz
+      playTone(randomFreq, 'sine', 0.05, 0.08); 
+    }
+    function playJoin() { initAudio(); playTone(600, 'sine', 0.1); setTimeout(()=>playTone(800, 'sine', 0.15), 100); } 
+    function playStart() { initAudio(); playTone(523, 'triangle', 0.1); setTimeout(() => playTone(659, 'triangle', 0.1), 150); setTimeout(() => playTone(784, 'triangle', 0.4), 300); }
+    function playWarning() { initAudio(); playTone(400, 'sine', 0.2, 0.2); setTimeout(()=>playTone(500, 'sine', 0.3, 0.2), 200); } 
+    function playShuffleSound() { initAudio(); playTone(300, 'triangle', 0.1); setTimeout(()=>playTone(400, 'triangle', 0.1), 100); setTimeout(()=>playTone(500, 'triangle', 0.1), 200); setTimeout(()=>playTone(600, 'triangle', 0.1), 300); setTimeout(()=>playTone(800, 'triangle', 0.5), 400); }
+    function playTickFast() { initAudio(); playTone(800, 'sine', 0.1, 0.05); } 
+    function playTick() { initAudio(); playTone(600, 'sine', 0.1, 0.05); } 
     function playReveal() { initAudio(); playTone(659, 'sine', 0.1); setTimeout(() => playTone(1046, 'sine', 0.5), 100); } 
-    function playWin() { initAudio(); playTone(523, 'square', 0.1); setTimeout(() => playTone(659, 'square', 0.1), 100); setTimeout(() => playTone(783, 'square', 0.1), 200); setTimeout(() => playTone(1046, 'square', 0.6), 300); }
-    function playFirstBlood() { initAudio(); playTone(880, 'sawtooth', 0.1); setTimeout(() => playTone(1108, 'sawtooth', 0.1), 100); setTimeout(() => playTone(1318, 'sawtooth', 0.4), 200); } 
-    function playCoin() { initAudio(); playTone(987.77, 'sine', 0.1); setTimeout(()=>playTone(1318.51, 'sine', 0.3), 100); }
+    function playWin() { initAudio(); playTone(523, 'triangle', 0.1); setTimeout(() => playTone(659, 'triangle', 0.1), 100); setTimeout(() => playTone(783, 'triangle', 0.1), 200); setTimeout(() => playTone(1046, 'triangle', 0.6), 300); }
+    function playFirstBlood() { initAudio(); playTone(880, 'triangle', 0.1); setTimeout(() => playTone(1108, 'triangle', 0.1), 100); setTimeout(() => playTone(1318, 'triangle', 0.4), 200); } 
 
     function toggleTeamInputs() {
       const mode = document.getElementById('cfgMode').value;
@@ -319,7 +367,7 @@
       const blobs = [
         '30% 70% 70% 30% / 30% 30% 70% 70%', '60% 40% 30% 70% / 60% 30% 70% 40%',
         '40% 60% 70% 30% / 40% 50% 60% 50%', '70% 30% 40% 60% / 50% 70% 30% 50%',
-        '50% 50% 20% 80% / 25% 80% 20% 75%', '20px', '25px', '50px' 
+        '50% 50% 20% 80% / 25% 80% 20% 75%', '30px', '40px'
       ];
       const colors = [
         'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)', 'linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%)',
@@ -405,17 +453,14 @@
         conn.on('data', (data) => {
           if (data.type === 'JOIN') {
             playJoin(); conn.playerName = data.name;
-            if(!playerStats[data.name]) {
-              let randomAvatar = avatarsList[Math.floor(Math.random() * avatarsList.length)];
-              playerStats[data.name] = { teamId: -1, score: 0, correctCount: 0, fastWins: 0, fastScore: 0, streak: 0, hasShield: false, isGhost: false, isTraitor: false, avatar: randomAvatar };
-            }
+            if(!playerStats[data.name]) playerStats[data.name] = { teamId: -1, score: 0, correctCount: 0, fastWins: 0, fastScore: 0, streak: 0, hasShield: false, isGhost: false, isTraitor: false, avatar: '👤' };
             
             if (gameConfig.isTeamMode) {
               conn.send({ type: 'TEAM_SELECTION_START', teams: teamsData, max: gameConfig.maxPerTeam, css: document.getElementById('dynamicTeamStyles').innerHTML, cfg: gameConfig });
             } else {
-              const tag = createPlayerTagElement(data.name, playerStats[data.name].avatar, `ptag-${data.name}`);
+              const tag = createPlayerTagElement(data.name, '👤', `ptag-${data.name}`);
               bucketsContainer.appendChild(tag);
-              conn.send({ type: 'INDIVIDUAL_MODE_WAIT', cfg: gameConfig, avatar: playerStats[data.name].avatar });
+              conn.send({ type: 'INDIVIDUAL_MODE_WAIT', cfg: gameConfig });
             }
           }
           else if (data.type === 'SYNC_AVATAR') {
@@ -423,10 +468,6 @@
                  playerStats[conn.playerName].avatar = data.avatar;
                  let ptag = document.getElementById(`ptag-${conn.playerName}`);
                  if(ptag) ptag.innerHTML = `<span style="font-size:28px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));">${data.avatar}</span> <span style="text-shadow: 0 1px 2px rgba(255,255,255,0.8);">${conn.playerName}</span>`;
-                 else {
-                    let tags = document.querySelectorAll('.player-tag');
-                    tags.forEach(t => { if(t.innerText.includes(conn.playerName)) t.innerHTML = `<span style="font-size:28px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));">${data.avatar}</span> <span style="text-shadow: 0 1px 2px rgba(255,255,255,0.8);">${conn.playerName}</span>`; });
-                 }
              }
           }
           else if (data.type === 'SELECT_TEAM' && gameConfig.isTeamMode) { handleTeamSelection(conn, data.teamId); }
@@ -460,7 +501,7 @@
         const pTag = createPlayerTagElement(pName, playerStats[pName].avatar, `ptag-${pName}`);
         document.getElementById(`players-${teamId}`).appendChild(pTag);
         
-        conn.send({ type: 'TEAM_ASSIGNED', teamName: team.name, teamClass: team.class, teamGrad: team.gradient, cfg: gameConfig, avatar: playerStats[pName].avatar });
+        conn.send({ type: 'TEAM_ASSIGNED', teamName: team.name, teamClass: team.class, teamGrad: team.gradient, cfg: gameConfig });
         broadcast({ type: 'TEAM_UPDATED', teams: teamsData, max: gameConfig.maxPerTeam }); playJoin();
       }
     }
@@ -514,7 +555,7 @@
           if(availableTeams.length > 0) {
             availableTeams.sort((a,b) => a.players.length - b.players.length);
             const t = availableTeams[0]; t.players.push(conn.playerName); playerStats[conn.playerName].teamId = t.id;
-            conn.send({ type: 'TEAM_ASSIGNED', teamName: t.name, teamClass: t.class, teamGrad: t.gradient, cfg: gameConfig, avatar: playerStats[conn.playerName].avatar });
+            conn.send({ type: 'TEAM_ASSIGNED', teamName: t.name, teamClass: t.class, teamGrad: t.gradient, cfg: gameConfig });
           }
         });
       }
@@ -534,12 +575,16 @@
               const correctArray = row[2].toString().split(',').map(n => parseInt(n.trim()));
               const modeRaw = row[3] ? row[3].trim().toLowerCase() : 'normal';
               const mediaUrl = row[4] ? row[4].trim() : '';
+              
+              let timeLimit = parseInt(row[5]);
+              if (isNaN(timeLimit) || timeLimit <= 0) { timeLimit = (modeRaw.includes('fast')) ? 10 : 15; }
+
               let opts = [];
-              for(let i = 5; i < row.length; i++) {
+              for(let i = 6; i < row.length; i++) {
                  if(row[i] !== undefined && row[i].trim() !== '') opts.push(row[i].trim());
               }
               if (opts.length === 0) opts = ["正確", "錯誤"];
-              return { type: type, q: q, options: opts, correct: correctArray, mode: modeRaw, media: mediaUrl };
+              return { type: type, q: q, options: opts, correct: correctArray, mode: modeRaw, media: mediaUrl, time: timeLimit };
             }).filter(q => q);
           }
         });
@@ -548,101 +593,136 @@
     
     function useDefaultQuestions() {
       questions = [
-        { type: "single", mode: "normal", q: "【無限制選項展示】一星期有幾天？(七個選項)", options: ["1天", "2天", "3天", "4天", "5天", "6天", "7天"], correct: [6], media: "" },
-        { type: "single", mode: "minefield", q: "【地雷陷阱】選錯直接扣500分！太陽系中最大的行星是？", options: ["金星", "火星", "木星", "地球"], correct: [2], media: "" },
-        { type: "single", mode: "memory", q: "【閃憶模式】選項只有3秒記憶時間！蘋果的英文是？", options: ["Apple", "Banana", "Cherry", "Date"], correct: [0], media: "" },
-        { type: "single", mode: "chameleon", q: "【迷霧文字】字體會忽隱忽現！水的化學式？", options: ["CO2", "H2O", "O2", "H2"], correct: [1], media: "" },
-        { type: "single", mode: "auction", q: "【搶答拍賣】出價最高的隊伍才能回答！答對贏雙倍，答錯倒扣！", options: ["紅", "綠", "藍", "黃"], correct: [2], media: "" },
-        { type: "single", mode: "traitor", q: "【背叛者模式】有內鬼！請找出誰在說謊誤導大家！", options: ["A", "B", "C", "D"], correct: [3], media: "" },
-        { type: "match_drag", mode: "normal", q: "【連連看-拖曳】依大螢幕圖示，在手機將選項拖曳排序！", options: ["蘋果", "香蕉", "葡萄", "西瓜", "芒果"], correct: [0, 1, 2, 3, 4], media: "🍎 | 🍌 | 🍇 | 🍉 | 🥭" },
-        { type: "match_click", mode: "normal", q: "【連連看-按壓】依照大螢幕隨機出現的順序，在手機依序點擊", options: ["春天", "夏天", "秋天", "冬天"], correct: [0, 1, 2, 3], media: "Spring | Summer | Autumn | Winter" },
-        { type: "slider", mode: "normal", q: "【精準拉桿】水在常溫常壓的沸點是幾度？", options: ["0", "200"], correct: [100], media: "" }
+        { type: "single", mode: "normal", q: "【無限制選項展示】一星期有幾天？(七個選項)", options: ["1天", "2天", "3天", "4天", "5天", "6天", "7天"], correct: [6], media: "", time: 15 },
+        { type: "single", mode: "minefield", q: "【地雷陷阱】選錯直接扣500分！太陽系中最大的行星是？", options: ["金星", "火星", "木星", "地球"], correct: [2], media: "", time: 15 },
+        { type: "single", mode: "memory", q: "【閃憶模式】選項只有3秒記憶時間！蘋果的英文是？", options: ["Apple", "Banana", "Cherry", "Date"], correct: [0], media: "", time: 10 },
+        { type: "single", mode: "chameleon", q: "【迷霧文字】字體會忽隱忽現！水的化學式？", options: ["CO2", "H2O", "O2", "H2"], correct: [1], media: "", time: 15 },
+        { type: "single", mode: "auction", q: "【搶答拍賣】出價最高的隊伍才能回答！答對贏雙倍，答錯倒扣！", options: ["紅", "綠", "藍", "黃"], correct: [2], media: "", time: 20 },
+        { type: "single", mode: "traitor", q: "【背叛者模式】有內鬼！請找出誰在說謊誤導大家！", options: ["A", "B", "C", "D"], correct: [3], media: "", time: 20 },
+        { type: "match_drag", mode: "normal", q: "【連連看-拖曳】依大螢幕圖示，在手機將選項拖曳排序！", options: ["蘋果", "香蕉", "葡萄", "西瓜", "芒果"], correct: [0, 1, 2, 3, 4], media: "🍎 | 🍌 | 🍇 | 🍉 | 🥭", time: 30 },
+        { type: "match_click", mode: "normal", q: "【連連看-按壓】依照大螢幕隨機出現的順序，在手機依序點擊", options: ["春天", "夏天", "秋天", "冬天"], correct: [0, 1, 2, 3], media: "Spring | Summer | Autumn | Winter", time: 25 },
+        { type: "slider", mode: "normal", q: "【精準拉桿】水在常溫常壓的沸點是幾度？", options: ["0", "200"], correct: [100], media: "", time: 15 }
       ];
     }
 
     function broadcast(messageObj, targetName = null) { connections.forEach(conn => { if (conn.open) { if (!targetName || conn.playerName === targetName) conn.send(messageObj); } }); }
 
     function handleAnswer(conn, data) {
-      if (!isAcceptingAnswers || answeredPlayers.has(conn.playerName)) return;
-      const qData = questions[currentQIndex]; 
+          if (!isAcceptingAnswers || answeredPlayers.has(conn.playerName)) return;
+          const qData = questions[currentQIndex]; 
 
-      if (qData.mode === 'auction' && gameConfig.useExtreme) {
-        if(gameConfig.isTeamMode) { if (playerStats[conn.playerName].teamId !== highestBidder) return; } 
-        else { if (conn.playerName !== highestBidder) return; }
-      }
+          if (qData.mode === 'auction' && gameConfig.useExtreme) {
+            if(gameConfig.isTeamMode) { if (playerStats[conn.playerName].teamId !== highestBidder) return; } 
+            else { if (conn.playerName !== highestBidder) return; }
+          }
 
-      answeredPlayers.add(conn.playerName);
-      const correctAnsArray = qData.correct;
-      const answers = data.answers;
-      let isCorrect = false; let earnedScore = 0;
-      let timeTaken = Date.now() - questionStartTime;
+          // 1. 登記玩家已作答
+          answeredPlayers.add(conn.playerName);
 
-      if (qData.mode === 'majority' && gameConfig.useAdvType) {
-        conn.tempResult = { isCorrect: false, earnedScore: 0, pVal: answers[0], timeTaken: timeTaken };
-        currentRoundData.push({ name: conn.playerName, time: timeTaken, isCorrect: false, scoreToAdd: 0 });
-        return;
-      }
+          // =========================================================
+          // 🌟 【新增】即時動態進場邏輯開始
+          // =========================================================
+          let currentRank = answeredPlayers.size;
+          let countEl = document.getElementById('answeredCount');
+          if (countEl) countEl.innerText = currentRank;
 
-      if (qData.type === 'slider' && gameConfig.useAdvType) {
-        const pVal = parseInt(answers[0]); const cVal = qData.correct[0];
-        const range = parseInt(qData.options[1]) - parseInt(qData.options[0]);
-        const err = Math.abs(pVal - cVal);
-        if (err === 0) { isCorrect = true; earnedScore = 1000; }
-        else if (err <= range * 0.2) { isCorrect = true; earnedScore = Math.floor(1000 * (1 - err/(range*0.2))); } 
-      } 
-      else if ((qData.type === 'order' || qData.type === 'match_drag' || qData.type === 'match_click') && gameConfig.useAdvType) {
-        let refArray = (qData.type.startsWith('match_')) ? currentScrambledCorrect : qData.correct;
-        if (answers.length === refArray.length && answers.every((v, i) => v === refArray[i])) { 
-            isCorrect = true; earnedScore = 1000; 
-        } else {
-            let correctPos = 0;
-            answers.forEach((v, i) => { if(v === refArray[i]) correctPos++; });
-            earnedScore = Math.floor(correctPos * (1000 / refArray.length));
-            if(correctPos === refArray.length) isCorrect = true;
+          // 抓取玩家的專屬頭像 (如果沒抓到就給預設的人影)
+          let playerAvatar = playerStats[conn.playerName] ? playerStats[conn.playerName].avatar : '👤';
+
+          // 判斷名次給予專屬獎牌與特殊樣式
+          let medal = '✅';
+          let extraClass = '';
+          if (currentRank === 1) { medal = '🥇'; extraClass = 'top-1'; }
+          else if (currentRank === 2) { medal = '🥈'; extraClass = 'top-2'; }
+          else if (currentRank === 3) { medal = '🥉'; extraClass = 'top-3'; }
+
+          // 建立果凍標籤並塞入畫面
+          let tagHTML = document.createElement('div');
+          tagHTML.className = `answered-tag ${extraClass}`;
+          tagHTML.innerHTML = `<span>${medal}</span> <span style="font-size: 20px;">${playerAvatar}</span> <span>${conn.playerName}</span>`;
+          
+          let gridEl = document.getElementById('answeredGrid');
+          if (gridEl) gridEl.appendChild(tagHTML);
+
+          // 發出泡泡音效 (前提是您有在前面加入 playPopSound 函數)
+          if (typeof playPopSound === 'function') playPopSound();
+          // =========================================================
+          // 🌟 即時動態進場邏輯結束
+          // =========================================================
+
+
+          const correctAnsArray = qData.correct;
+          const answers = data.answers;
+          let isCorrect = false; let earnedScore = 0;
+          let timeTaken = Date.now() - questionStartTime;
+          const maxTimeMs = (qData.time || 15) * 1000;
+
+          if (qData.mode === 'majority' && gameConfig.useAdvType) {
+            conn.tempResult = { isCorrect: false, earnedScore: 0, pVal: answers[0], timeTaken: timeTaken };
+            currentRoundData.push({ name: conn.playerName, time: timeTaken, isCorrect: false, scoreToAdd: 0 });
+            return;
+          }
+
+          if (qData.type === 'slider' && gameConfig.useAdvType) {
+            const pVal = parseInt(answers[0]); const cVal = qData.correct[0];
+            const range = parseInt(qData.options[1]) - parseInt(qData.options[0]);
+            const err = Math.abs(pVal - cVal);
+            if (err === 0) { isCorrect = true; earnedScore = 1000; }
+            else if (err <= range * 0.2) { isCorrect = true; earnedScore = Math.floor(1000 * (1 - err/(range*0.2))); } 
+          } 
+          else if ((qData.type === 'order' || qData.type === 'match_drag' || qData.type === 'match_click') && gameConfig.useAdvType) {
+            let refArray = (qData.type.startsWith('match_')) ? currentScrambledCorrect : qData.correct;
+            if (answers.length === refArray.length && answers.every((v, i) => v === refArray[i])) { 
+                isCorrect = true; earnedScore = 1000; 
+            } else {
+                let correctPos = 0;
+                answers.forEach((v, i) => { if(v === refArray[i]) correctPos++; });
+                earnedScore = Math.floor(correctPos * (1000 / refArray.length));
+                if(correctPos === refArray.length) isCorrect = true;
+            }
+          } 
+          else {
+            if (answers.length > 0) {
+              let correctCount = 0; let wrongSelected = false;
+              for (let i = 0; i < answers.length; i++) { if (qData.correct.includes(answers[i])) correctCount++; else { wrongSelected = true; break; } }
+              if (!wrongSelected && answers.length === qData.correct.length) { isCorrect = true; earnedScore = 1000; }
+              else if (!wrongSelected) { isCorrect = true; earnedScore = Math.floor(1000 * (correctCount / qData.correct.length)); }
+            }
+          }
+
+          if (qData.mode === 'fog' && gameConfig.useMedia && isCorrect) {
+            earnedScore = Math.floor(earnedScore * ((maxTimeMs - timeTaken) / maxTimeMs));
+            if(earnedScore < 100) earnedScore = 100;
+          }
+
+          if ((qData.mode === 'fast_single' || qData.mode === 'fast_rank') && gameConfig.useExtreme && !isCorrect && timeTaken < 3000) {
+            earnedScore = -300;
+          }
+
+          if (qData.mode === 'minefield' && gameConfig.useExtreme && !isCorrect) {
+            earnedScore = -500;
+          }
+
+          let multiplier = 1;
+          if (gameConfig.useEconomy) {
+            if (isCorrect) { multiplier = 1 + (playerStats[conn.playerName].streak * 0.2); if(multiplier > 1.5) multiplier = 1.5; }
+          }
+          earnedScore = Math.floor(earnedScore * multiplier);
+          
+          if (qData.mode === 'wager' && gameConfig.useEconomy) {
+            let wagerAmt = conn.wager || 0;
+            if (isCorrect) earnedScore += wagerAmt; else earnedScore -= wagerAmt; 
+          } else if (qData.mode === 'auction' && gameConfig.useExtreme) {
+            if (isCorrect) earnedScore += highestBid; else earnedScore -= highestBid;
+          }
+
+          conn.tempResult = { isCorrect, earnedScore, pVal: answers[0], timeTaken: timeTaken };
+          currentRoundData.push({ name: conn.playerName, time: timeTaken, isCorrect: isCorrect, scoreToAdd: earnedScore });
+
+          if (qData.mode === 'fast_single' && isCorrect) {
+            playFirstBlood(); clearInterval(countdownInterval); isAcceptingAnswers = false; broadcast({ type: 'DISABLE_BUTTONS' }); revealAnswer(); 
+          }
         }
-      } 
-      else {
-        if (answers.length > 0) {
-          let correctCount = 0; let wrongSelected = false;
-          for (let i = 0; i < answers.length; i++) { if (qData.correct.includes(answers[i])) correctCount++; else { wrongSelected = true; break; } }
-          if (!wrongSelected && answers.length === qData.correct.length) { isCorrect = true; earnedScore = 1000; }
-          else if (!wrongSelected) { isCorrect = true; earnedScore = Math.floor(1000 * (correctCount / qData.correct.length)); }
-        }
-      }
-
-      if (qData.mode === 'fog' && gameConfig.useMedia && isCorrect) {
-        earnedScore = Math.floor(earnedScore * ((15000 - timeTaken) / 15000));
-        if(earnedScore < 100) earnedScore = 100;
-      }
-
-      if ((qData.mode === 'fast_single' || qData.mode === 'fast_rank') && gameConfig.useExtreme && !isCorrect && timeTaken < 3000) {
-        earnedScore = -300;
-      }
-
-      if (qData.mode === 'minefield' && gameConfig.useExtreme && !isCorrect) {
-        earnedScore = -500;
-      }
-
-      let multiplier = 1;
-      if (gameConfig.useEconomy) {
-        if (isCorrect) { multiplier = 1 + (playerStats[conn.playerName].streak * 0.2); if(multiplier > 1.5) multiplier = 1.5; }
-      }
-      earnedScore = Math.floor(earnedScore * multiplier);
-      
-      if (qData.mode === 'wager' && gameConfig.useEconomy) {
-        let wagerAmt = conn.wager || 0;
-        if (isCorrect) earnedScore += wagerAmt; else earnedScore -= wagerAmt; 
-      } else if (qData.mode === 'auction' && gameConfig.useExtreme) {
-        if (isCorrect) earnedScore += highestBid; else earnedScore -= highestBid;
-      }
-
-      conn.tempResult = { isCorrect, earnedScore, pVal: answers[0], timeTaken: timeTaken };
-      currentRoundData.push({ name: conn.playerName, time: timeTaken, isCorrect: isCorrect, scoreToAdd: earnedScore });
-
-      if (qData.mode === 'fast_single' && isCorrect) {
-        playFirstBlood(); clearInterval(countdownInterval); isAcceptingAnswers = false; broadcast({ type: 'DISABLE_BUTTONS' }); revealAnswer(); 
-      }
-    }
 
     function nextQuestion() {
       currentQIndex++;
@@ -775,7 +855,8 @@
       const mediaEl = document.getElementById('qMedia');
       if (gameConfig.useMedia && qData.media) { 
         mediaEl.src = qData.media; mediaEl.style.display = 'block'; 
-        if(qData.mode === 'fog') { mediaEl.className = "fog-anim"; } else { mediaEl.className = ""; }
+        if(qData.mode === 'fog') { mediaEl.style.setProperty('--fog-time', `${qData.time || 15}s`); mediaEl.className = "fog-anim"; } 
+        else { mediaEl.className = ""; }
       } else { mediaEl.style.display = 'none'; mediaEl.className = ""; }
 
       const optBox = document.getElementById('optionsContainer');
@@ -820,6 +901,10 @@
       document.getElementById('timeBarContainer').style.display = 'block';
       currentRoundData = []; isAcceptingAnswers = true; answeredPlayers.clear(); connections.forEach(c => c.tempResult = null);
       
+      // 清空即時作答區
+      document.getElementById('answeredGrid').innerHTML = '';
+      document.getElementById('answeredCount').innerText = '0';
+
       connections.forEach(c => {
         if(c.open && c.playerName) {
           let role = 'all';
@@ -847,7 +932,7 @@
         }
       });
 
-      const MAX_TIME = isFastMode ? 10 : 15; let timeLeft = MAX_TIME;
+      const MAX_TIME = qData.time || (isFastMode ? 10 : 15); let timeLeft = MAX_TIME;
       const timerEl = document.getElementById('timerText'); const timeBar = document.getElementById('timeBar');
       timerEl.innerText = timeLeft; timerEl.style.color = "#333"; timeBar.style.width = "100%"; timeBar.style.background = "linear-gradient(90deg, #00c6ff, #0072ff)";
       
@@ -860,7 +945,7 @@
         // 觸發碼錶彈性動畫
         timerEl.classList.remove('tick-anim'); void timerEl.offsetWidth; timerEl.classList.add('tick-anim');
 
-        if (qData.mode === 'memory' && gameConfig.useExtreme && timeLeft === MAX_TIME - 3) {
+        if (qData.mode === 'memory' && gameConfig.useExtreme && timeLeft === Math.max(0, MAX_TIME - 3)) {
            document.querySelectorAll('.opt-text').forEach(t => t.innerText = "???");
         }
 
@@ -1003,12 +1088,22 @@
           let rankClass = i === 0 ? 'r-1' : (i === 1 ? 'r-2' : 'r-3'); let medal = i === 0 ? '🥇' : (i === 1 ? '🥈' : '🥉');
           
           let teamTagHtml = "";
+          let avatarHtml = `<span style="font-size:32px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));">${playerStats[p.name].avatar}</span>`;
+
           if (gameConfig.isTeamMode) {
             const pTeamId = playerStats[p.name].teamId; const tGrad = teamsData.find(t => t.id === pTeamId).gradient;
             teamTagHtml = `<div style="font-size:16px; margin-bottom:5px; background:${tGrad}; border-radius:10px; padding:2px;">${teamsData[pTeamId].name}</div>`;
           }
 
-          top3Container.innerHTML += `<div class="r-card ${rankClass}" style="animation-delay: ${i*0.2}s"><div style="font-size:30px; margin-bottom:10px;">${medal}</div><div class="r-name">${p.name}</div>${teamTagHtml}<div class="r-time">${timeSec}s</div></div>`;
+          top3Container.innerHTML += `
+            <div class="r-card ${rankClass}" style="animation-delay: ${i*0.2}s">
+              <div style="font-size:30px; margin-bottom:10px;">${medal}</div>
+              <div style="margin-bottom:5px;">${avatarHtml}</div>
+              <div class="r-name">${p.name}</div>
+              ${teamTagHtml}
+              <div class="r-time">${timeSec}s</div>
+            </div>
+          `;
           if(i===0) confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
         }
       }
@@ -1025,7 +1120,6 @@
           return { name: `<span style="background:${t.gradient}; padding:5px 15px; border-radius:10px; color:white;">${t.name}</span>`, score: score };
         });
       } else { 
-        // 個人戰，帶入頭像
         rankedData = Object.keys(playerStats).map(pName => { return { name: pName, score: playerStats[pName].score, avatar: playerStats[pName].avatar }; }); 
       }
       
@@ -1035,11 +1129,11 @@
         let medal = index === 0 ? "👑" : index === 1 ? "💎" : index === 2 ? "🌟" : "🔥";
         let streakHtml = ''; let ghostHtml = '';
         if(!gameConfig.isTeamMode && playerStats[item.name]) {
-          if(playerStats[item.name].streak >= 2) streakHtml = `<span class="player-tag fire-streak">🔥 x${playerStats[item.name].streak}</span>`;
+          if(playerStats[item.name].streak >= 2) streakHtml = `<span class="player-tag fire-streak" style="font-size:16px;">🔥 x${playerStats[item.name].streak}</span>`;
           if(playerStats[item.name].isGhost) ghostHtml = ` <span style="font-size:24px;">👻</span>`;
         }
         
-        let avatarHtml = gameConfig.isTeamMode ? "" : `<span style="font-size:32px; margin-right:10px;">${item.avatar}</span>`;
+        let avatarHtml = gameConfig.isTeamMode ? "" : `<span style="font-size:32px; margin-right:10px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));">${item.avatar}</span>`;
         
         li.innerHTML = `<span>${medal} ${avatarHtml}${item.name} ${streakHtml} ${ghostHtml}</span> <span class="rank-score">${item.score}</span>`;
         list.appendChild(li);
@@ -1078,7 +1172,7 @@
       for(let i=0; i<3; i++) {
         const place = i+1;
         if(finalData[i] && finalData[i].metric > 0) { 
-           let avatarHtml = gameConfig.isTeamMode ? "" : `<div style="font-size:50px; margin-bottom:10px;">${finalData[i].avatar}</div>`;
+           let avatarHtml = gameConfig.isTeamMode ? "" : `<div style="font-size:50px; margin-bottom:10px; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.3));">${finalData[i].avatar}</div>`;
            document.getElementById(`name-${place}`).innerHTML = `${avatarHtml}${finalData[i].name}`; 
            document.getElementById(`score-${place}`).innerText = finalData[i].display; 
         } 
