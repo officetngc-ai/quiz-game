@@ -251,7 +251,7 @@
     </div>
   </div>
 
-  <!-- ✅ 加入隱藏的 Audio 標籤解決瀏覽器音效預載問題 -->
+  <!-- ✅ 隱藏的 Audio 標籤解決瀏覽器音效預載問題 -->
   <audio id="bgmNormalObj" loop src="https://assets.mixkit.co/music/preview/mixkit-funny-quirky-comedy-track-71.mp3"></audio>
   <audio id="bgmFastObj" loop src="https://assets.mixkit.co/music/preview/mixkit-clapping-comedy-background-music-260.mp3"></audio>
 
@@ -273,19 +273,27 @@
       bgmNormal.play().then(()=>bgmNormal.pause()).catch(e=>{});
       bgmFast.play().then(()=>bgmFast.pause()).catch(e=>{});
     }
-    
-    function startBGM(type) {
-        if (currentBGMType === type) return; 
-        stopBGM();
-        currentBGMType = type;
-        const bgm = type === 'fast' ? bgmFast : bgmNormal;
-        bgm.play().catch(e => console.log("等待互動以播放 BGM"));
+
+    // ========== 🌟 雙軌 BGM 疊加引擎 ==========
+    function startPartyBGM() {
+        if (bgmNormal && bgmNormal.paused) {
+            bgmNormal.volume = 0.3;
+            bgmNormal.play().catch(e => console.log("等待互動以播放 BGM"));
+        }
     }
-    
-    function stopBGM() {
-        if(bgmNormal) { bgmNormal.pause(); bgmNormal.currentTime = 0; }
-        if(bgmFast) { bgmFast.pause(); bgmFast.currentTime = 0; }
-        currentBGMType = null;
+
+    function overlayFastBGM(isFast) {
+        if (!bgmFast || !bgmNormal) return;
+        if (isFast) {
+            bgmNormal.volume = 0.1; // 降低主音樂音量
+            if (bgmFast.paused) {
+                bgmFast.currentTime = 0; 
+                bgmFast.play().catch(e=>{});
+            }
+        } else {
+            bgmNormal.volume = 0.3; // 恢復正常音量
+            bgmFast.pause();
+        }
     }
 
     function playTone(freq, type, duration, vol=0.1) { 
@@ -349,6 +357,8 @@
           vibrate([50, 100, 50]); 
           hostConnection.send({ type: 'JOIN', name: myName });
           hostConnection.send({ type: 'SYNC_AVATAR', avatar: myAvatar });
+          
+          startPartyBGM(); // 成功加入遊戲後啟動全域常駐 BGM
         });
 
         hostConnection.on('data', (data) => {
@@ -357,7 +367,7 @@
             // 💀 淘汰處理
             isEliminated = true;
             document.getElementById('eliminatedOverlay').style.display = 'flex';
-            stopBGM();
+            overlayFastBGM(false);
             vibrate([500, 200, 500]); 
           }
           else if (data.type === 'TIMER_SYNC') {
@@ -385,7 +395,6 @@
                 timeBar.className = 'striped-bar bar-normal';
                 timeBar.style.width = `${progress}%`;
                 timeBar.style.background = '';
-                // 雷射外框發光同步到手機端
                 let hue = (data.timeLeft/data.maxTime) * 120;
                 let spread = (1 - (data.timeLeft/data.maxTime)) * 4 + 1; 
                 document.getElementById('gameScreen').style.border = `0.8dvh solid hsl(${hue}, 100%, 50%)`;
@@ -403,7 +412,7 @@
               giantTimerEl.innerText = data.timeLeft;
               
               if (!isEliminated) {
-                 startBGM('fast'); 
+                 overlayFastBGM(true); // 疊加快節奏
                  playTickFast();
               }
             } else {
@@ -422,7 +431,7 @@
               giantTimerEl.style.display = 'none';
               document.getElementById('gameScreen').style.border = 'none';
               document.getElementById('gameScreen').style.boxShadow = 'none';
-              stopBGM();
+              overlayFastBGM(false); // 停止快節奏
             }
           }
           else if (data.type === 'GAME_PAUSED') {
@@ -489,7 +498,7 @@
           }
           else if (data.type === 'WAGER_PHASE' || data.type === 'BOUNTY_PHASE' || data.type === 'AUCTION_PHASE') {
             if (isEliminated) return; // 淘汰者不參與押注
-            vibrate(100); stopBGM();
+            vibrate(100); 
             document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting'); document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('gameScreen').style.border = 'none'; document.getElementById('gameScreen').style.boxShadow = 'none';
             document.getElementById('btnGrid').style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; document.getElementById('submitBtn').style.display = 'none'; document.getElementById('coopText').style.display = 'none';
             document.getElementById('wagerBox').style.display = 'flex';
@@ -528,7 +537,8 @@
             currentOptions = data.options || []; 
             clearTimeout(memoryTimeout);
             
-            startBGM(data.isFast ? 'fast' : 'normal');
+            startPartyBGM(); // 確保常駐 BGM 正在播放
+            overlayFastBGM(data.isFast); // 根據是否為極速題疊加 BGM
             
             // UI 初始設定，等待第一次 TIMER_SYNC 更新
             document.getElementById('mobileTimerContainer').style.display = 'flex';
@@ -655,7 +665,8 @@
             }
           } 
           else if (data.type === 'DISABLE_BUTTONS') {
-            stopBGM(); document.getElementById('mobileTimerContainer').style.display = 'none';
+            overlayFastBGM(false); // 停火時關閉疊加快節奏，恢復常駐背景音
+            document.getElementById('mobileTimerContainer').style.display = 'none';
             document.body.className = ''; document.body.style.background = myTeamGrad; clearTimeout(memoryTimeout);
             document.getElementById('gameStatus').innerText = "⏳ 停火！請抬頭看大螢幕";
             document.getElementById('gameStatus').style.background = "#89609e"; document.getElementById('gameStatus').style.color = "white";
@@ -746,7 +757,7 @@
       }
       
       vibrate(80); playCoinSound(); document.body.className = ''; document.body.style.background = myTeamGrad; 
-      document.getElementById('skillBar').style.display = 'none'; stopBGM(); document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting');
+      document.getElementById('skillBar').style.display = 'none'; document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting');
       document.getElementById('gameScreen').style.border = 'none';
       document.getElementById('gameScreen').style.boxShadow = 'none';
 
