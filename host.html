@@ -28,7 +28,7 @@
     @keyframes feverBg { 0% {background-position: 0% 0%;} 100% {background-position: 100% 100%;} }
     @keyframes spinBg { from { background-position: 0 0; } to { background-position: 100px 100px; } }
 
-    /* ========== 警告與大風吹動畫 ========== */
+    /* ========== 警告特效動畫 ========== */
     #eventWarning { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
     .warning-text { font-size: 120px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 30px #f39c12, 0 10px 0 #d35400; animation: flashText 0.3s infinite alternate; }
     .shuffle-anim { animation: spinAndZoom 1.5s ease-in-out infinite alternate !important; color: #e056fd; text-shadow: 0 0 40px #be2edd, 0 10px 0 #686de0;}
@@ -76,7 +76,7 @@
     #groupTimerText { color: #c0392b; font-size: 80px; display: inline-block; animation: lobbyTimerPulse 0.8s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 4px 10px rgba(192,57,43,0.3); margin: 0 15px;}
     @keyframes lobbyTimerPulse { 
       0% { transform: scale(1); color: #c0392b; } 
-      50% { transform: scale(1.25) rotate(5deg); color: #900C3F; } /* 深寶石紅 */
+      50% { transform: scale(1.25) rotate(5deg); color: #900C3F; } 
       100% { transform: scale(1); color: #c0392b; } 
     }
 
@@ -170,6 +170,7 @@
     <div style="font-size: 40px; color: #fff; margin-top:20px; font-weight:bold;" id="warningSub"></div>
   </div>
 
+  <!-- 1. 賽事前置設定面板 -->
   <div id="setupScreen" class="glass-panel" style="max-width: 1000px;">
     <h2 style="color: #4a3472; font-size: 48px; margin-bottom: 20px;">⚙️ 建立終極派對聯賽</h2>
     
@@ -213,7 +214,7 @@
       <div style="text-align: left;">
         <h2 style="color:#ff4b2b; margin:0;" id="lobbyWaitText">✨ 掃描 QR Code 選擇陣營！</h2>
         <div class="lobby-timer-box" id="lobbyTimerBox">
-          倒數開始遊戲：<span id="groupTimerText">60</span> 秒
+          倒數自動分組：<span id="groupTimerText">60</span> 秒
         </div>
       </div>
     </div>
@@ -252,9 +253,11 @@
   </div>
 
   <script>
-    const SHEET_CSV_URL = ""; 
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSChl0vRMFeEVPH4K5T8OC6R4EXWDsoqwJA68DQxQc58IH1zxaG-A1uly4lZT1jr6x8rJIMGPjJ0vRU/pub?output=csv"; 
 
-    // ========== 音效與程序化背景音樂引擎 ==========
+    // ========== 隨機趣味頭像庫 ==========
+    const avatarsList = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿','🦔','🐉','🐲'];
+
     let audioCtx;
     let bgmOsc = null; let bgmGain = null; let bgmLfo = null;
 
@@ -402,26 +405,25 @@
         conn.on('data', (data) => {
           if (data.type === 'JOIN') {
             playJoin(); conn.playerName = data.name;
-            if(!playerStats[data.name]) playerStats[data.name] = { teamId: -1, score: 0, correctCount: 0, fastWins: 0, fastScore: 0, streak: 0, hasShield: false, isGhost: false, isTraitor: false, avatar: '👤' };
+            if(!playerStats[data.name]) {
+              let randomAvatar = avatarsList[Math.floor(Math.random() * avatarsList.length)];
+              playerStats[data.name] = { teamId: -1, score: 0, correctCount: 0, fastWins: 0, fastScore: 0, streak: 0, hasShield: false, isGhost: false, isTraitor: false, avatar: randomAvatar };
+            }
             
             if (gameConfig.isTeamMode) {
               conn.send({ type: 'TEAM_SELECTION_START', teams: teamsData, max: gameConfig.maxPerTeam, css: document.getElementById('dynamicTeamStyles').innerHTML, cfg: gameConfig });
             } else {
-              // 個人戰模式大廳加入玩家，使用果凍名牌
-              const tag = createPlayerTagElement(data.name, '👤');
+              const tag = createPlayerTagElement(data.name, playerStats[data.name].avatar, `ptag-${data.name}`);
               bucketsContainer.appendChild(tag);
-              conn.send({ type: 'INDIVIDUAL_MODE_WAIT', cfg: gameConfig });
+              conn.send({ type: 'INDIVIDUAL_MODE_WAIT', cfg: gameConfig, avatar: playerStats[data.name].avatar });
             }
           }
           else if (data.type === 'SYNC_AVATAR') {
-             // 接收手機端產生的專屬頭像
              if(playerStats[conn.playerName]) {
                  playerStats[conn.playerName].avatar = data.avatar;
-                 // 如果大廳已有這個人的標籤，更新頭像
                  let ptag = document.getElementById(`ptag-${conn.playerName}`);
                  if(ptag) ptag.innerHTML = `<span style="font-size:28px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));">${data.avatar}</span> <span style="text-shadow: 0 1px 2px rgba(255,255,255,0.8);">${conn.playerName}</span>`;
                  else {
-                    // 個人戰時的更新
                     let tags = document.querySelectorAll('.player-tag');
                     tags.forEach(t => { if(t.innerText.includes(conn.playerName)) t.innerHTML = `<span style="font-size:28px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2));">${data.avatar}</span> <span style="text-shadow: 0 1px 2px rgba(255,255,255,0.8);">${conn.playerName}</span>`; });
                  }
@@ -438,7 +440,6 @@
         });
       });
 
-      // 個人戰與團隊戰共用倒數計時器邏輯
       let timeLeft = gameConfig.groupTime; 
       const timerTextEl = document.getElementById('groupTimerText');
       if(timerTextEl) timerTextEl.innerText = timeLeft;
@@ -459,7 +460,7 @@
         const pTag = createPlayerTagElement(pName, playerStats[pName].avatar, `ptag-${pName}`);
         document.getElementById(`players-${teamId}`).appendChild(pTag);
         
-        conn.send({ type: 'TEAM_ASSIGNED', teamName: team.name, teamClass: team.class, teamGrad: team.gradient, cfg: gameConfig });
+        conn.send({ type: 'TEAM_ASSIGNED', teamName: team.name, teamClass: team.class, teamGrad: team.gradient, cfg: gameConfig, avatar: playerStats[pName].avatar });
         broadcast({ type: 'TEAM_UPDATED', teams: teamsData, max: gameConfig.maxPerTeam }); playJoin();
       }
     }
@@ -513,7 +514,7 @@
           if(availableTeams.length > 0) {
             availableTeams.sort((a,b) => a.players.length - b.players.length);
             const t = availableTeams[0]; t.players.push(conn.playerName); playerStats[conn.playerName].teamId = t.id;
-            conn.send({ type: 'TEAM_ASSIGNED', teamName: t.name, teamClass: t.class, teamGrad: t.gradient, cfg: gameConfig });
+            conn.send({ type: 'TEAM_ASSIGNED', teamName: t.name, teamClass: t.class, teamGrad: t.gradient, cfg: gameConfig, avatar: playerStats[conn.playerName].avatar });
           }
         });
       }
