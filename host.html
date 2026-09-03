@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>P2P 主畫面 - 綜藝實境秀版</title>
+  <title>P2P 主畫面 - 終極聯賽完全體</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -39,7 +39,6 @@
     .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.15), inset 0 0 0 5px rgba(255,255,255,0.5); margin: 20px auto; width: 85%; color: #333; animation: popUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     @keyframes popUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     
-    /* 綜藝感：整個面板抖動 (最後5秒) */
     .panel-shake { animation: boxShake 0.4s infinite !important; }
     @keyframes boxShake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-4px) rotate(-1deg); } 75% { transform: translateX(4px) rotate(1deg); } }
 
@@ -81,13 +80,11 @@
     .color-6 { background: linear-gradient(135deg, #2c3e50, #34495e); box-shadow: 0 10px 0 #1a252f;}
     .color-7 { background: linear-gradient(135deg, #e84393, #fd79a8); box-shadow: 0 10px 0 #b33971;}
 
-    /* 綜藝感：會呼吸的浮動選項 */
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
     @keyframes floatOpt { 0%, 100% { transform: translateY(0px) rotate(0deg); } 33% { transform: translateY(-8px) rotate(1deg); } 66% { transform: translateY(5px) rotate(-1deg); } }
 
     .option.dimmed { opacity: 0.2; transform: scale(0.9); filter: grayscale(100%) blur(2px); animation: none !important;}
     
-    /* 綜藝感：史詩級正解黃金揭曉 */
     .option.highlight { 
         transform: scale(1.15) !important; 
         box-shadow: 0 0 60px rgba(255, 215, 0, 1), 0 15px 0 rgba(0,0,0,0.3) !important; 
@@ -95,7 +92,8 @@
         z-index: 20; 
         animation: winnerSuperPulse 0.8s infinite alternate !important;
         background: linear-gradient(135deg, #f1c40f, #f39c12) !important;
-        color: #000; text-shadow: 0 2px 5px rgba(255,255,255,0.8);
+        color: #000;
+        text-shadow: 0 2px 5px rgba(255,255,255,0.8);
     }
     @keyframes winnerSuperPulse { 0% { transform: scale(1.15); box-shadow: 0 0 40px rgba(255,215,0,0.8); } 100% { transform: scale(1.25); box-shadow: 0 0 80px rgba(255,215,0,1); } }
 
@@ -104,7 +102,6 @@
     #timeBarContainer { width: 100%; height: 25px; background: #eee; border-radius: 20px; margin: 20px 0; overflow: hidden; box-shadow: inset 0 5px 10px rgba(0,0,0,0.1);}
     #timeBar { height: 100%; width: 100%; background: linear-gradient(90deg, #00c6ff, #0072ff); transition: width 1s linear, background 0.5s; }
     
-    /* 綜藝感：彈性倒數計時 */
     #timerText { font-size: 80px; font-weight: 900; margin: 0; line-height: 1; text-shadow: 2px 2px 0 #fff; display: inline-block;}
     .tick-anim { animation: elasticTick 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     @keyframes elasticTick { 0% { transform: scale(0.8); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
@@ -148,6 +145,7 @@
     <div style="font-size: 40px; color: #fff; margin-top:20px; font-weight:bold;" id="warningSub"></div>
   </div>
 
+  <!-- 1. 賽事前置設定面板 -->
   <div id="setupScreen" class="glass-panel" style="max-width: 1000px;">
     <h2 style="color: #4a3472; font-size: 48px; margin-bottom: 20px;">⚙️ 建立終極派對聯賽</h2>
     
@@ -191,7 +189,7 @@
       <div style="text-align: left;">
         <h2 style="color:#ff4b2b; margin:0;" id="lobbyWaitText">✨ 掃描 QR Code 選擇陣營！</h2>
         <div style="font-size: 32px; font-weight: 900; color: #4a3472; margin-top: 15px;" id="lobbyTimerBox">
-          倒數自動分組：<span id="groupTimerText" style="color:#e74c3c; font-size:48px;">60</span> 秒
+          <!-- 倒數文字會由 JS 動態替換 -->
         </div>
       </div>
     </div>
@@ -321,13 +319,18 @@
       const bucketsContainer = document.getElementById('teamBuckets'); bucketsContainer.innerHTML = '';
 
       if (gameConfig.isTeamMode) {
+        document.getElementById('lobbyWaitText').innerText = "✨ 掃描 QR Code 選擇陣營！";
+        document.getElementById('lobbyTimerBox').innerHTML = `倒數自動分組：<span id="groupTimerText" style="color:#e74c3c; font-size:48px;">${gameConfig.groupTime}</span> 秒`;
+        document.getElementById('forceStartBtn').innerText = "跳過等待，隨機分組並開始 ➡️";
+        
         teamsData.forEach(t => {
           bucketsContainer.innerHTML += `<div class="team-bucket ${t.class}" id="bucket-${t.id}"><div class="team-title">${t.name} (0/${gameConfig.maxPerTeam})</div><div id="players-${t.id}"></div></div>`;
         });
       } else {
         document.getElementById('lobbyWaitText').innerText = "✨ 掃描 QR Code 加入英雄榜！";
-        document.getElementById('lobbyTimerBox').style.display = 'none';
-        document.getElementById('forceStartBtn').innerText = "全體準備，開始遊戲 ➡️";
+        document.getElementById('lobbyTimerBox').style.display = 'block'; 
+        document.getElementById('lobbyTimerBox').innerHTML = `倒數開始遊戲：<span id="groupTimerText" style="color:#e74c3c; font-size:48px;">${gameConfig.groupTime}</span> 秒`;
+        document.getElementById('forceStartBtn').innerText = "跳過等待，立刻開始 ➡️";
         bucketsContainer.style.display = "flex"; bucketsContainer.style.flexWrap = "wrap"; bucketsContainer.style.justifyContent = "center";
       }
 
@@ -366,13 +369,15 @@
         });
       });
 
-      if (gameConfig.isTeamMode) {
-        let timeLeft = gameConfig.groupTime; document.getElementById('groupTimerText').innerText = timeLeft;
-        groupTimerInterval = setInterval(() => {
-          timeLeft--; document.getElementById('groupTimerText').innerText = timeLeft;
-          if(timeLeft <= 0) { clearInterval(groupTimerInterval); autoAssignAndStart(); }
-        }, 1000);
-      }
+      // 個人戰與團隊戰共用倒數計時器邏輯
+      let timeLeft = gameConfig.groupTime; 
+      document.getElementById('groupTimerText').innerText = timeLeft;
+      groupTimerInterval = setInterval(() => {
+        timeLeft--; 
+        const timerTextEl = document.getElementById('groupTimerText');
+        if(timerTextEl) timerTextEl.innerText = timeLeft;
+        if(timeLeft <= 0) { clearInterval(groupTimerInterval); autoAssignAndStart(); }
+      }, 1000);
     }
 
     function handleTeamSelection(conn, teamId) {
@@ -608,7 +613,7 @@
         const warning = document.getElementById('eventWarning'); warning.style.display = 'flex';
         document.getElementById('warningTitle').innerText = "⚖️ 搶答權拍賣 ⚖️";
         document.getElementById('warningSub').innerText = `出價最高的隊伍獲得唯一作答權！\n答對雙倍標金，答錯沒收標金！`;
-        playWarning(); startBGM('fast'); // 啟動緊湊 BGM
+        playWarning(); startBGM('fast'); 
         broadcast({ type: 'AUCTION_PHASE' });
 
         let auctionTime = 10;
@@ -666,7 +671,7 @@
     }
 
     function showQuestionUI(qData, isFastMode) {
-      playStart(); startBGM(isFastMode ? 'fast' : 'normal'); // 啟動背景音樂[cite: 1]
+      playStart(); startBGM(isFastMode ? 'fast' : 'normal'); 
       document.getElementById('questionBox').style.display = 'block'; document.getElementById('qText').innerText = qData.q;
       
       if(qData.mode === 'traitor' && gameConfig.useExtreme && gameConfig.isTeamMode) {
@@ -730,9 +735,8 @@
         qData.options.forEach((optText, i) => {
           const shape = shapeList[i % shapeList.length];
           const colorClass = `color-${i % 8}`;
-          optBox.innerHTML += `<div class="option ${colorClass}" id="opt${i}"><span class="shape">${shape}</span><span class="opt-text">${optText}</span></div>`;
+          optBox.innerHTML += `<div class="option ${colorClass} floating-opt" id="opt${i}"><span class="shape">${shape}</span><span class="opt-text">${optText}</span></div>`;
         });
-        // 賦予選項呼吸感與進場彈跳[cite: 1]
         document.querySelectorAll('.option').forEach((opt, i) => {
           opt.style.animation = 'none'; opt.offsetHeight;
           opt.style.animation = `superBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${i*0.1}s both`;
@@ -779,26 +783,27 @@
       clearInterval(countdownInterval);
       countdownInterval = setInterval(() => {
         timeLeft--; timerEl.innerText = timeLeft; timeBar.style.width = `${(timeLeft / MAX_TIME) * 100}%`;
-
-        // 觸發碼錶彈性動畫[cite: 1]
-        timerEl.classList.remove('tick-anim'); void timerEl.offsetWidth; timerEl.classList.add('tick-anim');
+        
+        timerEl.classList.remove('tick-anim');
+        void timerEl.offsetWidth; 
+        timerEl.classList.add('tick-anim');
 
         if (qData.mode === 'memory' && gameConfig.useExtreme && timeLeft === MAX_TIME - 3) {
            document.querySelectorAll('.opt-text').forEach(t => t.innerText = "???");
         }
 
         if (timeLeft <= 5 && timeLeft > 0) { 
-          // 進入極限恐慌狀態[cite: 1]
-          timerEl.style.color = "#e74c3c"; timerEl.classList.add('panic-timer');
+          timerEl.style.color = "#e74c3c"; 
+          timerEl.classList.add('panic-timer');
           document.querySelector('.glass-panel').classList.add('panel-shake');
           timeBar.style.background = "linear-gradient(90deg, #ff416c, #ff4b2b)";
           
-          if(bgmOsc && bgmOsc.frequency.value !== 55) startBGM('fast'); // 加速音效
+          if(bgmOsc && bgmOsc.frequency.value !== 55) startBGM('fast'); 
           isFastMode ? playTickFast() : playTick(); 
         } else {
-          timerEl.classList.remove('panic-timer'); document.querySelector('.glass-panel').classList.remove('panel-shake');
+          timerEl.classList.remove('panic-timer');
+          document.querySelector('.glass-panel').classList.remove('panel-shake');
         }
-
         if (timeLeft <= 0) {
           clearInterval(countdownInterval); isAcceptingAnswers = false; broadcast({ type: 'DISABLE_BUTTONS' }); revealAnswer();
         }
@@ -806,7 +811,7 @@
     }
 
     function revealAnswer() {
-      stopBGM(); // 停止倒數音效
+      stopBGM(); 
       document.body.className = "bg-reveal"; playReveal();
       document.querySelector('.glass-panel').classList.remove('panel-shake');
       document.getElementById('timerText').classList.remove('panic-timer');
@@ -844,9 +849,9 @@
       else {
         const options = document.querySelectorAll('.option');
         options.forEach((opt, i) => {
-          opt.classList.remove('floating-opt'); opt.style.animation = 'none'; 
+          opt.classList.remove('floating-opt');
+          opt.style.animation = 'none'; 
           if(currentMode === 'memory') opt.querySelector('.opt-text').innerText = questions[currentQIndex].options[i];
-          // 史詩黃金正解特效[cite: 1]
           if (correctAns.includes(i)) opt.classList.add('highlight'); else opt.classList.add('dimmed');
         });
       }
