@@ -94,6 +94,7 @@
     
     .ans-btn { min-height: 0; height: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 1dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.9); position: relative; overflow: hidden; margin:0; padding: 2dvh; box-sizing: border-box;}
     
+    /* 字體使用 clamp，確保文字太長時自動縮小，不斷字不溢出 */
     .opt-text { font-size: clamp(16px, 4dvh, 50px); line-height: 1.2; word-break: break-word; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); }
 
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
@@ -108,11 +109,12 @@
     body.fast-mode .ans-btn.active:not(.selected) { animation: feverPulse 0.3s infinite alternate; }
     @keyframes feverPulse { from {transform: scale(1);} to {transform: scale(1.02); filter: brightness(1.2);} }
     
+    /* 修正重疊問題：選中時內縮並發光 */
     .ans-btn.selected { transform: scale(0.95) translateY(1.5dvh) !important; box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 3dvh rgba(255,255,255,0.8), inset 0 0 2dvh rgba(0,0,0,0.5); color: rgba(255,255,255,1); border: 0.6dvh solid #fff; animation: none;}
     
     .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none;}
     @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
-    .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.9); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
+    .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.85); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
 
     /* 拉桿、連連看區塊彈性適配 */
     #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1; min-height: 0; background: rgba(255,255,255,0.9); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; box-sizing: border-box;}
@@ -249,7 +251,7 @@
     </div>
   </div>
 
-  <!-- ✅ 隱藏的 Audio 標籤解決瀏覽器音效預載問題 -->
+  <!-- ✅ 加入隱藏的 Audio 標籤解決瀏覽器音效預載問題 -->
   <audio id="bgmNormalObj" loop src="https://assets.mixkit.co/music/preview/mixkit-funny-quirky-comedy-track-71.mp3"></audio>
   <audio id="bgmFastObj" loop src="https://assets.mixkit.co/music/preview/mixkit-clapping-comedy-background-music-260.mp3"></audio>
 
@@ -263,6 +265,7 @@
     function initAudio() { 
       if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); } 
       
+      // 使用 HTML Audio Element 綁定播放，徹底解決手機/電腦自動播放限制
       bgmNormal = document.getElementById('bgmNormalObj');
       bgmFast = document.getElementById('bgmFastObj');
       bgmNormal.volume = 0.3; bgmFast.volume = 0.5;
@@ -280,8 +283,8 @@
     }
     
     function stopBGM() {
-        bgmNormal.pause(); bgmNormal.currentTime = 0;
-        bgmFast.pause(); bgmFast.currentTime = 0;
+        if(bgmNormal) { bgmNormal.pause(); bgmNormal.currentTime = 0; }
+        if(bgmFast) { bgmFast.pause(); bgmFast.currentTime = 0; }
         currentBGMType = null;
     }
 
@@ -316,7 +319,7 @@
     
     let myAvatar = "";
     let isGlobalPaused = false; 
-    let isEliminated = false; // 紀錄自己是否已出局
+    let isEliminated = false; // 💀 紀錄自己是否已出局
 
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -368,6 +371,7 @@
             timerText.innerText = data.timeLeft;
             let progress = ((data.maxTime - data.timeLeft) / data.maxTime) * 100;
             
+            // 接收主機端的隨機花色樣式
             if (data.timerStyle === 0) {
                 timeBar.className = 'striped-bar bar-normal';
                 timeBar.style.width = `${progress}%`;
@@ -381,6 +385,7 @@
                 timeBar.className = 'striped-bar bar-normal';
                 timeBar.style.width = `${progress}%`;
                 timeBar.style.background = '';
+                // 雷射外框發光同步到手機端
                 let hue = (data.timeLeft/data.maxTime) * 120;
                 let spread = (1 - (data.timeLeft/data.maxTime)) * 4 + 1; 
                 document.getElementById('gameScreen').style.border = `0.8dvh solid hsl(${hue}, 100%, 50%)`;
@@ -525,6 +530,7 @@
             
             startBGM(data.isFast ? 'fast' : 'normal');
             
+            // UI 初始設定，等待第一次 TIMER_SYNC 更新
             document.getElementById('mobileTimerContainer').style.display = 'flex';
             document.getElementById('mobileTimerBar').className = 'striped-bar bar-normal';
             document.getElementById('mobileTimerBar').style.width = '100%';
