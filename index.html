@@ -9,7 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap" rel="stylesheet">
   <style id="dynamicTeamStyles"></style>
   <style>
-    /* ========== 全域無卷軸配置 ========== */
+    /* ========== 全域無卷軸配置 (防破版核心) ========== */
     body { font-family: 'Nunito', sans-serif; text-align: center; background: #e0e5ec; margin:0; padding:0; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; transition: all 0.5s ease; box-sizing: border-box;}
     
     .fast-mode { background: repeating-linear-gradient(45deg, #f1c40f, #f1c40f 5dvh, #e67e22 5dvh, #e67e22 10dvh); background-size: 200% 200%; animation: feverRush 0.8s linear infinite; box-shadow: inset 0 0 5dvh rgba(211,84,0,0.8); }
@@ -21,11 +21,21 @@
     @keyframes chameleonBlur { 0% { filter: blur(0); opacity: 1; } 100% { filter: blur(1dvh); opacity: 0.2; } }
     .memory-hide { color: transparent !important; text-shadow: 0 0 2dvh rgba(255,255,255,0.8); pointer-events: none;}
 
-    /* ========== 暫停畫面 (全域絕對控場) ========== */
+    /* ========== 🚨 全域紅色警戒光影 (手機端) ========== */
+    body.panic-lighting::after {
+        content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+        box-shadow: inset 0 0 10dvh 3dvh rgba(255, 0, 0, 0.6);
+        pointer-events: none; z-index: 9998;
+        animation: panicFlash 0.5s infinite alternate;
+    }
+    @keyframes panicFlash {
+        0% { box-shadow: inset 0 0 5dvh 1dvh rgba(255, 0, 0, 0.2); }
+        100% { box-shadow: inset 0 0 15dvh 5dvh rgba(255, 0, 0, 0.8); }
+    }
+
     #playerPauseOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 99999; flex-direction: column; justify-content: center; align-items: center; color: white; }
     .pause-icon-mobile { font-size: 15dvh; animation: superPop 1s infinite alternate; }
 
-    /* ========== 登入畫面綜藝感 ========== */
     #loginScreen { padding: 4dvh 5vw; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; position: relative;}
     #loginScreen h2 { font-size: clamp(24px, 5dvh, 42px); margin-bottom: 2dvh; text-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.3); animation: floatBtn 3s infinite alternate; z-index: 10;}
     .floating-emoji { position: absolute; font-size: 8dvh; opacity: 0.2; animation: floatAround 10s infinite linear; z-index: 1;}
@@ -35,17 +45,21 @@
     .action-btn { padding: 3dvh; font-size: clamp(20px, 4dvh, 32px); width: 85%; margin-top: 3dvh; border-radius: 3dvh; border: none; font-weight: 900; cursor: pointer; transition: 0.1s; background: #FFD700; color: #d35400; box-shadow: 0 1dvh 0 #e67e22, 0 1.5dvh 2dvh rgba(0,0,0,0.2); font-family: inherit; z-index: 10; box-sizing: border-box;}
     .action-btn:active { transform: translateY(1dvh); box-shadow: 0 0 0 #e67e22; } 
 
-    /* ========== 玩家身分牌 ========== */
     #playerTopBar { display: none; background: rgba(255,255,255,0.95); padding: 1.5dvh 4vw; border-radius: 4dvh; margin: 1dvh auto 0.5dvh auto; font-weight: 900; font-size: clamp(18px, 3dvh, 24px); color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.15); align-items: center; justify-content: center; gap: 2vw; max-width: 90%; flex-shrink: 0; animation: superPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-sizing: border-box;}
 
-    /* ========== 手機端綜藝感碼錶 ========== */
-    #mobileTimer { display: none; font-size: clamp(40px, 8dvh, 80px); font-weight: 900; color: #fff; text-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.3); margin: 0.5dvh 0; flex-shrink: 0;}
-    .tick-anim { animation: elasticTick 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    @keyframes elasticTick { 0% { transform: scale(0.8); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
-    .panic-timer { animation: panicTick 0.3s infinite alternate !important; color: #ff3f34 !important; text-shadow: 0 0 3dvh #ff3f34, 0 0.5dvh 0 #8a0b0b !important; }
-    @keyframes panicTick { 0% { transform: scale(1.2) rotate(-3deg); } 100% { transform: scale(1.5) rotate(3deg); } }
+    /* ========== 底部進度條計時器 (替換純數字) ========== */
+    #mobileTimerContainer { display: none; width: 90%; height: 3dvh; background: #333; border-radius: 2dvh; margin: 0.5dvh auto; box-shadow: inset 0 0.5dvh 1dvh rgba(0,0,0,0.4); border: 0.3dvh solid #fff; flex-shrink: 0;}
+    .striped-bar { height: 100%; width: 0%; transition: width 1s linear, background 0.5s ease; background-size: 200% 200%; }
+    .bar-normal { background-image: repeating-linear-gradient(45deg, #3498db, #3498db 20px, #2980b9 20px, #2980b9 40px); animation: stripemove 2s linear infinite; }
+    .bar-warning { background-image: repeating-linear-gradient(45deg, #f1c40f, #f1c40f 20px, #f39c12 20px, #f39c12 40px); animation: stripemove 1s linear infinite; }
+    .bar-panic { background-image: repeating-linear-gradient(45deg, #e74c3c, #e74c3c 20px, #c0392b 20px, #c0392b 40px); animation: stripemove 0.4s linear infinite; }
+    @keyframes stripemove { 0% { background-position: 0 0; } 100% { background-position: 50px 0; } }
+
+    /* ========== 中央巨大化倒數特效 (手機端最後5秒) ========== */
+    #giantTimerOverlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9000; pointer-events: none; font-size: 50dvh; font-weight: 900; color: rgba(255, 50, 50, 0.6); text-shadow: 0 0 5dvh rgba(255,0,0,0.6); animation: giantPulse 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; line-height: 1;}
+    @keyframes giantPulse { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } }
     
-    .panel-shake { animation: boxShake 0.4s infinite !important; }
+    .panel-shake { animation: boxShake 0.3s infinite !important; }
     @keyframes boxShake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-1vw) rotate(-1deg); } 75% { transform: translateX(1vw) rotate(1deg); } }
 
     #teamScreen { display: none; flex-direction: column; height: 100%; justify-content: flex-start; padding: 5dvh 5vw; background: rgba(0,0,0,0.1); overflow-y: auto; box-sizing: border-box;}
@@ -69,7 +83,7 @@
     #traitorWarning { display: none; background: #000; color: #e74c3c; border: 0.5dvh solid #c0392b; padding: 1.5dvh; border-radius: 3dvh; font-size: clamp(16px, 2.5dvh, 22px); font-weight: 900; margin-bottom: 1dvh; box-shadow: 0 0 2dvh rgba(231, 76, 60, 0.8); animation: pulseWin 1s infinite; flex-shrink: 0;}
 
     /* ========== 網格彈性自適應佈局 (防破版核心) ========== */
-    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5dvh; flex: 1 1 auto; min-height: 0; grid-auto-rows: minmax(0, 1fr); margin-bottom: 1.5dvh;}
+    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5dvh; flex: 1 1 auto; min-height: 0; grid-auto-rows: minmax(0, 1fr); margin-bottom: 1dvh;}
     .ans-btn { min-height: 0; height: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.8); box-shadow: 0 1.5dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1.5dvh rgba(255,255,255,0.4); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.8); position: relative; overflow: hidden; margin:0; padding: 1dvh; box-sizing: border-box;}
     
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
@@ -81,8 +95,6 @@
     .ans-btn.active { opacity: 1; pointer-events: auto; animation: superPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
     @keyframes superPop { 0% {transform: scale(0) rotate(-10deg);} 80% {transform: scale(1.1) rotate(5deg);} 100% {transform: scale(1) rotate(0deg);} }
 
-    body.fast-mode .ans-btn.active:not(.selected) { animation: feverPulse 0.3s infinite alternate; }
-    @keyframes feverPulse { from {transform: scale(1);} to {transform: scale(1.05); filter: brightness(1.2);} }
     .ans-btn.selected { transform: scale(0.9) translateY(1.5dvh) !important; box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 3dvh rgba(255,255,255,0.8), inset 0 0 2dvh rgba(0,0,0,0.5); color: rgba(255,255,255,1); border: 0.6dvh solid #fff; animation: none;}
     .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none;}
     @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
@@ -100,16 +112,15 @@
     #orderDisplay { display: none; background: rgba(255,255,255,0.8); padding: 1dvh; border-radius: 2dvh; margin-bottom: 1dvh; font-size: clamp(16px, 3dvh, 24px); font-weight: 900; min-height: 5dvh; color: #333; flex-shrink: 0;}
     #resetOrderBtn { display: none; background: #e74c3c; color: white; border: none; border-radius: 1dvh; padding: 0.5dvh 3vw; font-weight: bold; margin-bottom: 1dvh; cursor:pointer; flex-shrink: 0;}
 
-    #dragBox { display:none; flex-direction:column; align-items:center; flex:1 1 auto; min-height: 0; width:100%; margin-bottom: 1.5dvh; overflow: hidden; box-sizing: border-box;}
-    #dragList { list-style:none; padding:0; width:95%; margin:0; display:flex; flex-direction:column; gap:1.5dvh; flex: 1; min-height: 0; }
-    #dragList li { flex: 1 1 auto; min-height: 0; background: white; padding: 1dvh; border-radius: 2dvh; font-size: clamp(16px, 3.5dvh, 30px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: grab; border-left: 1dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box;}
+    #dragBox { display:none; flex-direction:column; align-items:center; flex:1 1 auto; min-height: 0; width:100%; margin-bottom: 1dvh; overflow: hidden; box-sizing: border-box;}
+    #dragList { list-style:none; padding:0; width:95%; margin:0; display:flex; flex-direction:column; gap:1.5dvh; flex: 1; min-height: 0; overflow-y: auto;}
+    #dragList li { flex: 0 0 auto; background: white; padding: 1.5dvh; border-radius: 2dvh; font-size: clamp(16px, 3.5dvh, 30px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: grab; border-left: 1dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box;}
     .sortable-ghost { opacity: 0.4; background: #f1c40f !important; }
 
-    /* ========== 懸浮發射鈕與技能列改為 Flex 佈局 ========== */
-    #submitBtn { display: none; width: 100%; background: linear-gradient(135deg, #a18cd1, #fbc2eb); box-shadow: 0 1dvh 0 #89609e; color: #fff; margin: 1dvh 0; flex-shrink: 0;}
+    #submitBtn { display: none; width: 100%; background: linear-gradient(135deg, #a18cd1, #fbc2eb); box-shadow: 0 1dvh 0 #89609e; color: #fff; margin: 0 0 1dvh 0; flex-shrink: 0;}
     #submitBtn:active { transform: translateY(1dvh); box-shadow: 0 0 0 #89609e; }
 
-    #skillBar { display: none; flex-shrink: 0; justify-content: space-around; background: rgba(0,0,0,0.6); padding: 1.5dvh; border-radius: 3dvh; backdrop-filter: blur(5px); margin-top: 1dvh;}
+    #skillBar { display: none; flex-shrink: 0; justify-content: space-around; background: rgba(0,0,0,0.6); padding: 1dvh; border-radius: 3dvh; backdrop-filter: blur(5px); margin-bottom: 1dvh;}
     .skill-btn { padding: 1.5dvh 1vw; font-size: clamp(12px, 2dvh, 16px); font-weight: 900; border-radius: 2dvh; border: none; color: white; cursor: pointer; transition: 0.1s; flex:1; margin:0 1vw;}
     .skill-btn:active { transform: translateY(0.5dvh); box-shadow: none !important;}
     .btn-freeze { background: #3498db; box-shadow: 0 0.5dvh 0 #2980b9; }
@@ -124,12 +135,13 @@
 </head>
 <body>
 
-  <!-- 手機端全域暫停畫面 -->
   <div id="playerPauseOverlay">
     <div class="pause-icon-mobile">⏸️</div>
     <h2 style="font-size: 5dvh; margin: 1dvh 0; font-weight: 900;">遊戲暫停中</h2>
     <p style="font-size: 3dvh; font-weight: bold; color: #f1c40f;">請等待管理員恢復...</p>
   </div>
+
+  <div id="giantTimerOverlay">5</div>
 
   <div id="freezeOverlay" onclick="breakIce()">
     <div class="ice-crack">🧊</div>
@@ -158,7 +170,8 @@
     <div id="playerTopBar"><span id="myAvatarBadge" style="font-size: 4dvh; filter: drop-shadow(0 0.2dvh 0.2dvh rgba(0,0,0,0.2));"></span> <span id="myNameDisplay"></span></div>
     
     <div id="gameStatus">👀 備戰中，等待主持人的信號...</div>
-    <div id="mobileTimer">--</div>
+    
+    <div id="mobileTimerContainer"><div id="mobileTimerBar" class="striped-bar bar-normal"></div></div>
 
     <div style="flex-shrink: 0;">
       <span id="streakBadge"></span>
@@ -210,29 +223,12 @@
   </div>
 
   <script>
-    // ========== 手機端音效與 BGM 引擎 ==========
+    // ========== 手機端純淨版音效引擎 ==========
     let audioCtx;
-    const bgmNormal = new Audio('https://assets.mixkit.co/music/preview/mixkit-funny-quirky-comedy-track-71.mp3'); 
-    bgmNormal.loop = true; bgmNormal.volume = 0.3;
-    const bgmFast = new Audio('https://assets.mixkit.co/music/preview/mixkit-clapping-comedy-background-music-260.mp3'); 
-    bgmFast.loop = true; bgmFast.volume = 0.4;
-    let currentBGM = null;
-
     function initAudio() { 
       if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); } 
     }
     
-    function startBGM(type) {
-        stopBGM();
-        currentBGM = type === 'fast' ? bgmFast : bgmNormal;
-        currentBGM.play().catch(e => console.log("等待互動以播放 BGM"));
-    }
-    
-    function stopBGM() {
-        if(bgmNormal) { bgmNormal.pause(); bgmNormal.currentTime = 0; }
-        if(bgmFast) { bgmFast.pause(); bgmFast.currentTime = 0; }
-    }
-
     function playTone(freq, type, duration, vol=0.1) { 
       if(!audioCtx) return; 
       const osc = audioCtx.createOscillator(); 
@@ -247,6 +243,7 @@
     function playCoinSound() { initAudio(); playTone(987.77, 'sine', 0.1, 0.1); setTimeout(() => playTone(1318.51, 'sine', 0.3, 0.1), 100); }
     function playClickSound() { initAudio(); playTone(800, 'square', 0.05, 0.05); }
     function playShockSound() { initAudio(); playTone(200, 'sawtooth', 0.1); setTimeout(()=>playTone(300, 'sawtooth', 0.3), 100); }
+    function playTickFast() { initAudio(); playTone(800, 'square', 0.1, 0.05); } 
     function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
 
     const avatarsList = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿','🦔','🐉','🐲'];
@@ -360,8 +357,8 @@
             }
           }
           else if (data.type === 'WAGER_PHASE' || data.type === 'BOUNTY_PHASE' || data.type === 'AUCTION_PHASE') {
-            vibrate(100); stopBGM();
-            document.getElementById('mobileTimer').style.display = 'none'; clearInterval(mobileTimerInterval);
+            vibrate(100);
+            document.getElementById('mobileTimerContainer').style.display = 'none'; clearInterval(mobileTimerInterval);
             document.getElementById('btnGrid').style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; document.getElementById('submitBtn').style.display = 'none'; document.getElementById('coopText').style.display = 'none';
             document.getElementById('wagerBox').style.display = 'flex';
             
@@ -396,8 +393,6 @@
             currentOptionsLength = data.options ? data.options.length : 0; 
             currentOptions = data.options || []; 
             clearTimeout(memoryTimeout);
-            
-            startBGM(data.isFast ? 'fast' : 'normal');
             
             let maxTimeForMobile = data.time || (data.isFast ? 10 : 15);
             startMobileTimer(maxTimeForMobile, data.isFast);
@@ -473,6 +468,12 @@
               
               let shuffled = (data.qType === 'match_click') ? Array.from({length: data.options.length}, (_, i) => i).sort(() => Math.random() - 0.5) : Array.from({length: data.options.length}, (_, i) => i);
               
+              // 【網格防破版】手機端依選項數量動態切排版
+              let optCount = data.options.length;
+              if (optCount <= 4) { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; }
+              else if (optCount <= 6) { btnGrid.style.gridTemplateColumns = "repeat(3, 1fr)"; }
+              else { btnGrid.style.gridTemplateColumns = "repeat(4, 1fr)"; }
+
               data.options.forEach((optText, i) => {
                   let textContent = (data.qType === 'match_click' || data.qType === 'order') ? data.options[i] : shapeList[i % shapeList.length];
                   let btnHTML = `<button class="ans-btn color-${i % 8} active" onclick="toggleSelection(${i}, event)" style="animation-delay: ${i * 0.05}s; order: ${shuffled[i]};">
@@ -510,7 +511,7 @@
             }
           } 
           else if (data.type === 'DISABLE_BUTTONS') {
-            stopBGM(); clearInterval(mobileTimerInterval); document.getElementById('mobileTimer').style.display = 'none';
+            clearInterval(mobileTimerInterval); document.getElementById('mobileTimerContainer').style.display = 'none';
             document.body.className = ''; document.body.style.background = myTeamGrad; clearTimeout(memoryTimeout);
             document.getElementById('gameStatus').innerText = "⏳ 停火！請抬頭看大螢幕";
             document.getElementById('gameStatus').style.background = "#89609e"; document.getElementById('gameStatus').style.color = "white";
@@ -524,23 +525,42 @@
 
     function startMobileTimer(maxTime, isFast) {
       clearInterval(mobileTimerInterval);
-      const timerEl = document.getElementById('mobileTimer');
-      timerEl.style.display = 'block'; timerEl.innerText = maxTime; timerEl.classList.remove('panic-timer');
+      const timerContainer = document.getElementById('mobileTimerContainer');
+      const timeBar = document.getElementById('mobileTimerBar');
+      const giantTimerEl = document.getElementById('giantTimerOverlay');
+      
+      timerContainer.style.display = 'block'; 
+      timeBar.className = 'striped-bar bar-normal';
+      timeBar.style.width = '0%';
       document.getElementById('gameScreen').classList.remove('panel-shake');
+      document.body.classList.remove('panic-lighting');
       
       let timeLeft = maxTime;
       mobileTimerInterval = setInterval(() => {
         if (isGlobalPaused) return; 
 
-        timeLeft--; timerEl.innerText = timeLeft;
-        timerEl.classList.remove('tick-anim'); void timerEl.offsetWidth; timerEl.classList.add('tick-anim');
+        timeLeft--; 
+        let progress = ((maxTime - timeLeft) / maxTime) * 100;
+        timeBar.style.width = `${progress}%`;
         
         if(timeLeft <= 5 && timeLeft > 0) {
-          timerEl.classList.add('panic-timer'); document.getElementById('gameScreen').classList.add('panel-shake');
-          if(bgmOsc && bgmOsc.frequency.value !== 55) startBGM('fast'); 
+          document.getElementById('gameScreen').classList.add('panel-shake');
+          document.body.classList.add('panic-lighting');
+          timeBar.className = 'striped-bar bar-panic';
+          
+          giantTimerEl.style.display = 'flex';
+          giantTimerEl.innerText = timeLeft;
+          playTickFast();
+        } else {
+          document.getElementById('gameScreen').classList.remove('panel-shake');
+          document.body.classList.remove('panic-lighting');
+          giantTimerEl.style.display = 'none';
+          if (progress > 50 && timeLeft > 5) { timeBar.className = 'striped-bar bar-warning'; }
         }
+        
         if(timeLeft <= 0) {
-          clearInterval(mobileTimerInterval); timerEl.style.display = 'none'; document.getElementById('gameScreen').classList.remove('panel-shake');
+          clearInterval(mobileTimerInterval); timerContainer.style.display = 'none'; document.getElementById('gameScreen').classList.remove('panel-shake');
+          giantTimerEl.style.display = 'none'; document.body.classList.remove('panic-lighting');
         }
       }, 1000);
     }
@@ -627,7 +647,7 @@
       }
       
       vibrate(80); playCoinSound(); document.body.className = ''; document.body.style.background = myTeamGrad; 
-      document.getElementById('skillBar').style.display = 'none'; stopBGM(); clearInterval(mobileTimerInterval); document.getElementById('mobileTimer').style.display = 'none'; document.getElementById('gameScreen').classList.remove('panel-shake');
+      document.getElementById('skillBar').style.display = 'none'; clearInterval(mobileTimerInterval); document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting');
 
       if (currentQuestionType !== 'slider' && currentQuestionType !== 'match_drag') {
         document.querySelectorAll('.ans-btn').forEach((b, i) => { 
