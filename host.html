@@ -151,7 +151,7 @@
     .bar-party { background: repeating-linear-gradient(45deg, #ff9a9e, #ff9a9e 2vw, #fecfef 2vw, #fecfef 4vw) !important; animation: moveStripes 0.5s linear infinite; }
     @keyframes moveStripes { 0% {background-position: 0 0;} 100% {background-position: 5.65vw 0;} }
     
-    #timerText { font-size: clamp(30px, 6vh, 60px); font-weight: 900; color: #333; width: 8vw; text-align: right;}
+    #timerText { font-size: clamp(40px, 8vh, 120px); font-weight: 900; margin: 0; line-height: 1; text-shadow: 0.2vh 0.2vh 0 #fff; display: inline-block; flex-shrink: 0; width: 10vw; text-align: right;}
     .tick-anim { animation: elasticTick 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     @keyframes elasticTick { 0% { transform: scale(0.8); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
     
@@ -210,9 +210,9 @@
   </div>
 
   <div id="setupScreen" class="glass-panel">
-    <h2 style="color: #4a3472; font-size: 6vh; margin-bottom: 2vh; flex-shrink: 0;">⚙️ 建立終極派對聯賽</h2>
+    <h2 style="color: #4a3472; font-size: 7vh; margin-bottom: 2vh; flex-shrink: 0;">⚙️ 建立終極派對聯賽</h2>
     
-    <div style="display:flex; gap:3vw; text-align:left; flex: 1; min-height: 0; overflow: hidden;">
+    <div style="display:flex; gap:2vw; text-align:left; flex: 1; min-height: 0; overflow: hidden;">
       <!-- 第一欄：基礎賽制 -->
       <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
         <h3 style="margin:0 0 1vh 0; color:#e67e22; font-size: 3vh;">👥 基礎賽制設定</h3>
@@ -237,12 +237,12 @@
       <!-- 第二欄：七大擴充模組 -->
       <div style="flex:1; background: rgba(46, 204, 113, 0.2); border-left: 0.5vw solid #2ecc71; padding: 1.5vh; border-radius: 2vh; display:flex; flex-direction:column; justify-content:center;">
         <h3 style="margin:0 0 1vh 0; color:#27ae60; font-size: 3vh;">🔥 七大遊玩擴充模組</h3>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgMedia" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 👁️ 迷霧解析 & 多媒體圖片</label>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgAdvType" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 🧩 進階題型 (連連看/拉桿/排序)</label>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgEconomy" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 💰 賞金獵人 & 盲注 & 連對加成</label>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgSabotage" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚔️ 戰術干擾 (冰凍/洗牌/50-50/護盾)</label>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgGhost" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ☠️ 靈魂急救 (生存依賴模式)</label>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgExtreme" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚖️ 極限心理戰 (背叛者/拍賣/地雷/閃憶)</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgMedia" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 👁️ 迷霧解析 & 多媒體圖片</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgAdvType" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 🧩 進階題型 (連連看/拉桿/排序)</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgEconomy" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 💰 賞金獵人 & 盲注 & 連對加成</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgSabotage" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚔️ 戰術干擾 (冰凍/洗牌/50-50/護盾)</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgGhost" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ☠️ 靈魂急救 (生存依賴模式)</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgExtreme" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚖️ 極限心理戰 (背叛者/拍賣/地雷/閃憶)</label>
       </div>
 
       <!-- 第三欄：🏆 錦標賽/大逃殺設定 -->
@@ -323,7 +323,8 @@
   <audio id="bgmFastObj" loop src="https://assets.mixkit.co/music/preview/mixkit-clapping-comedy-background-music-260.mp3"></audio>
 
   <script>
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSChl0vRMFeEVPH4K5T8OC6R4EXWDsoqwJA68DQxQc58IH1zxaG-A1uly4lZT1jr6x8rJIMGPjJ0vRU/pub?output=csv"; 
+    // CSV URL 
+    const SHEET_CSV_URL = ""; 
 
     // ========== 柔和化音樂與真實 BGM 引擎 ==========
     let audioCtx;
@@ -342,17 +343,27 @@
       bgmNormal.play().then(()=>bgmNormal.pause()).catch(e=>{});
       bgmFast.play().then(()=>bgmFast.pause()).catch(e=>{});
     }
-    
-    function startBGM(type) {
-        stopBGM();
-        if(!bgmNormal) return;
-        currentBGM = type === 'fast' ? bgmFast : bgmNormal;
-        currentBGM.play().catch(e => console.log("等待互動以播放 BGM"));
+
+    // ========== 🌟 雙軌 BGM 疊加引擎 (常駐背景音) ==========
+    function startPartyBGM() {
+        if (bgmNormal && bgmNormal.paused) {
+            bgmNormal.volume = 0.3;
+            bgmNormal.play().catch(e => console.log("等待互動以播放 BGM"));
+        }
     }
-    
-    function stopBGM() {
-        if(bgmNormal) { bgmNormal.pause(); bgmNormal.currentTime = 0; }
-        if(bgmFast) { bgmFast.pause(); bgmFast.currentTime = 0; }
+
+    function overlayFastBGM(isFast) {
+        if (!bgmFast || !bgmNormal) return;
+        if (isFast) {
+            bgmNormal.volume = 0.1; // 降低常駐派對音
+            if (bgmFast.paused) {
+                bgmFast.currentTime = 0; 
+                bgmFast.play().catch(e=>{});
+            }
+        } else {
+            bgmNormal.volume = 0.3; // 恢復正常音量
+            bgmFast.pause();
+        }
     }
 
     function playTone(freq, type, duration, vol=0.1) { 
@@ -459,7 +470,9 @@
     }
 
     function initLobby() {
-      initAudio();
+      initAudio(); // 初始化音訊環境，解鎖 BGM
+      startPartyBGM(); // 開啟常駐背景音
+
       let shuffleInput = parseInt(document.getElementById('cfgShuffle').value);
       gameConfig = {
         isTeamMode: document.getElementById('cfgMode').value === 'teams',
@@ -615,7 +628,7 @@
             if(i+1 < activeTeamIds.length) {
                 matchups.push([activeTeamIds[i], activeTeamIds[i+1]]);
             } else {
-                matchups.push([activeTeamIds[i]]); 
+                matchups.push([activeTeamIds[i]]); // Bye (晉級)
             }
         }
         return matchups;
@@ -635,6 +648,7 @@
           }
         });
 
+        // 初始化樹狀淘汰賽名單
         if(gameConfig.useTournament) {
             let activeTeamIds = teamsData.map(t => t.id);
             currentMatchups = buildMatchups(activeTeamIds);
@@ -697,7 +711,6 @@
         else { if (conn.playerName !== highestBidder) return; }
       }
 
-      // 1. 登記玩家已作答
       answeredPlayers.add(conn.playerName);
 
       // =========================================================
@@ -838,7 +851,7 @@
         const warning = document.getElementById('eventWarning'); warning.style.display = 'flex';
         document.getElementById('warningTitle').innerText = "⚖️ 搶答權拍賣 ⚖️";
         document.getElementById('warningSub').innerText = `出價最高的隊伍獲得唯一作答權！\n答對雙倍標金，答錯沒收標金！`;
-        playWarning(); startBGM('fast'); 
+        playWarning(); overlayFastBGM(true); 
         broadcast({ type: 'AUCTION_PHASE' });
 
         let auctionTime = 10;
@@ -849,7 +862,7 @@
           broadcast({ type: 'TIMER_SYNC', timeLeft: auctionTime, isFast: true, maxTime: 10, timerStyle: 0 });
 
           if(auctionTime <= 0) { 
-            clearInterval(aInt); warning.style.display = 'none'; 
+            clearInterval(aInt); warning.style.display = 'none'; overlayFastBGM(false);
             
             highestBid = 0; highestBidder = null;
             if(gameConfig.isTeamMode) {
@@ -876,7 +889,7 @@
         document.getElementById('warningTitle').innerText = qData.mode === 'bounty' ? "🎯 賞金獵人 🎯" : "💰 盲注時刻 💰";
         let tagMatch = qData.q.match(/【(.*?)】/); let tag = tagMatch ? tagMatch[1] : "神秘領域";
         document.getElementById('warningSub').innerText = `主題：【${tag}】\n請在手機端操作！`;
-        playWarning(); startBGM('normal');
+        playWarning(); startPartyBGM(); overlayFastBGM(false);
         
         let targets = gameConfig.isTeamMode ? teamsData : Object.keys(playerStats).map(p => ({id: p, name: p}));
         broadcast({ type: qData.mode === 'bounty' ? 'BOUNTY_PHASE' : 'WAGER_PHASE', teams: targets });
@@ -904,10 +917,12 @@
     }
 
     function showQuestionUI(qData, isFastMode) {
-      playStart(); startBGM(isFastMode ? 'fast' : 'normal'); 
+      playStart(); 
+      startPartyBGM(); 
+      overlayFastBGM(isFastMode); 
+      
       document.getElementById('questionBox').style.display = 'flex'; document.getElementById('qText').innerText = qData.q;
       
-      // 清空即時作答區
       let answeredGrid = document.getElementById('answeredGrid');
       let answeredCount = document.getElementById('answeredCount');
       if(answeredGrid) answeredGrid.innerHTML = '';
@@ -1007,7 +1022,7 @@
       currentRoundData = []; isAcceptingAnswers = true; answeredPlayers.clear(); connections.forEach(c => c.tempResult = null);
       
       connections.forEach(c => {
-        if(c.open && c.playerName) {
+        if(c.open && c.playerName && !playerStats[c.playerName].isEliminated) {
           let role = 'all';
           if(qData.mode === 'coop' && gameConfig.useAdvType && gameConfig.isTeamMode) {
             const team = teamsData.find(t => t.id === playerStats[c.playerName].teamId);
@@ -1083,7 +1098,7 @@
           giantTimerEl.style.display = 'flex';
           giantTimerEl.innerText = timeLeft;
 
-          if(currentBGM !== bgmFast) startBGM('fast'); 
+          overlayFastBGM(true); 
           
           playTickFast(); 
         } else {
@@ -1102,6 +1117,7 @@
       }, 1000);
     }
 
+    // 🏆 處理錦標賽/大逃殺淘汰邏輯
     function processElimination() {
         if (!gameConfig.useTournament) return;
         let isElimRound = ((currentQIndex + 1) % gameConfig.tournInterval === 0);
@@ -1163,7 +1179,7 @@
     }
 
     function revealAnswer() {
-      stopBGM(); 
+      overlayFastBGM(false); // 關閉快節奏音樂，讓派對常駐背景音繼續播放
       document.body.className = "bg-reveal"; playReveal();
       document.querySelector('.glass-panel').classList.remove('panel-shake', 'emergency-light');
       document.querySelector('.glass-panel').style.border = 'none';
