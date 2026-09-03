@@ -71,7 +71,7 @@
         100% { transform: translate(-50%, -50%) scale(0.8) rotate(0deg); opacity: 0; } 
     }
 
-    .setup-row { display: flex; justify-content: space-between; align-items: center; margin: 1vh 0; font-size: clamp(14px, 2vh, 22px); font-weight: bold; background: rgba(0,0,0,0.05); padding: 1vh 2vw; border-radius: 2vh;}
+    .setup-row { display: flex; justify-content: space-between; align-items: center; margin: 1vh 0; font-size: clamp(14px, 2.5vh, 26px); font-weight: bold; background: rgba(0,0,0,0.05); padding: 1vh 2vw; border-radius: 2vh;}
     .setup-input, .setup-select { font-size: clamp(14px, 1.8vh, 18px); padding: 0.5vh; border-radius: 1vh; border: 0.2vh solid #ccc; font-weight: bold; font-family: inherit;}
 
     /* ========== 大廳與隨機變形果凍名牌 ========== */
@@ -210,9 +210,9 @@
   </div>
 
   <div id="setupScreen" class="glass-panel">
-    <h2 style="color: #4a3472; font-size: 7vh; margin-bottom: 2vh; flex-shrink: 0;">⚙️ 建立終極派對聯賽</h2>
+    <h2 style="color: #4a3472; font-size: 6vh; margin-bottom: 2vh; flex-shrink: 0;">⚙️ 建立終極派對聯賽</h2>
     
-    <div style="display:flex; gap:2vw; text-align:left; flex: 1; min-height: 0; overflow: hidden;">
+    <div style="display:flex; gap:3vw; text-align:left; flex: 1; min-height: 0; overflow: hidden;">
       <!-- 第一欄：基礎賽制 -->
       <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
         <h3 style="margin:0 0 1vh 0; color:#e67e22; font-size: 3vh;">👥 基礎賽制設定</h3>
@@ -237,12 +237,12 @@
       <!-- 第二欄：七大擴充模組 -->
       <div style="flex:1; background: rgba(46, 204, 113, 0.2); border-left: 0.5vw solid #2ecc71; padding: 1.5vh; border-radius: 2vh; display:flex; flex-direction:column; justify-content:center;">
         <h3 style="margin:0 0 1vh 0; color:#27ae60; font-size: 3vh;">🔥 七大遊玩擴充模組</h3>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgMedia" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 👁️ 迷霧解析 & 多媒體圖片</label>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgAdvType" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 🧩 進階題型 (連連看/拉桿/排序)</label>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgEconomy" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 💰 賞金獵人 & 盲注 & 連對加成</label>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgSabotage" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚔️ 戰術干擾 (冰凍/洗牌/50-50/護盾)</label>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgGhost" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ☠️ 靈魂急救 (生存依賴模式)</label>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgExtreme" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚖️ 極限心理戰 (背叛者/拍賣/地雷/閃憶)</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgMedia" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 👁️ 迷霧解析 & 多媒體圖片</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgAdvType" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 🧩 進階題型 (連連看/拉桿/排序)</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgEconomy" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 💰 賞金獵人 & 盲注 & 連對加成</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgSabotage" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚔️ 戰術干擾 (冰凍/洗牌/50-50/護盾)</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgGhost" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ☠️ 靈魂急救 (生存依賴模式)</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgExtreme" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚖️ 極限心理戰 (背叛者/拍賣/地雷/閃憶)</label>
       </div>
 
       <!-- 第三欄：🏆 錦標賽/大逃殺設定 -->
@@ -334,6 +334,7 @@
     function initAudio() { 
       if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); } 
       
+      // 使用 HTML Audio Element 綁定播放，徹底解決手機/電腦自動播放限制
       bgmNormal = document.getElementById('bgmNormalObj');
       bgmFast = document.getElementById('bgmFastObj');
       bgmNormal.volume = 0.3; bgmFast.volume = 0.5;
@@ -375,6 +376,7 @@
     function playWin() { initAudio(); playTone(523, 'triangle', 0.1); setTimeout(() => playTone(659, 'triangle', 0.1), 100); setTimeout(() => playTone(783, 'triangle', 0.1), 200); setTimeout(() => playTone(1046, 'triangle', 0.6), 300); }
     function playFirstBlood() { initAudio(); playTone(880, 'triangle', 0.1); setTimeout(() => playTone(1108, 'triangle', 0.1), 100); setTimeout(() => playTone(1318, 'triangle', 0.4), 200); } 
     
+    // 🌟 動態進場專屬泡泡音效
     function playPopSound() { 
       initAudio(); 
       const randomFreq = 800 + Math.random() * 400; 
@@ -613,7 +615,7 @@
             if(i+1 < activeTeamIds.length) {
                 matchups.push([activeTeamIds[i], activeTeamIds[i+1]]);
             } else {
-                matchups.push([activeTeamIds[i]]); // Bye (晉級)
+                matchups.push([activeTeamIds[i]]); 
             }
         }
         return matchups;
@@ -633,7 +635,6 @@
           }
         });
 
-        // 初始化樹狀淘汰賽名單
         if(gameConfig.useTournament) {
             let activeTeamIds = teamsData.map(t => t.id);
             currentMatchups = buildMatchups(activeTeamIds);
@@ -1006,7 +1007,7 @@
       currentRoundData = []; isAcceptingAnswers = true; answeredPlayers.clear(); connections.forEach(c => c.tempResult = null);
       
       connections.forEach(c => {
-        if(c.open && c.playerName && !playerStats[c.playerName].isEliminated) {
+        if(c.open && c.playerName) {
           let role = 'all';
           if(qData.mode === 'coop' && gameConfig.useAdvType && gameConfig.isTeamMode) {
             const team = teamsData.find(t => t.id === playerStats[c.playerName].teamId);
@@ -1101,7 +1102,6 @@
       }, 1000);
     }
 
-    // 🏆 處理錦標賽/大逃殺淘汰邏輯
     function processElimination() {
         if (!gameConfig.useTournament) return;
         let isElimRound = ((currentQIndex + 1) % gameConfig.tournInterval === 0);
