@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>P2P 主畫面 - 影音視覺極致版</title>
+  <title>P2P 主畫面 - 實境秀極致防破版</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -13,8 +13,8 @@
   <style id="dynamicTeamStyles"></style>
 
   <style>
-    /* ========== 全域無卷軸與響應式配置 ========== */
-    body { font-family: 'Nunito', sans-serif; text-align: center; margin: 0; padding: 2vh 2vw; color: #fff; overflow: hidden; height: 100vh; box-sizing: border-box; transition: background 0.5s; background-size: 300% 300%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    /* ========== 全域無卷軸與響應式配置 (防破版核心) ========== */
+    body { font-family: 'Nunito', sans-serif; text-align: center; margin: 0; padding: 2vh 2vw; color: #fff; overflow: hidden; height: 100vh; width: 100vw; box-sizing: border-box; transition: background 0.5s; background-size: 300% 300%; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;}
     
     .bg-setup { background-image: linear-gradient(135deg, #667eea, #764ba2); }
     .bg-lobby { background-image: linear-gradient(45deg, #ff9a9e, #fecfef, #a18cd1, #fbc2eb); animation: fluidBg 8s ease infinite; }
@@ -30,127 +30,106 @@
     @keyframes feverBg { 0% {background-position: 0% 0%;} 100% {background-position: 100% 100%;} }
     @keyframes spinBg { from { background-position: 0 0; } to { background-position: 10vw 10vw; } }
 
-    /* ========== 警告與全域控場動畫 ========== */
-    #eventWarning { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
+    /* ========== 🚨 全局紅色警戒光影特效 (最後5秒) ========== */
+    body.panic-lighting::after {
+        content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        box-shadow: inset 0 0 20vh 5vh rgba(255, 0, 0, 0.8);
+        pointer-events: none; z-index: 9998;
+        animation: panicFlash 0.5s infinite alternate;
+    }
+    @keyframes panicFlash {
+        0% { box-shadow: inset 0 0 10vh 2vh rgba(255, 0, 0, 0.3); background: rgba(255,0,0,0.05); }
+        100% { box-shadow: inset 0 0 30vh 8vh rgba(255, 0, 0, 0.9); background: rgba(255,0,0,0.25); }
+    }
+
+    #eventWarning { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
     .warning-text { font-size: 15vh; font-weight: 900; color: #f1c40f; text-shadow: 0 0 3vh #f39c12, 0 1vh 0 #d35400; animation: flashText 0.3s infinite alternate; }
     .shuffle-anim { animation: spinAndZoom 1.5s ease-in-out infinite alternate !important; color: #e056fd; text-shadow: 0 0 4vh #be2edd, 0 1vh 0 #686de0;}
     @keyframes flashText { from { transform: scale(1); } to { transform: scale(1.1); color: #fff; } }
     @keyframes spinAndZoom { 0% { transform: scale(0.8) rotate(-5deg); } 100% { transform: scale(1.2) rotate(5deg); color: #fff;} }
 
-    #pauseOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; color: white; }
+    #pauseOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 10000; justify-content: center; align-items: center; flex-direction: column; color: white; }
     .pause-icon { font-size: 20vh; animation: pulseWin 1s infinite alternate; text-shadow: 0 1vh 3vh rgba(0,0,0,0.5); }
     .pause-text { font-size: 10vh; font-weight: 900; margin: 2vh 0; letter-spacing: 0.5vw; color: #f1c40f; }
 
-    /* ========== UI 面板 彈性適配 (防破版核心) ========== */
-    .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 3vh 3vw; border-radius: 4vh; box-shadow: 0 2vh 5vh rgba(0,0,0,0.15), inset 0 0 0 0.5vh rgba(255,255,255,0.5); width: 95vw; height: 96vh; display: flex; flex-direction: column; justify-content: stretch; align-items: stretch; color: #333; animation: popUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-sizing: border-box; overflow: hidden; }
+    /* ========== UI 玻璃面板 (彈性伸縮容器) ========== */
+    .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 2vh 2vw; border-radius: 3vh; box-shadow: 0 2vh 5vh rgba(0,0,0,0.15), inset 0 0 0 0.5vh rgba(255,255,255,0.5); width: 96vw; height: 96vh; display: flex; flex-direction: column; justify-content: stretch; align-items: stretch; color: #333; animation: popUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-sizing: border-box; overflow: hidden; transition: box-shadow 0.3s ease; }
     @keyframes popUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     
-    .panel-shake { animation: boxShake 0.4s infinite !important; }
+    .panel-shake { animation: boxShake 0.3s infinite !important; }
     @keyframes boxShake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-0.5vw) rotate(-1deg); } 75% { transform: translateX(0.5vw) rotate(1deg); } }
 
-    .setup-row { display: flex; justify-content: space-between; align-items: center; margin: 1vh 0; font-size: clamp(14px, 2vh, 22px); font-weight: bold; background: rgba(0,0,0,0.05); padding: 1vh 2vw; border-radius: 2vh;}
+    .setup-row { display: flex; justify-content: space-between; align-items: center; margin: 1vh 0; font-size: clamp(14px, 2.2vh, 22px); font-weight: bold; background: rgba(0,0,0,0.05); padding: 1vh 2vw; border-radius: 2vh;}
     .setup-input, .setup-select { font-size: clamp(14px, 2vh, 20px); padding: 0.5vh; border-radius: 1vh; border: 0.2vh solid #ccc; font-weight: bold; font-family: inherit;}
 
-    /* ========== 大廳與隨機變形果凍名牌 ========== */
-    #teamBuckets { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 2vh; flex: 1; min-height: 0; align-items: stretch; overflow: hidden;}
-    .team-bucket { flex: 1 1 20%; min-width: 15vw; border-radius: 3vh; padding: 2vh; color: white; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); transition: 0.3s; display:flex; flex-direction:column; overflow:hidden;}
-    .team-title { font-size: 3vh; font-weight: 900; margin-bottom: 1vh; border-bottom: 0.3vh solid rgba(255,255,255,0.5); padding-bottom: 0.5vh; text-shadow: 0.1vh 0.1vh 0.3vh rgba(0,0,0,0.3); flex-shrink: 0;}
+    /* ========== 大廳與果凍名牌 ========== */
+    #teamBuckets { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 1.5vh; flex: 1; min-height: 0; align-items: stretch; overflow: hidden;}
+    .team-bucket { flex: 1 1 20%; min-width: 15vw; border-radius: 2vh; padding: 1.5vh; color: white; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); transition: 0.3s; display:flex; flex-direction:column; overflow:hidden;}
+    .team-title { font-size: 2.8vh; font-weight: 900; margin-bottom: 1vh; border-bottom: 0.3vh solid rgba(255,255,255,0.5); padding-bottom: 0.5vh; text-shadow: 0.1vh 0.1vh 0.3vh rgba(0,0,0,0.3); flex-shrink: 0;}
     .players-list { flex: 1; overflow: hidden; display: flex; align-content: flex-start; flex-wrap: wrap; justify-content: center;}
     
-    .player-tag { color: #333; font-size: clamp(14px, 2.5vh, 24px); padding: 1vh 1.5vw; margin: 0.5vh; display: inline-flex; align-items: center; gap: 0.5vw; font-weight: 900; box-shadow: 0 1vh 1.5vh rgba(0,0,0,0.15), inset 0 -0.4vh 0.5vh rgba(0,0,0,0.1); border: 0.3vh solid rgba(255,255,255,0.6); }
+    .player-tag { color: #333; font-size: clamp(12px, 2.2vh, 24px); padding: 0.8vh 1vw; margin: 0.5vh; display: inline-flex; align-items: center; gap: 0.5vw; font-weight: 900; box-shadow: 0 1vh 1.5vh rgba(0,0,0,0.15), inset 0 -0.4vh 0.5vh rgba(0,0,0,0.1); border: 0.3vh solid rgba(255,255,255,0.6); }
     @keyframes jellyTag { 0%, 100% { transform: scale(1, 1) rotate(0deg); } 25% { transform: scale(1.05, 0.95) rotate(3deg); } 50% { transform: scale(0.95, 1.05) rotate(-3deg); } 75% { transform: scale(1.02, 0.98) rotate(1deg); } }
     @keyframes superBounceTag { 0% { transform: scale(0) translateY(10vh); opacity:0; } 60% { transform: scale(1.1) translateY(-1vh); opacity:1; } 100% { transform: scale(1) translateY(0); opacity:1; } }
-    
-    .fire-streak { box-shadow: 0 0 1vh #e74c3c, 0 0 2vh #f1c40f !important; border: 0.2vh solid #e74c3c !important; } 
-    .ghost-tag { opacity: 0.5; filter: grayscale(100%); text-decoration: line-through; }
 
-    .lobby-timer-box { font-size: 4vh; font-weight: 900; color: #4a3472; margin-top: 2vh; background: rgba(255,255,255,0.95); padding: 1.5vh 3vw; border-radius: 5vh; box-shadow: 0 1.5vh 2.5vh rgba(0,0,0,0.2); display: inline-block; border: 0.5vh solid #f1c40f; flex-shrink: 0;}
-    #groupTimerText { color: #c0392b; font-size: 8vh; display: inline-block; animation: lobbyTimerPulse 0.8s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 0.4vh 1vh rgba(192,57,43,0.3); margin: 0 1vw;}
+    .lobby-timer-box { font-size: 3.5vh; font-weight: 900; color: #4a3472; margin-top: 1.5vh; background: rgba(255,255,255,0.95); padding: 1vh 3vw; border-radius: 4vh; box-shadow: 0 1.5vh 2.5vh rgba(0,0,0,0.2); display: inline-block; border: 0.4vh solid #f1c40f; flex-shrink: 0;}
+    #groupTimerText { color: #c0392b; font-size: 7vh; display: inline-block; animation: lobbyTimerPulse 0.8s infinite cubic-bezier(0.175, 0.885, 0.32, 1.275); text-shadow: 0 0.4vh 1vh rgba(192,57,43,0.3); margin: 0 1vw;}
     @keyframes lobbyTimerPulse { 0% { transform: scale(1); color: #c0392b; } 50% { transform: scale(1.25) rotate(5deg); color: #900C3F; } 100% { transform: scale(1); color: #c0392b; } }
 
-    #headerContainer { display: inline-flex; justify-content: center; align-items: center; gap: 3vw; margin-bottom: 2vh; flex-shrink: 0;}
-    #qrcode { background: white; padding: 1.5vh; border-radius: 2vh; border: 0.6vh dashed #ff6b6b; transform: rotate(-3deg);}
+    #headerContainer { display: inline-flex; justify-content: center; align-items: center; gap: 3vw; margin-bottom: 1.5vh; flex-shrink: 0;}
+    #qrcode { background: white; padding: 1vh; border-radius: 1.5vh; border: 0.5vh dashed #ff6b6b; transform: rotate(-3deg);}
     
-    /* ========== 題目與選項排版防破版機制 ========== */
-    #questionBox h2 { font-size: clamp(30px, 6vh, 60px); margin: 0 0 1vh 0; line-height: 1.3; flex-shrink: 0; color: #2c3e50; font-weight: 900; }
-    .mode-badge { background: linear-gradient(45deg, #f093fb, #f5576c); color: white; padding: 1vh 2vw; border-radius: 3vh; font-size: clamp(20px, 3vh, 32px); vertical-align: middle; margin-left: 1vw; box-shadow: 0 0.5vh 0 #c0392b;}
+    /* ========== 題目與選項排版 (防切斷、防溢出) ========== */
+    #questionBox h2 { font-size: clamp(24px, 5vh, 60px); margin: 0 0 1vh 0; line-height: 1.2; flex-shrink: 0; color: #2c3e50; font-weight: 900; }
+    .mode-badge { background: linear-gradient(45deg, #f093fb, #f5576c); color: white; padding: 0.8vh 1.5vw; border-radius: 3vh; font-size: clamp(16px, 2.5vh, 30px); vertical-align: middle; margin-left: 1vw; box-shadow: 0 0.5vh 0 #c0392b;}
     
-    #qMedia { max-height: 25vh; max-width: 100%; object-fit: contain; border-radius: 2vh; display: none; margin: 1vh auto; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); border: 0.5vh solid white; flex-shrink: 0;}
+    #qMedia { flex: 0 1 20vh; max-height: 20vh; width: auto; max-width: 100%; object-fit: contain; border-radius: 1.5vh; display: none; margin: 0.5vh auto; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); border: 0.4vh solid white;}
     .fog-anim { animation: fogClear var(--fog-time) linear forwards; }
     @keyframes fogClear { 0% { filter: blur(3vh); } 100% { filter: blur(0); } }
 
-    /* 連連看題型排版優化 */
-    #matchPromptsContainer { display: none; flex-wrap: wrap; justify-content: center; gap: 1.5vw; margin-top: 1vh; flex: 1; min-height: 0; align-content: center; overflow: hidden;}
-    .match-prompt-item { flex: 1 1 auto; max-width: 48%; min-width: 150px; background: white; border-radius: 2vh; padding: 2vh 2vw; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: clamp(24px, 4vh, 48px); font-weight: 900; position: relative; color: #333;}
-    .match-prompt-item img { max-width: 100%; max-height: 12vh; border-radius: 1vh; object-fit: contain;}
-    .match-badge { position: absolute; top: -1.5vh; left: -1.5vh; background: #e74c3c; color: white; width: 6vh; height: 6vh; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3.5vh; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.3); z-index: 5;}
+    #matchPromptsContainer { display: none; flex-wrap: wrap; justify-content: center; gap: 1vw; margin-top: 1vh; flex: 1 1 auto; min-height: 0; align-content: center; overflow: hidden;}
+    .match-prompt-item { flex: 1 1 calc(20% - 1vw); max-width: 45%; min-width: 120px; background: white; border-radius: 1.5vh; padding: 1vh 1vw; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: clamp(18px, 3.5vh, 40px); font-weight: 900; position: relative; color: #333;}
+    .match-badge { position: absolute; top: -1.5vh; left: -1.5vh; background: #e74c3c; color: white; width: 5vh; height: 5vh; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3vh; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.3); z-index: 5;}
 
-    /* 網格選項自適應排版 */
-    #optionsContainer { 
-        display: grid; 
-        gap: 2vh 2vw; margin-top: 2vh; flex: 1; min-height: 0; width: 100%; box-sizing: border-box; 
-    }
-    .option { 
-        width: 100%; height: 100%;
-        padding: 2vh 2vw; font-size: clamp(24px, 5vh, 60px); font-weight: 900; color: white; 
-        border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); 
-        display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; 
-        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    }
+    /* 極限網格佈局：選項再多也像水一樣適應 */
+    #optionsContainer { display: grid; gap: 1.5vh 1.5vw; margin-top: 1.5vh; flex: 1 1 auto; min-height: 0; width: 100%; box-sizing: border-box; }
+    .option { width: 100%; height: 100%; padding: 1vh 1vw; font-size: clamp(18px, 4vh, 50px); font-weight: 900; color: white; border-radius: 2vh; box-shadow: 0 0.8vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     
-    .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1vh 0 #b32a18;} 
-    .color-1 { background: linear-gradient(135deg, #0072ff, #00c6ff); box-shadow: 0 1vh 0 #0056b3;} 
-    .color-2 { background: linear-gradient(135deg, #f9d423, #ff4e50); box-shadow: 0 1vh 0 #b33200;} 
-    .color-3 { background: linear-gradient(135deg, #11998e, #38ef7d); box-shadow: 0 1vh 0 #0e7a5c;}
-    .color-4 { background: linear-gradient(135deg, #8e44ad, #9b59b6); box-shadow: 0 1vh 0 #732d91;}
-    .color-5 { background: linear-gradient(135deg, #e67e22, #f39c12); box-shadow: 0 1vh 0 #d35400;}
-    .color-6 { background: linear-gradient(135deg, #2c3e50, #34495e); box-shadow: 0 1vh 0 #1a252f;}
-    .color-7 { background: linear-gradient(135deg, #e84393, #fd79a8); box-shadow: 0 1vh 0 #b33971;}
+    .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 0.8vh 0 #b32a18;} .color-1 { background: linear-gradient(135deg, #0072ff, #00c6ff); box-shadow: 0 0.8vh 0 #0056b3;} .color-2 { background: linear-gradient(135deg, #f9d423, #ff4e50); box-shadow: 0 0.8vh 0 #b33200;} .color-3 { background: linear-gradient(135deg, #11998e, #38ef7d); box-shadow: 0 0.8vh 0 #0e7a5c;} .color-4 { background: linear-gradient(135deg, #8e44ad, #9b59b6); box-shadow: 0 0.8vh 0 #732d91;} .color-5 { background: linear-gradient(135deg, #e67e22, #f39c12); box-shadow: 0 0.8vh 0 #d35400;} .color-6 { background: linear-gradient(135deg, #2c3e50, #34495e); box-shadow: 0 0.8vh 0 #1a252f;} .color-7 { background: linear-gradient(135deg, #e84393, #fd79a8); box-shadow: 0 0.8vh 0 #b33971;}
 
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
     @keyframes floatOpt { 0%, 100% { transform: translateY(0px) rotate(0deg); } 33% { transform: translateY(-0.8vh) rotate(1deg); } 66% { transform: translateY(0.5vh) rotate(-1deg); } }
 
-    /* 解決放大重疊問題：縮小錯誤項，完美光暈正確項 */
+    /* 解決放大重疊：壓縮錯誤項，黃金光暈正確項 */
     .option.dimmed { opacity: 0.15; transform: scale(0.85); filter: grayscale(100%); animation: none !important; box-shadow: none !important; z-index: 1;}
-    .option.highlight { 
-        transform: scale(1.02) !important; 
-        box-shadow: 0 0 5vh rgba(255, 215, 0, 1), inset 0 0 2vh rgba(255,255,255,0.8) !important; 
-        border: 0.8vh solid #FFD700; z-index: 20; 
-        animation: none !important;
-        background: linear-gradient(135deg, #f1c40f, #f39c12) !important;
-        color: #000; text-shadow: 0 0.2vh 0.5vh rgba(255,255,255,0.8);
-    }
-
-    #sliderResult { display: none; font-size: clamp(30px, 6vh, 80px); font-weight: 900; color: #2ecc71; margin-top: 2vh; background: rgba(255,255,255,0.9); padding: 1vh 3vw; border-radius: 2vh; flex-shrink: 0;}
+    .option.highlight { transform: scale(1.02) !important; box-shadow: 0 0 5vh rgba(255, 215, 0, 1), inset 0 0 2vh rgba(255,255,255,0.8) !important; border: 0.8vh solid #FFD700; z-index: 20; animation: none !important; background: linear-gradient(135deg, #f1c40f, #f39c12) !important; color: #000; text-shadow: 0 0.2vh 0.5vh rgba(255,255,255,0.8); }
 
     /* ========== 答題即時進場區 (防溢出設計) ========== */
-    #answeredContainer { margin-top: 1.5vh; padding-top: 1.5vh; border-top: 0.3vh dashed rgba(0,0,0,0.1); flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; width: 100%;}
-    #answeredCountTitle { font-size: clamp(16px, 2.5vh, 26px); font-weight: 900; color: #555; margin: 0 0 1vh 0; flex-shrink: 0;}
-    #answeredGrid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 1vh; overflow: hidden; max-height: 12vh; }
-    .answered-tag { font-size: clamp(12px, 2vh, 22px); padding: 0.5vh 1vw; border-radius: 3vh; background: rgba(255,255,255,0.9); color: #333; font-weight: 900; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.15); display: inline-flex; align-items: center; gap: 0.6vw; animation: popInAnswer 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0); }
+    #answeredContainer { margin-top: 1vh; padding-top: 1vh; border-top: 0.3vh dashed rgba(0,0,0,0.1); flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; width: 100%; height: 14vh;}
+    #answeredCountTitle { font-size: clamp(14px, 2.5vh, 24px); font-weight: 900; color: #555; margin: 0 0 0.5vh 0; flex-shrink: 0;}
+    #answeredGrid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 0.8vh; flex: 1 1 auto; overflow: hidden; }
+    .answered-tag { font-size: clamp(12px, 1.8vh, 20px); padding: 0.4vh 1vw; border-radius: 2vh; background: rgba(255,255,255,0.9); color: #333; font-weight: 900; box-shadow: 0 0.4vh 0.8vh rgba(0,0,0,0.15); display: inline-flex; align-items: center; gap: 0.4vw; animation: popInAnswer 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0); margin: 0;}
     .answered-tag.top-1 { border: 0.3vh solid #f1c40f; background: #fffdf0; transform: scale(1.15) !important; z-index: 3; }
     .answered-tag.top-2 { border: 0.3vh solid #bdc3c7; transform: scale(1.05) !important; z-index: 2; }
     .answered-tag.top-3 { border: 0.3vh solid #cd7f32; transform: scale(1.0) !important; z-index: 1; }
     @keyframes popInAnswer { 0% { transform: scale(0) translateY(3vh); opacity: 0; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
 
-    /* ========== 底部時間條與小字計時器 ========== */
-    .bottom-timer-row { display: flex; align-items: center; gap: 2vw; margin-top: 1vh; flex-shrink: 0; width: 100%; }
-    #timeBarContainer { flex: 1; height: 3vh; background: #eee; border-radius: 2vh; overflow: hidden; box-shadow: inset 0 0.5vh 1vh rgba(0,0,0,0.1);}
-    #timeBar { height: 100%; width: 100%; background: linear-gradient(90deg, #00c6ff, #0072ff); transition: width 1s linear, background 0.5s; }
-    #timerText { font-size: clamp(30px, 6vh, 60px); font-weight: 900; color: #333; width: 8vw; text-align: right;}
+    /* ========== 底部時間條 (花紋溫度計升溫) ========== */
+    .bottom-timer-row { display: flex; align-items: center; gap: 2vw; margin-top: 1vh; flex-shrink: 0; width: 100%; height: 5vh; }
+    #timeBarContainer { flex: 1; height: 100%; background: #333; border-radius: 2.5vh; overflow: hidden; box-shadow: inset 0 0.5vh 1vh rgba(0,0,0,0.6); border: 0.3vh solid #fff; position: relative;}
+    
+    .striped-bar { height: 100%; width: 0%; transition: width 1s linear, background 0.5s ease; background-size: 200% 200%; }
+    .bar-normal { background-image: repeating-linear-gradient(45deg, #3498db, #3498db 20px, #2980b9 20px, #2980b9 40px); animation: stripemove 2s linear infinite; }
+    .bar-warning { background-image: repeating-linear-gradient(45deg, #f1c40f, #f1c40f 20px, #f39c12 20px, #f39c12 40px); animation: stripemove 1s linear infinite; }
+    .bar-panic { background-image: repeating-linear-gradient(45deg, #e74c3c, #e74c3c 20px, #c0392b 20px, #c0392b 40px); animation: stripemove 0.4s linear infinite; }
+    @keyframes stripemove { 0% { background-position: 0 0; } 100% { background-position: 50px 0; } }
     
     /* ========== 中央巨大化倒數特效 (最後5秒) ========== */
-    #giantTimerOverlay {
-        display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        justify-content: center; align-items: center; z-index: 9000; pointer-events: none;
-        font-size: 60vh; font-weight: 900; color: rgba(255, 63, 52, 0.85);
-        text-shadow: 0 0 10vh rgba(255,0,0,0.8);
-        animation: panicHeartbeat 1s infinite;
-    }
-    @keyframes panicHeartbeat { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(0.8); opacity: 0.5; } }
+    #giantTimerOverlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9000; pointer-events: none; font-size: 80vh; font-weight: 900; color: rgba(255, 50, 50, 0.4); text-shadow: 0 0 10vh rgba(255,0,0,0.6); animation: giantPulse 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; line-height: 1;}
+    @keyframes giantPulse { 0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; } }
     
-    .ctrl-btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1.5vh 4vw; font-size: clamp(20px, 3.5vh, 40px); font-weight: 900; border: none; border-radius: 5vh; cursor: pointer; box-shadow: 0 1vh 0 #4a3472; transition: 0.2s; font-family: inherit; margin-top:1vh; flex-shrink: 0;}
-    .ctrl-btn:active { transform: translateY(1vh); box-shadow: 0 0 0 #4a3472; }
+    .ctrl-btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 1.5vh 4vw; font-size: clamp(18px, 3vh, 36px); font-weight: 900; border: none; border-radius: 5vh; cursor: pointer; box-shadow: 0 0.8vh 0 #4a3472; transition: 0.2s; font-family: inherit; margin-top:1vh; flex-shrink: 0;}
+    .ctrl-btn:active { transform: translateY(0.8vh); box-shadow: 0 0 0 #4a3472; }
 
     /* ========== 結算與排行榜 ========== */
     #roundRanking, #leaderboard, #podiumContainer { display: none; }
@@ -181,15 +160,11 @@
 </head>
 <body class="bg-setup">
   
-  <!-- 全域絕對暫停畫面 -->
   <div id="pauseOverlay">
     <div class="pause-icon">⏸️</div>
     <div class="pause-text">遊戲暫停中</div>
     <div style="font-size: 4vh; color: #f1c40f; font-weight: bold;">(再次按下空白鍵恢復遊戲)</div>
   </div>
-
-  <!-- 巨大化倒數特效 (最後5秒) -->
-  <div id="giantTimerOverlay">5</div>
 
   <div id="eventWarning">
     <div class="warning-text" id="warningTitle">⚡ 閃電搶答 ⚡</div>
@@ -233,8 +208,8 @@
     <button class="ctrl-btn" onclick="initLobby()">產生遊戲大廳 🚀</button>
   </div>
 
-  <div id="lobbyScreen" class="glass-panel" style="display:none; width: 95vw;">
-    <div style="display: flex; justify-content: center; align-items: center; gap: 3vw; flex-shrink: 0;">
+  <div id="lobbyScreen" class="glass-panel" style="display:none;">
+    <div id="headerContainer">
       <div id="qrcode"></div>
       <div style="text-align: left;">
         <h2 style="color:#ff4b2b; margin:0; text-shadow: 0 0.4vh 1vh rgba(0,0,0,0.1);" id="lobbyWaitText">✨ 掃描 QR Code 選擇陣營！</h2>
@@ -253,17 +228,20 @@
     <div id="matchPromptsContainer"></div>
     <div id="optionsContainer"></div>
     
+    <div id="sliderResult"></div>
+
+    <!-- 巨大化倒數特效 (最後5秒) -->
+    <div id="giantTimerOverlay">5</div>
+
     <!-- ⚡ 即時作答進場區 (防溢出設計) -->
     <div id="answeredContainer">
       <div id="answeredCountTitle">⚡ 已完成作答 <span id="answeredCount">0</span> 人 ⚡</div>
       <div id="answeredGrid"></div>
     </div>
-    
-    <div id="sliderResult"></div>
 
+    <!-- 溫度計升溫條 -->
     <div class="bottom-timer-row">
-       <div id="timeBarContainer"><div id="timeBar"></div></div>
-       <div id="timerText">--</div>
+       <div id="timeBarContainer"><div id="timeBar" class="striped-bar bar-normal"></div></div>
     </div>
     <button id="nextBtn" class="ctrl-btn" onclick="nextQuestion()" style="display:none; margin-top:2vh;">下一題 ➡️</button>
   </div>
@@ -289,14 +267,14 @@
 
   <script>
     // CSV URL 請保留您的設定
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSChl0vRMFeEVPH4K5T8OC6R4EXWDsoqwJA68DQxQc58IH1zxaG-A1uly4lZT1jr6x8rJIMGPjJ0vRU/pub?output=csv"; 
+    const SHEET_CSV_URL = ""; 
 
     // ========== 柔和化音樂與真實 BGM 引擎 ==========
     let audioCtx;
     const bgmNormal = new Audio('https://assets.mixkit.co/music/preview/mixkit-funny-quirky-comedy-track-71.mp3'); 
-    bgmNormal.loop = true; bgmNormal.volume = 0.4;
+    bgmNormal.loop = true; bgmNormal.volume = 0.3;
     const bgmFast = new Audio('https://assets.mixkit.co/music/preview/mixkit-clapping-comedy-background-music-260.mp3'); 
-    bgmFast.loop = true; bgmFast.volume = 0.5;
+    bgmFast.loop = true; bgmFast.volume = 0.4;
     let currentBGM = null;
 
     function initAudio() { 
@@ -419,7 +397,7 @@
     }
 
     function initLobby() {
-      initAudio(); // 初始化音訊環境
+      initAudio();
       let shuffleInput = parseInt(document.getElementById('cfgShuffle').value);
       gameConfig = {
         isTeamMode: document.getElementById('cfgMode').value === 'teams',
@@ -633,7 +611,6 @@
         else { if (conn.playerName !== highestBidder) return; }
       }
 
-      // 1. 登記玩家已作答
       answeredPlayers.add(conn.playerName);
 
       // =========================================================
@@ -651,7 +628,7 @@
 
       let tagHTML = document.createElement('div');
       tagHTML.className = `answered-tag ${extraClass}`;
-      tagHTML.innerHTML = `<span style="font-size:2.5vh;">${medal}</span> <span style="font-size: 3vh; filter: drop-shadow(0 0.2vh 0.2vh rgba(0,0,0,0.2));">${playerAvatar}</span> <span>${conn.playerName}</span>`;
+      tagHTML.innerHTML = `<span style="font-size:2.5vh;">${medal}</span> <span style="font-size: 3.5vh; filter: drop-shadow(0 0.2vh 0.2vh rgba(0,0,0,0.2));">${playerAvatar}</span> <span>${conn.playerName}</span>`;
       
       let gridEl = document.getElementById('answeredGrid');
       if (gridEl) gridEl.appendChild(tagHTML);
@@ -837,7 +814,6 @@
       playStart(); startBGM(isFastMode ? 'fast' : 'normal'); 
       document.getElementById('questionBox').style.display = 'flex'; document.getElementById('qText').innerText = qData.q;
       
-      // 清空即時作答區
       let answeredGrid = document.getElementById('answeredGrid');
       let answeredCount = document.getElementById('answeredCount');
       if(answeredGrid) answeredGrid.innerHTML = '';
@@ -902,7 +878,6 @@
       else {
         optBox.innerHTML = '';
         
-        // 【動態防破版】依照選項數量自動切換 Grid 排版
         let optCount = qData.options.length;
         if (optCount <= 4) { optBox.style.gridTemplateColumns = "repeat(2, 1fr)"; }
         else if (optCount <= 6) { optBox.style.gridTemplateColumns = "repeat(3, 1fr)"; }
@@ -923,6 +898,8 @@
       }
 
       document.getElementById('giantTimerOverlay').style.display = 'none';
+      document.body.classList.remove('panic-lighting');
+      
       document.getElementById('timeBarContainer').style.display = 'block';
       currentRoundData = []; isAcceptingAnswers = true; answeredPlayers.clear(); connections.forEach(c => c.tempResult = null);
       
@@ -956,7 +933,10 @@
       const MAX_TIME = qData.time || (isFastMode ? 10 : 15); let timeLeft = MAX_TIME;
       const timerEl = document.getElementById('timerText'); const timeBar = document.getElementById('timeBar');
       const giantTimerEl = document.getElementById('giantTimerOverlay');
-      timerEl.innerText = timeLeft; timerEl.style.color = "#333"; timeBar.style.width = "100%"; timeBar.style.background = "linear-gradient(90deg, #00c6ff, #0072ff)";
+      timerEl.innerText = timeLeft; timerEl.style.color = "#333"; 
+      
+      timeBar.className = 'striped-bar bar-normal';
+      timeBar.style.width = "0%";
       
       questionStartTime = Date.now(); 
 
@@ -964,9 +944,11 @@
       countdownInterval = setInterval(() => {
         if (isGlobalPaused) return; 
 
-        timeLeft--; timerEl.innerText = timeLeft; timeBar.style.width = `${(timeLeft / MAX_TIME) * 100}%`;
+        timeLeft--; timerEl.innerText = timeLeft; 
+        
+        let progress = ((MAX_TIME - timeLeft) / MAX_TIME) * 100;
+        timeBar.style.width = `${progress}%`;
 
-        // 觸發碼錶彈性動畫
         timerEl.classList.remove('tick-anim'); void timerEl.offsetWidth; timerEl.classList.add('tick-anim');
 
         if (qData.mode === 'memory' && gameConfig.useExtreme && timeLeft === Math.max(0, MAX_TIME - 3)) {
@@ -976,9 +958,10 @@
         if (timeLeft <= 5 && timeLeft > 0) { 
           timerEl.style.color = "#e74c3c"; timerEl.classList.add('panic-timer');
           document.querySelector('.glass-panel').classList.add('panel-shake');
-          timeBar.style.background = "linear-gradient(90deg, #ff416c, #ff4b2b)";
           
-          // 顯示巨大的中央倒數
+          timeBar.className = 'striped-bar bar-panic';
+          document.body.classList.add('panic-lighting');
+          
           giantTimerEl.style.display = 'flex';
           giantTimerEl.innerText = timeLeft;
 
@@ -988,10 +971,12 @@
         } else {
           timerEl.classList.remove('panic-timer'); document.querySelector('.glass-panel').classList.remove('panel-shake');
           giantTimerEl.style.display = 'none';
+          document.body.classList.remove('panic-lighting');
+          if (progress > 50 && timeLeft > 5) { timeBar.className = 'striped-bar bar-warning'; }
         }
 
         if (timeLeft <= 0) {
-          giantTimerEl.style.display = 'none';
+          giantTimerEl.style.display = 'none'; document.body.classList.remove('panic-lighting');
           clearInterval(countdownInterval); isAcceptingAnswers = false; broadcast({ type: 'DISABLE_BUTTONS' }); revealAnswer();
         }
       }, 1000);
@@ -1003,6 +988,7 @@
       document.querySelector('.glass-panel').classList.remove('panel-shake');
       document.getElementById('timerText').classList.remove('panic-timer');
       document.getElementById('giantTimerOverlay').style.display = 'none';
+      document.body.classList.remove('panic-lighting');
 
       const currentMode = questions[currentQIndex].mode; const qType = questions[currentQIndex].type; 
       let correctAns = questions[currentQIndex].correct;
@@ -1040,7 +1026,6 @@
           opt.classList.remove('floating-opt');
           opt.style.animation = 'none'; 
           if(currentMode === 'memory') opt.querySelector('.opt-text').innerText = questions[currentQIndex].options[i];
-          
           if (correctAns.includes(i)) opt.classList.add('highlight'); else opt.classList.add('dimmed');
         });
       }
@@ -1153,7 +1138,6 @@
           return { name: `<span style="background:${t.gradient}; padding:0.5vh 1.5vw; border-radius:1vh; color:white;">${t.name}</span>`, score: score };
         });
       } else { 
-        // 個人戰，帶入頭像
         rankedData = Object.keys(playerStats).map(pName => { return { name: pName, score: playerStats[pName].score, avatar: playerStats[pName].avatar }; }); 
       }
       
