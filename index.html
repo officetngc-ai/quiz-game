@@ -68,9 +68,9 @@
     
     #traitorWarning { display: none; background: #000; color: #e74c3c; border: 0.5dvh solid #c0392b; padding: 1.5dvh; border-radius: 3dvh; font-size: clamp(16px, 2.5dvh, 22px); font-weight: 900; margin-bottom: 1dvh; box-shadow: 0 0 2dvh rgba(231, 76, 60, 0.8); animation: pulseWin 1s infinite; flex-shrink: 0;}
 
-    /* ========== 網格彈性自適應佈局 ========== */
-    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2dvh; flex: 1; min-height: 0; grid-auto-rows: 1fr; margin-bottom: 1dvh;}
-    .ans-btn { cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.8); box-shadow: 0 1.5dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1.5dvh rgba(255,255,255,0.4); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.8); position: relative; overflow: hidden; margin:0;}
+    /* ========== 網格彈性自適應佈局 (防破版核心) ========== */
+    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5dvh; flex: 1 1 auto; min-height: 0; grid-auto-rows: minmax(0, 1fr); margin-bottom: 1.5dvh;}
+    .ans-btn { min-height: 0; height: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.8); box-shadow: 0 1.5dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1.5dvh rgba(255,255,255,0.4); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.8); position: relative; overflow: hidden; margin:0; padding: 1dvh; box-sizing: border-box;}
     
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
     @keyframes floatOpt { 0%, 100% { transform: translateY(0px) rotate(0deg); } 33% { transform: translateY(-0.5dvh) rotate(1deg); } 66% { transform: translateY(0.3dvh) rotate(-1deg); } }
@@ -100,9 +100,9 @@
     #orderDisplay { display: none; background: rgba(255,255,255,0.8); padding: 1dvh; border-radius: 2dvh; margin-bottom: 1dvh; font-size: clamp(16px, 3dvh, 24px); font-weight: 900; min-height: 5dvh; color: #333; flex-shrink: 0;}
     #resetOrderBtn { display: none; background: #e74c3c; color: white; border: none; border-radius: 1dvh; padding: 0.5dvh 3vw; font-weight: bold; margin-bottom: 1dvh; cursor:pointer; flex-shrink: 0;}
 
-    #dragBox { display:none; flex-direction:column; align-items:center; flex:1; min-height: 0; width:100%; margin-bottom: 1dvh; overflow-y: auto;}
-    #dragList { list-style:none; padding:0; width:95%; margin:0; display:flex; flex-direction:column; gap:1.5dvh;}
-    #dragList li { background: white; padding: 2dvh; border-radius: 2dvh; font-size: clamp(18px, 3.5dvh, 30px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: grab; border-left: 1dvh solid #3498db; transition: transform 0.1s; flex-shrink: 0;}
+    #dragBox { display:none; flex-direction:column; align-items:center; flex:1 1 auto; min-height: 0; width:100%; margin-bottom: 1.5dvh; overflow: hidden; box-sizing: border-box;}
+    #dragList { list-style:none; padding:0; width:95%; margin:0; display:flex; flex-direction:column; gap:1.5dvh; flex: 1; min-height: 0; }
+    #dragList li { flex: 1 1 auto; min-height: 0; background: white; padding: 1dvh; border-radius: 2dvh; font-size: clamp(16px, 3.5dvh, 30px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: grab; border-left: 1dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box;}
     .sortable-ghost { opacity: 0.4; background: #f1c40f !important; }
 
     /* ========== 懸浮發射鈕與技能列改為 Flex 佈局 ========== */
@@ -181,7 +181,7 @@
     <div id="btnGrid"></div>
 
     <div id="dragBox">
-      <h3 style="color:#333; font-size: 3dvh; margin-top:0;">上下拖曳排列對應順序</h3>
+      <h3 style="color:#333; font-size: 3dvh; margin-top:0; flex-shrink:0;">上下拖曳排列對應順序</h3>
       <ul id="dragList"></ul>
     </div>
 
@@ -258,7 +258,7 @@
     let gameCfg = {}; let iceHp = 0; let myScore = 0; let hasShield = false;
     let isBountyMode = false; let isAuctionMode = false;
     let sortableInstance = null; let memoryTimeout = null;
-    let currentOptions = [];
+    let currentOptions = []; 
     let currentOptionsLength = 0;
     
     let mobileTimerInterval = null;
@@ -394,7 +394,7 @@
             vibrate(100); selectedAnswers.clear(); selectedOrder = []; currentQuestionType = data.qType; 
             myScore = data.score; 
             currentOptionsLength = data.options ? data.options.length : 0; 
-            currentOptions = data.options || [];
+            currentOptions = data.options || []; 
             clearTimeout(memoryTimeout);
             
             startBGM(data.isFast ? 'fast' : 'normal');
