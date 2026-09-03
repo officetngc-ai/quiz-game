@@ -28,7 +28,7 @@
     @keyframes feverBg { 0% {background-position: 0% 0%;} 100% {background-position: 100% 100%;} }
     @keyframes spinBg { from { background-position: 0 0; } to { background-position: 100px 100px; } }
 
-    /* ========== 警告特效動畫 ========== */
+    /* ========== 警告與大風吹動畫 ========== */
     #eventWarning { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
     .warning-text { font-size: 120px; font-weight: 900; color: #f1c40f; text-shadow: 0 0 30px #f39c12, 0 10px 0 #d35400; animation: flashText 0.3s infinite alternate; }
     .shuffle-anim { animation: spinAndZoom 1.5s ease-in-out infinite alternate !important; color: #e056fd; text-shadow: 0 0 40px #be2edd, 0 10px 0 #686de0;}
@@ -39,9 +39,9 @@
     .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 30px; border-radius: 30px; box-shadow: 0 20px 50px rgba(0,0,0,0.15), inset 0 0 0 5px rgba(255,255,255,0.5); margin: 20px auto; width: 85%; color: #333; animation: popUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     @keyframes popUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
     
-    /* 綜藝感：整個面板抖動 (最後3秒) */
+    /* 綜藝感：整個面板抖動 (最後5秒) */
     .panel-shake { animation: boxShake 0.4s infinite !important; }
-    @keyframes boxShake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-3px) rotate(-1deg); } 75% { transform: translateX(3px) rotate(1deg); } }
+    @keyframes boxShake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-4px) rotate(-1deg); } 75% { transform: translateX(4px) rotate(1deg); } }
 
     .setup-row { display: flex; justify-content: space-between; align-items: center; margin: 10px 0; font-size: 20px; font-weight: bold; background: rgba(0,0,0,0.05); padding: 10px 15px; border-radius: 15px;}
     .setup-input, .setup-select { font-size: 18px; padding: 5px; border-radius: 10px; border: 2px solid #ccc; font-weight: bold; font-family: inherit;}
@@ -72,7 +72,6 @@
     #optionsContainer { display: flex; flex-wrap: wrap; justify-content: center; gap: 25px; margin-top: 20px; }
     .option { width: calc(50% - 15px); padding: 20px; font-size: 32px; font-weight: 900; color: white; border-radius: 25px; box-shadow: 0 10px 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: flex-start; gap: 20px;}
     
-    /* 動態選項顏色庫擴充至 8 種 */
     .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 10px 0 #b32a18;} 
     .color-1 { background: linear-gradient(135deg, #0072ff, #00c6ff); box-shadow: 0 10px 0 #0056b3;} 
     .color-2 { background: linear-gradient(135deg, #f9d423, #ff4e50); box-shadow: 0 10px 0 #b33200;} 
@@ -96,8 +95,7 @@
         z-index: 20; 
         animation: winnerSuperPulse 0.8s infinite alternate !important;
         background: linear-gradient(135deg, #f1c40f, #f39c12) !important;
-        color: #000;
-        text-shadow: 0 2px 5px rgba(255,255,255,0.8);
+        color: #000; text-shadow: 0 2px 5px rgba(255,255,255,0.8);
     }
     @keyframes winnerSuperPulse { 0% { transform: scale(1.15); box-shadow: 0 0 40px rgba(255,215,0,0.8); } 100% { transform: scale(1.25); box-shadow: 0 0 80px rgba(255,215,0,1); } }
 
@@ -232,10 +230,31 @@
   </div>
 
   <script>
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSChl0vRMFeEVPH4K5T8OC6R4EXWDsoqwJA68DQxQc58IH1zxaG-A1uly4lZT1jr6x8rJIMGPjJ0vRU/pub?output=csv"; 
+    const SHEET_CSV_URL = ""; 
 
+    // ========== 音效與程序化背景音樂引擎 ==========
     let audioCtx;
+    let bgmOsc = null; let bgmGain = null; let bgmLfo = null;
+
     function initAudio() { if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); } }
+    
+    function startBGM(type) {
+        stopBGM(); if(!audioCtx) return;
+        bgmOsc = audioCtx.createOscillator(); bgmGain = audioCtx.createGain(); bgmLfo = audioCtx.createOscillator();
+        bgmOsc.type = type === 'fast' ? 'sawtooth' : 'triangle';
+        bgmOsc.frequency.value = type === 'fast' ? 55 : 65; 
+        bgmGain.gain.value = 0.05;
+        bgmOsc.connect(bgmGain); bgmGain.connect(audioCtx.destination);
+        bgmOsc.start();
+        bgmLfo.frequency.value = type === 'fast' ? 4 : 1.5; 
+        bgmLfo.connect(bgmGain.gain); bgmLfo.start();
+    }
+    
+    function stopBGM() {
+        if(bgmOsc) { bgmOsc.stop(); bgmOsc.disconnect(); bgmOsc=null; }
+        if(bgmLfo) { bgmLfo.stop(); bgmLfo.disconnect(); bgmLfo=null; }
+    }
+
     function playTone(freq, type, duration, vol=0.1) { if(!audioCtx) return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime); gain.gain.setValueAtTime(vol, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + duration); }
     function playJoin() { initAudio(); playTone(880, 'sine', 0.1); setTimeout(()=>playTone(1108.73, 'sine', 0.2), 100); } 
     function playStart() { initAudio(); playTone(523, 'square', 0.1); setTimeout(() => playTone(659, 'square', 0.1), 150); setTimeout(() => playTone(784, 'square', 0.4), 300); }
@@ -589,7 +608,7 @@
         const warning = document.getElementById('eventWarning'); warning.style.display = 'flex';
         document.getElementById('warningTitle').innerText = "⚖️ 搶答權拍賣 ⚖️";
         document.getElementById('warningSub').innerText = `出價最高的隊伍獲得唯一作答權！\n答對雙倍標金，答錯沒收標金！`;
-        playWarning();
+        playWarning(); startBGM('fast'); // 啟動緊湊 BGM
         broadcast({ type: 'AUCTION_PHASE' });
 
         let auctionTime = 10;
@@ -623,7 +642,7 @@
         document.getElementById('warningTitle').innerText = qData.mode === 'bounty' ? "🎯 賞金獵人 🎯" : "💰 盲注時刻 💰";
         let tagMatch = qData.q.match(/【(.*?)】/); let tag = tagMatch ? tagMatch[1] : "神秘領域";
         document.getElementById('warningSub').innerText = `主題：【${tag}】\n請在手機端操作！`;
-        playWarning();
+        playWarning(); startBGM('normal');
         
         let targets = gameConfig.isTeamMode ? teamsData : Object.keys(playerStats).map(p => ({id: p, name: p}));
         broadcast({ type: qData.mode === 'bounty' ? 'BOUNTY_PHASE' : 'WAGER_PHASE', teams: targets });
@@ -647,7 +666,7 @@
     }
 
     function showQuestionUI(qData, isFastMode) {
-      playStart(); 
+      playStart(); startBGM(isFastMode ? 'fast' : 'normal'); // 啟動背景音樂[cite: 1]
       document.getElementById('questionBox').style.display = 'block'; document.getElementById('qText').innerText = qData.q;
       
       if(qData.mode === 'traitor' && gameConfig.useExtreme && gameConfig.isTeamMode) {
@@ -711,14 +730,13 @@
         qData.options.forEach((optText, i) => {
           const shape = shapeList[i % shapeList.length];
           const colorClass = `color-${i % 8}`;
-          optBox.innerHTML += `<div class="option ${colorClass} floating-opt" id="opt${i}"><span class="shape">${shape}</span><span class="opt-text">${optText}</span></div>`;
+          optBox.innerHTML += `<div class="option ${colorClass}" id="opt${i}"><span class="shape">${shape}</span><span class="opt-text">${optText}</span></div>`;
         });
+        // 賦予選項呼吸感與進場彈跳[cite: 1]
         document.querySelectorAll('.option').forEach((opt, i) => {
           opt.style.animation = 'none'; opt.offsetHeight;
           opt.style.animation = `superBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${i*0.1}s both`;
-          setTimeout(() => {
-              if (isAcceptingAnswers) opt.classList.add('floating-opt');
-          }, 600 + i*100);
+          setTimeout(() => { if (isAcceptingAnswers) opt.classList.add('floating-opt'); }, 600 + i*100);
         });
       }
 
@@ -761,25 +779,26 @@
       clearInterval(countdownInterval);
       countdownInterval = setInterval(() => {
         timeLeft--; timerEl.innerText = timeLeft; timeBar.style.width = `${(timeLeft / MAX_TIME) * 100}%`;
-        
-        timerEl.classList.remove('tick-anim');
-        void timerEl.offsetWidth; 
-        timerEl.classList.add('tick-anim');
+
+        // 觸發碼錶彈性動畫[cite: 1]
+        timerEl.classList.remove('tick-anim'); void timerEl.offsetWidth; timerEl.classList.add('tick-anim');
 
         if (qData.mode === 'memory' && gameConfig.useExtreme && timeLeft === MAX_TIME - 3) {
            document.querySelectorAll('.opt-text').forEach(t => t.innerText = "???");
         }
 
         if (timeLeft <= 5 && timeLeft > 0) { 
-          timerEl.style.color = "#e74c3c"; 
-          timerEl.classList.add('panic-timer');
+          // 進入極限恐慌狀態[cite: 1]
+          timerEl.style.color = "#e74c3c"; timerEl.classList.add('panic-timer');
           document.querySelector('.glass-panel').classList.add('panel-shake');
           timeBar.style.background = "linear-gradient(90deg, #ff416c, #ff4b2b)";
+          
+          if(bgmOsc && bgmOsc.frequency.value !== 55) startBGM('fast'); // 加速音效
           isFastMode ? playTickFast() : playTick(); 
         } else {
-          timerEl.classList.remove('panic-timer');
-          document.querySelector('.glass-panel').classList.remove('panel-shake');
+          timerEl.classList.remove('panic-timer'); document.querySelector('.glass-panel').classList.remove('panel-shake');
         }
+
         if (timeLeft <= 0) {
           clearInterval(countdownInterval); isAcceptingAnswers = false; broadcast({ type: 'DISABLE_BUTTONS' }); revealAnswer();
         }
@@ -787,10 +806,11 @@
     }
 
     function revealAnswer() {
+      stopBGM(); // 停止倒數音效
       document.body.className = "bg-reveal"; playReveal();
       document.querySelector('.glass-panel').classList.remove('panel-shake');
       document.getElementById('timerText').classList.remove('panic-timer');
-      
+
       const currentMode = questions[currentQIndex].mode; const qType = questions[currentQIndex].type; 
       let correctAns = questions[currentQIndex].correct;
       
@@ -824,9 +844,9 @@
       else {
         const options = document.querySelectorAll('.option');
         options.forEach((opt, i) => {
-          opt.classList.remove('floating-opt');
-          opt.style.animation = 'none'; 
+          opt.classList.remove('floating-opt'); opt.style.animation = 'none'; 
           if(currentMode === 'memory') opt.querySelector('.opt-text').innerText = questions[currentQIndex].options[i];
+          // 史詩黃金正解特效[cite: 1]
           if (correctAns.includes(i)) opt.classList.add('highlight'); else opt.classList.add('dimmed');
         });
       }
