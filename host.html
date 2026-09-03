@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>P2P 主畫面 - 絕對無卷軸版</title>
+  <title>P2P 主畫面 - 實境秀終極一頁式版</title>
   <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -30,6 +30,7 @@
     @keyframes feverBg { 0% {background-position: 0% 0%;} 100% {background-position: 100% 100%;} }
     @keyframes spinBg { from { background-position: 0 0; } to { background-position: 10vw 10vw; } }
 
+    /* ========== 警告與全域控場動畫 ========== */
     #eventWarning { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; flex-direction: column; }
     .warning-text { font-size: 15vh; font-weight: 900; color: #f1c40f; text-shadow: 0 0 3vh #f39c12, 0 1vh 0 #d35400; animation: flashText 0.3s infinite alternate; }
     .shuffle-anim { animation: spinAndZoom 1.5s ease-in-out infinite alternate !important; color: #e056fd; text-shadow: 0 0 4vh #be2edd, 0 1vh 0 #686de0;}
@@ -50,7 +51,7 @@
     .setup-row { display: flex; justify-content: space-between; align-items: center; margin: 1vh 0; font-size: clamp(14px, 2vh, 22px); font-weight: bold; background: rgba(0,0,0,0.05); padding: 1vh 2vw; border-radius: 2vh;}
     .setup-input, .setup-select { font-size: clamp(14px, 2vh, 20px); padding: 0.5vh; border-radius: 1vh; border: 0.2vh solid #ccc; font-weight: bold; font-family: inherit;}
 
-    /* 大廳區塊 */
+    /* ========== 大廳與隨機變形果凍名牌 ========== */
     #teamBuckets { display: flex; justify-content: space-around; flex-wrap: wrap; gap: 2vh; flex: 1; min-height: 0; align-items: stretch; overflow: hidden;}
     .team-bucket { flex: 1 1 20%; min-width: 15vw; border-radius: 3vh; padding: 2vh; color: white; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); transition: 0.3s; display:flex; flex-direction:column; overflow:hidden;}
     .team-title { font-size: 3vh; font-weight: 900; margin-bottom: 1vh; border-bottom: 0.3vh solid rgba(255,255,255,0.5); padding-bottom: 0.5vh; text-shadow: 0.1vh 0.1vh 0.3vh rgba(0,0,0,0.3); flex-shrink: 0;}
@@ -104,7 +105,7 @@
     #sliderResult { display: none; font-size: 6vh; font-weight: 900; color: #2ecc71; margin-top: 2vh; background: rgba(255,255,255,0.9); padding: 1vh 3vw; border-radius: 2vh; flex-shrink: 0;}
 
     /* ========== 答題即時進場區 ========== */
-    #answeredContainer { margin-top: 2vh; padding-top: 1.5vh; border-top: 0.3vh dashed rgba(0,0,0,0.1); min-height: 10vh; max-height: 20vh; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden;}
+    #answeredContainer { margin-top: 1vh; padding-top: 1vh; border-top: 0.3vh dashed rgba(0,0,0,0.1); min-height: 8vh; max-height: 16vh; flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden;}
     #answeredCountTitle { font-size: clamp(16px, 2.5vh, 26px); font-weight: 900; color: #555; margin: 0 0 1vh 0; flex-shrink: 0;}
     #answeredGrid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 1vh; flex: 1; overflow: hidden; }
     .answered-tag { font-size: clamp(14px, 2.2vh, 22px); padding: 0.5vh 1.5vw; border-radius: 3vh; background: rgba(255,255,255,0.9); color: #333; font-weight: 900; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.15); display: inline-flex; align-items: center; gap: 0.6vw; animation: popInAnswer 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0); }
@@ -302,6 +303,7 @@
     function playWin() { initAudio(); playTone(523, 'triangle', 0.1); setTimeout(() => playTone(659, 'triangle', 0.1), 100); setTimeout(() => playTone(783, 'triangle', 0.1), 200); setTimeout(() => playTone(1046, 'triangle', 0.6), 300); }
     function playFirstBlood() { initAudio(); playTone(880, 'triangle', 0.1); setTimeout(() => playTone(1108, 'triangle', 0.1), 100); setTimeout(() => playTone(1318, 'triangle', 0.4), 200); } 
     
+    // 🌟 動態進場專屬泡泡音效
     function playPopSound() { 
       initAudio(); 
       const randomFreq = 800 + Math.random() * 400; 
@@ -588,7 +590,7 @@
     function broadcast(messageObj, targetName = null) { connections.forEach(conn => { if (conn.open) { if (!targetName || conn.playerName === targetName) conn.send(messageObj); } }); }
 
     function handleAnswer(conn, data) {
-      if (!isAcceptingAnswers || answeredPlayers.has(conn.playerName)) return;
+      if (!isAcceptingAnswers || answeredPlayers.has(conn.playerName) || isGlobalPaused) return;
       const qData = questions[currentQIndex]; 
 
       if (qData.mode === 'auction' && gameConfig.useExtreme) {
@@ -800,7 +802,7 @@
       playStart(); startBGM(isFastMode ? 'fast' : 'normal'); 
       document.getElementById('questionBox').style.display = 'flex'; document.getElementById('qText').innerText = qData.q;
       
-      // 清空即時作答進場區
+      // 清空即時作答區
       let answeredGrid = document.getElementById('answeredGrid');
       let answeredCount = document.getElementById('answeredCount');
       if(answeredGrid) answeredGrid.innerHTML = '';
@@ -919,6 +921,7 @@
 
         timeLeft--; timerEl.innerText = timeLeft; timeBar.style.width = `${(timeLeft / MAX_TIME) * 100}%`;
 
+        // 觸發碼錶彈性動畫
         timerEl.classList.remove('tick-anim'); void timerEl.offsetWidth; timerEl.classList.add('tick-anim');
 
         if (qData.mode === 'memory' && gameConfig.useExtreme && timeLeft === Math.max(0, MAX_TIME - 3)) {
