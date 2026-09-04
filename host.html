@@ -147,12 +147,12 @@
     #timeBarContainer { flex: 1; height: 3vh; background: #eee; border-radius: 2vh; overflow: hidden; box-shadow: inset 0 0.5vh 1vh rgba(0,0,0,0.1);}
     #timeBar { height: 100%; width: 100%; transition: width 1s linear, background 1s linear; }
     
-    /* 🎉 派對糖果條 */
+    /* 🎉 派 party糖果條 */
     .bar-stripe { background: repeating-linear-gradient(45deg, #00c6ff, #00c6ff 2vw, #0072ff 2vw, #0072ff 4vw) !important; animation: moveStripes 1s linear infinite; }
     .bar-party { background: repeating-linear-gradient(45deg, #ff9a9e, #ff9a9e 2vw, #fecfef 2vw, #fecfef 4vw) !important; animation: moveStripes 0.5s linear infinite; }
     @keyframes moveStripes { 0% {background-position: 0 0;} 100% {background-position: 5.65vw 0;} }
     
-    #timerText { font-size: clamp(30px, 6vh, 60px); font-weight: 900; color: #333; width: 8vw; text-align: right;}
+    #timerText { font-size: clamp(40px, 8vh, 120px); font-weight: 900; margin: 0; line-height: 1; text-shadow: 0.2vh 0.2vh 0 #fff; display: inline-block; flex-shrink: 0; width: 10vw; text-align: right;}
     .tick-anim { animation: elasticTick 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     @keyframes elasticTick { 0% { transform: scale(0.8); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
     
@@ -244,7 +244,7 @@
         <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgEconomy" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 💰 賞金獵人 & 盲注 & 連對加成</label>
         <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgSabotage" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚔️ 戰術干擾 (冰凍/洗牌/50-50/護盾)</label>
         <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgGhost" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ☠️ 靈魂急救 (生存依賴模式)</label>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgExtreme" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚖️ 極限心理戰 (背叛者/拍賣/地雷/閃憶)</label>
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgExtreme" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚖️ 極限心理戰 (背叛者/拍拉/地雷/閃憶)</label>
       </div>
 
       <!-- 第三欄：🏆 錦標賽/大逃殺設定 -->
@@ -267,6 +267,7 @@
   </div>
 
   <div id="lobbyScreen" class="glass-panel" style="display:none; width: 95vw;">
+    <h2 style="color: #4a3472; font-size: 5vh; margin-top: 0; margin-bottom: 2vh; text-shadow: 0 0.3vh 0.5vh rgba(255,255,255,0.8);">👥 目前已登入人數：<span id="lobbyTotalCount" style="color: #e74c3c;">0</span> 人</h2>
     <div style="display: flex; justify-content: center; align-items: center; gap: 3vw; flex-shrink: 0;">
       <div id="qrcode"></div>
       <div style="text-align: left;">
@@ -290,7 +291,7 @@
 
     <!-- ⚡ 即時作答進場區 -->
     <div id="answeredContainer">
-      <div id="answeredCountTitle">⚡ 已完成作答 <span id="answeredCount">0</span> 人 ⚡</div>
+      <div id="answeredCountTitle">⚡ 已完成作答 <span id="answeredCount">0</span> / <span id="totalActiveCount">0</span> 人 ⚡</div>
       <div id="answeredGrid"></div>
     </div>
 
@@ -347,6 +348,7 @@
       bgmLobby = document.getElementById('bgmLobbyObj'); 
       bgmNormal = document.getElementById('bgmNormalObj');
       bgmFast = document.getElementById('bgmFastObj');
+      
       if (document.getElementById('bgmRoundObj')) bgmRound = document.getElementById('bgmRoundObj');
       if (document.getElementById('bgmPodiumObj')) bgmPodium = document.getElementById('bgmPodiumObj');
       
@@ -363,37 +365,39 @@
         if (!bgmLobby) return;
         bgmLobby.volume = 0.3;
         currentBGM = bgmLobby;
-        bgmLobby.play().catch(e => console.log("等待互動以播放大廳 BGM"));
+        
+        bgmLobby.muted = true;
+        bgmLobby.play().then(() => {
+            bgmLobby.muted = false;
+        }).catch(e => console.log("Audio unlock blocked:", e));
     }
 
     function startPartyBGM() {
-        stopBGM(); // 確保進入答題時，先關閉大廳等其他無關音樂
+        stopBGM(); 
         
         if (!bgmNormal) return;
-        if (bgmNormal.paused) {
-            bgmNormal.volume = 0.3;
-            currentBGM = bgmNormal;
-            let playPromise = bgmNormal.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(e => console.log("等待互動以播放答題 BGM"));
-            }
-        }
+        bgmNormal.volume = 0.3;
+        currentBGM = bgmNormal;
+        bgmNormal.muted = true;
+        bgmNormal.play().then(() => {
+            bgmNormal.muted = false;
+        }).catch(e => console.log("Audio unlock blocked:", e));
     }
 
     function overlayFastBGM(isFast) {
         if (!bgmFast || !bgmNormal) return;
         if (isFast) {
-            bgmNormal.volume = 0.1; // 降低常駐派對音
+            bgmNormal.volume = 0.1; 
             if (bgmFast.paused) {
                 bgmFast.currentTime = 0; 
-                let playPromise = bgmFast.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(e => console.log("等待互動以播放快節奏 BGM"));
-                }
+                bgmFast.muted = true;
+                bgmFast.play().then(() => {
+                    bgmFast.muted = false;
+                }).catch(e => console.log("Audio unlock blocked:", e));
             }
         } else {
-            bgmNormal.volume = 0.3; // 恢復正常音量
-            if(!bgmFast.paused) bgmFast.pause();
+            bgmNormal.volume = 0.3; 
+            bgmFast.pause();
         }
     }
     
@@ -408,12 +412,22 @@
 
     function playRoundBGM() {
         stopBGM();
-        if(bgmRound) bgmRound.play().catch(e=>{});
+        if(bgmRound) {
+            bgmRound.muted = true;
+            bgmRound.play().then(() => {
+                bgmRound.muted = false;
+            }).catch(e=>{});
+        }
     }
 
     function playPodiumBGM() {
         stopBGM();
-        if(bgmPodium) bgmPodium.play().catch(e=>{});
+        if(bgmPodium) {
+            bgmPodium.muted = true;
+            bgmPodium.play().then(() => {
+                bgmPodium.muted = false;
+            }).catch(e=>{});
+        }
     }
 
     function playTone(freq, type, duration, vol=0.1) { 
@@ -437,12 +451,14 @@
     function playWin() { initAudio(); playTone(523, 'triangle', 0.1); setTimeout(() => playTone(659, 'triangle', 0.1), 100); setTimeout(() => playTone(783, 'triangle', 0.1), 200); setTimeout(() => playTone(1046, 'triangle', 0.6), 300); }
     function playFirstBlood() { initAudio(); playTone(880, 'triangle', 0.1); setTimeout(() => playTone(1108, 'triangle', 0.1), 100); setTimeout(() => playTone(1318, 'triangle', 0.4), 200); } 
     
+    // 🌟 動態進場專屬泡泡音效
     function playPopSound() { 
       initAudio(); 
       const randomFreq = 800 + Math.random() * 400; 
       playTone(randomFreq, 'sine', 0.05, 0.08); 
     }
 
+    // ========== 全域絕對暫停機制 ==========
     let isGlobalPaused = false;
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
@@ -533,7 +549,6 @@
           }
       });
 
-      // 些微延遲後再播放大廳音樂，確保解鎖不撞車
       setTimeout(() => { startLobbyBGM(); }, 200); 
 
       let shuffleInput = parseInt(document.getElementById('cfgShuffle').value);
@@ -590,7 +605,11 @@
             playJoin(); conn.playerName = data.name;
             if(!playerStats[data.name]) playerStats[data.name] = { teamId: -1, score: 0, correctCount: 0, fastWins: 0, fastScore: 0, streak: 0, hasShield: false, isGhost: false, isTraitor: false, avatar: '👤', isEliminated: false };
             
-            // 💀 防錯：如果淘汰玩家斷線重連，瞬間把他打回原形
+            // ✅ 即時更新 Lobby 登入人數
+            if(document.getElementById('lobbyTotalCount')) {
+                document.getElementById('lobbyTotalCount').innerText = Object.keys(playerStats).length;
+            }
+
             if (playerStats[data.name].isEliminated) {
                  conn.send({ type: 'ELIMINATED' });
                  return;
@@ -717,7 +736,6 @@
           }
         });
 
-        // 初始化樹狀淘汰賽名單
         if(gameConfig.useTournament) {
             let activeTeamIds = teamsData.map(t => t.id);
             currentMatchups = buildMatchups(activeTeamIds);
@@ -880,7 +898,7 @@
     }
 
     function nextQuestion() {
-      stopBGM(); // 關閉結算音樂
+      stopBGM(); 
       currentQIndex++;
       if (currentQIndex >= questions.length) { showTeamPodium(); return; }
       if (gameConfig.isTeamMode && gameConfig.shuffleRound > 0 && currentQIndex === gameConfig.shuffleRound) { triggerTeamShuffle(); return; }
@@ -1055,8 +1073,11 @@
       else {
         optBox.innerHTML = '';
         
+        // 【動態防破版】依照選項數量自動切換 Grid 排版
         let optCount = qData.options.length;
-        if (optCount <= 4) { optBox.style.gridTemplateColumns = "repeat(2, 1fr)"; }
+        if (optCount === 1) { optBox.style.gridTemplateColumns = "1fr"; }
+        else if (optCount === 2 || optCount === 4) { optBox.style.gridTemplateColumns = "repeat(2, 1fr)"; }
+        else if (optCount === 3) { optBox.style.gridTemplateColumns = "repeat(3, 1fr)"; }
         else if (optCount <= 6) { optBox.style.gridTemplateColumns = "repeat(3, 1fr)"; }
         else { optBox.style.gridTemplateColumns = "repeat(4, 1fr)"; }
 
@@ -1089,6 +1110,11 @@
       
       currentRoundData = []; isAcceptingAnswers = true; answeredPlayers.clear(); connections.forEach(c => c.tempResult = null);
       
+      // ✅ 計算並顯示總生存人數
+      let activePlayersCount = Object.keys(playerStats).filter(p => !playerStats[p].isEliminated).length;
+      let totalActiveEl = document.getElementById('totalActiveCount');
+      if(totalActiveEl) totalActiveEl.innerText = activePlayersCount;
+
       connections.forEach(c => {
         if(c.open && c.playerName && !playerStats[c.playerName].isEliminated) {
           let role = 'all';
@@ -1279,6 +1305,7 @@
       
       if (qType === 'slider' && gameConfig.useAdvType) {
         document.getElementById('sliderResult').innerText = `精準正解是：${correctAns[0]}！`;
+        document.getElementById('sliderResult').style.display = 'block';
       } 
       // ✅ 新增：如果是「排序題」，公佈時直接顯示正確的排序文字，不再只是反白選項
       else if ((qType === 'order' || qType === 'match_drag' || qType === 'match_click') && gameConfig.useAdvType) {
