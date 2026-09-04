@@ -156,7 +156,7 @@
     .tick-anim { animation: elasticTick 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     @keyframes elasticTick { 0% { transform: scale(0.8); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
     
-    /* 🎉 派 party歡樂倒數文字 */
+    /* 🎉 派對歡樂倒數文字 */
     .panic-timer { animation: partyTick 0.4s infinite alternate !important; color: #e056fd !important; text-shadow: 0 0 3vh #e056fd, 0 0.5vh 0 #686de0 !important; }
     @keyframes partyTick { 0% { transform: scale(1.2) rotate(-5deg); } 100% { transform: scale(1.5) rotate(5deg); } }
     
@@ -361,14 +361,9 @@
       if(bgmFast) bgmFast.volume = 0.5;
       if(bgmRound) bgmRound.volume = 0.4;
       if(bgmPodium) bgmPodium.volume = 0.6;
-
-      // 預載解鎖
-      if(bgmLobby) bgmLobby.play().then(()=>bgmLobby.pause()).catch(e=>{});
-      if(bgmNormal) bgmNormal.play().then(()=>bgmNormal.pause()).catch(e=>{});
-      if(bgmFast) bgmFast.play().then(()=>bgmFast.pause()).catch(e=>{});
     }
 
-    // 🆕 專屬大廳音樂啟動函式
+    // ========== 🌟 雙軌 BGM 疊加音量閃避引擎 (Audio Ducking) ==========
     function startLobbyBGM() {
         stopBGM();
         if (!bgmLobby) return;
@@ -380,9 +375,8 @@
         }
     }
 
-    // ========== 🌟 雙軌 BGM 疊加音量閃避引擎 (Audio Ducking) ==========
     function startPartyBGM() {
-        if(currentBGM === bgmLobby) stopBGM(); 
+        stopBGM(); 
         
         if (!bgmNormal) return;
         if (bgmNormal.paused) {
@@ -535,22 +529,20 @@
     }
 
     function initLobby() {
+      // 🌟 強制解鎖音軌 (利用 onClick 同步執行)
+      if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      
+      let audios = [
+          document.getElementById('bgmLobbyObj'), document.getElementById('bgmNormalObj'), 
+          document.getElementById('bgmFastObj'), document.getElementById('bgmRoundObj'), 
+          document.getElementById('bgmPodiumObj')
+      ];
+      audios.forEach(a => { if(a) { a.muted = true; a.play().catch(()=>{}); a.pause(); a.currentTime = 0; a.muted = false; } });
+      
       initAudio();
       
-      // 強制瞬間解鎖所有主機端音軌
-      let allAudios = [bgmNormal, bgmFast, bgmRound, bgmPodium];
-      allAudios.forEach(bgm => {
-          if (bgm) {
-              bgm.muted = true;
-              bgm.play().then(() => {
-                  bgm.pause();
-                  bgm.currentTime = 0;
-                  bgm.muted = false;
-              }).catch(e => console.log("Audio unlock blocked:", e));
-          }
-      });
-
-      // 些微延遲後再播放大廳音樂，確保解鎖不撞車
+      // 些微延遲後再播放大廳音樂
       setTimeout(() => { startLobbyBGM(); }, 200); 
 
       let shuffleInput = parseInt(document.getElementById('cfgShuffle').value);
@@ -754,8 +746,9 @@
       try {
         const response = await fetch(SHEET_CSV_URL); const csvText = await response.text();
         Papa.parse(csvText, { header: false, skipEmptyLines: true, complete: function(results) {
+            // 🚨 修正：加入空白行過濾，防止讀到一半卡死
             questions = results.data.slice(1).map(row => {
-              if(!row[0]) return null;
+              if(!row || row.length < 3 || !row[0] || row[0].trim() === '') return null;
               const type = row[0].trim().toLowerCase();
               const q = row[1].trim();
               const correctArray = row[2].toString().split(',').map(n => parseInt(n.trim()));
@@ -771,7 +764,7 @@
               }
               if (opts.length === 0) opts = ["正確", "錯誤"];
               return { type: type, q: q, options: opts, correct: correctArray, mode: modeRaw, media: mediaUrl, time: timeLimit };
-            }).filter(q => q);
+            }).filter(q => q !== null);
           }
         });
       } catch (err) { useDefaultQuestions(); }
@@ -935,6 +928,9 @@
 
     function startQuestionFlow() {
       const qData = questions[currentQIndex];
+      // 🚨 防呆：如果讀到空行或無效題目，直接進頒獎台防當機
+      if (!qData) { showTeamPodium(); return; }
+
       document.getElementById('questionBox').style.display = 'none'; document.getElementById('leaderboard').style.display = 'none'; document.getElementById('roundRanking').style.display = 'none'; document.getElementById('nextBtn').style.display = 'none'; document.getElementById('nextBtnLeader').style.display = 'none';
 
       connections.forEach(c => { c.wager = 0; c.bountyTarget = null; c.bidAmount = 0; }); 
@@ -1019,7 +1015,6 @@
       if(answeredGrid) answeredGrid.innerHTML = '';
       if(answeredCount) answeredCount.innerText = '0';
       if(totalActivePlayersEl) {
-          // 計算目前存活玩家數量
           let activeCount = Object.keys(playerStats).filter(p => !playerStats[p].isEliminated).length;
           totalActivePlayersEl.innerText = activeCount;
       }
@@ -1083,7 +1078,6 @@
       else {
         optBox.innerHTML = '';
         
-        // 【動態防破版】依照選項數量自動切換 Grid 排版
         let optCount = qData.options.length;
         if (optCount === 1) { optBox.style.gridTemplateColumns = "1fr"; }
         else if (optCount === 2 || optCount === 4) { optBox.style.gridTemplateColumns = "repeat(2, 1fr)"; }
@@ -1142,7 +1136,8 @@
             isGhost: gameConfig.useGhost ? playerStats[c.playerName].isGhost : false,
             isTraitor: gameConfig.useExtreme ? playerStats[c.playerName].isTraitor : false,
             coopRole: role, questionText: qData.q, time: qData.time,
-            isAuctionWinner: isAuctionWinner, aucWinnerName: aucWinnerName
+            isAuctionWinner: isAuctionWinner, aucWinnerName: aucWinnerName,
+            useSabotage: gameConfig.useSabotage // 🚨 傳送道具啟用設定給手機端
           });
         }
       });
@@ -1310,26 +1305,21 @@
       
       if (qType === 'slider' && gameConfig.useAdvType) {
         document.getElementById('sliderResult').innerText = `精準正解是：${correctAns[0]}！`;
+        document.getElementById('sliderResult').style.display = 'block';
       } 
-      // ✅ 新增：如果是「排序題」，公佈時直接顯示正確的排序文字，不再只是反白選項
+      // 🚨 修正：排序題公佈時直接顯示正確的排序文字，隱藏干擾網格
       else if ((qType === 'order' || qType === 'match_drag' || qType === 'match_click') && gameConfig.useAdvType) {
         let opts = questions[currentQIndex].options;
         let correctStr = "";
         
         if (qType === 'order') {
             correctStr = qData.correct.map(i => opts[i]).join(' ➡️ ');
+            document.getElementById('optionsContainer').style.display = 'none'; // 隱藏原本的選項按鈕
             document.getElementById('sliderResult').style.display = 'block';
-            document.getElementById('sliderResult').innerHTML = `<span style="color:#2ecc71; font-size:clamp(20px, 4vh, 40px); font-weight:900;">正解順序：<br>${correctStr}</span>`;
-            
-            const options = document.querySelectorAll('.option');
-            options.forEach((opt) => {
-              opt.classList.remove('floating-opt');
-              opt.style.animation = 'none'; 
-              opt.classList.add('dimmed');
-            });
+            document.getElementById('sliderResult').innerHTML = `<span style="color:#2ecc71; font-size:clamp(20px, 5vh, 50px); font-weight:900;">🎯 正解順序：<br><br>${correctStr}</span>`;
         } else {
             correctStr = currentScrambledCorrect.map(i => opts[i]).join(' ➡️ ');
-            document.getElementById('matchPromptsContainer').innerHTML = `<h3 style='width:100%; color:#2ecc71; font-size:4vh;'>正解順序：<br>${correctStr}</h3>`;
+            document.getElementById('matchPromptsContainer').innerHTML = `<h3 style='width:100%; color:#2ecc71; font-size:5vh;'>🎯 正解順序：<br><br>${correctStr}</h3>`;
         }
       } 
       else {
