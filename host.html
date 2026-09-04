@@ -110,8 +110,7 @@
 
     /* 網格選項自適應排版 */
     #optionsContainer { display: grid; gap: 2vh 2vw; margin-top: 2vh; flex: 1; min-height: 0; width: 100%; box-sizing: border-box; }
-    .option { width: 100%; height: 100%; padding: 1.5vh 2vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    /* ✅ 字體極限自適應縮放，利用 vw/vh 自動彈性調整，不再破版 */
+    .option { width: 100%; height: 100%; padding: 1.5vh 2vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.98); }
     .opt-text { font-size: clamp(20px, 4vw, 70px); font-weight: 900; line-height: 1.2; word-break: break-word; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); }
 
     .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1vh 0 #b32a18;} 
@@ -123,8 +122,14 @@
     .color-6 { background: linear-gradient(135deg, #2c3e50, #34495e); box-shadow: 0 1vh 0 #1a252f;}
     .color-7 { background: linear-gradient(135deg, #e84393, #fd79a8); box-shadow: 0 1vh 0 #b33971;}
 
+    @keyframes superBounce {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.02); opacity: 1; }
+      100% { transform: scale(0.98); opacity: 1; }
+    }
+
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
-    @keyframes floatOpt { 0%, 100% { transform: translateY(0px) rotate(0deg); } 33% { transform: translateY(-0.8vh) rotate(1deg); } 66% { transform: translateY(0.5vh) rotate(-1deg); } }
+    @keyframes floatOpt { 0%, 100% { transform: scale(0.98) translateY(0px) rotate(0deg); } 33% { transform: scale(0.98) translateY(-0.8vh) rotate(1deg); } 66% { transform: scale(0.98) translateY(0.5vh) rotate(-1deg); } }
 
     /* 解決放大重疊問題：縮小錯誤項，完美光暈正確項 */
     .option.dimmed { opacity: 0.15; transform: scale(0.85); filter: grayscale(100%); animation: none !important; box-shadow: none !important; z-index: 1;}
@@ -136,18 +141,12 @@
     #answeredContainer { margin-top: 1.5vh; padding-top: 1.5vh; border-top: 0.3vh dashed rgba(0,0,0,0.1); flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; width: 100%;}
     #answeredCountTitle { font-size: clamp(16px, 2.5vh, 26px); font-weight: 900; color: #555; margin: 0 0 1vh 0; flex-shrink: 0;}
     #answeredGrid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 1vh; overflow: hidden; max-height: 12vh; }
-    .answered-tag { font-size: clamp(12px, 2vh, 22px); padding: 0.5vh 1vw; border-radius: 3vh; background: rgba(255,255,255,0.9); color: #333; font-weight: 900; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.15); display: inline-flex; align-items: center; gap: 0.6vw; animation: popInAnswer 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0); }
-    .answered-tag.top-1 { border: 0.3vh solid #f1c40f; background: #fffdf0; transform: scale(1.15) !important; z-index: 3; }
-    .answered-tag.top-2 { border: 0.3vh solid #bdc3c7; transform: scale(1.05) !important; z-index: 2; }
-    .answered-tag.top-3 { border: 0.3vh solid #cd7f32; transform: scale(1.0) !important; z-index: 1; }
-    @keyframes popInAnswer { 0% { transform: scale(0) translateY(3vh); opacity: 0; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
-
-    /* ========== 底部時間條 隨機三模式 ========== */
+    
+    /* 底部時間條 隨機三模式 */
     .bottom-timer-row { display: flex; align-items: center; gap: 2vw; margin-top: 1vh; flex-shrink: 0; width: 100%; }
     #timeBarContainer { flex: 1; height: 3vh; background: #eee; border-radius: 2vh; overflow: hidden; box-shadow: inset 0 0.5vh 1vh rgba(0,0,0,0.1);}
     #timeBar { height: 100%; width: 100%; transition: width 1s linear, background 1s linear; }
     
-    /* 🎉 派對糖果條 */
     .bar-stripe { background: repeating-linear-gradient(45deg, #00c6ff, #00c6ff 2vw, #0072ff 2vw, #0072ff 4vw) !important; animation: moveStripes 1s linear infinite; }
     .bar-party { background: repeating-linear-gradient(45deg, #ff9a9e, #ff9a9e 2vw, #fecfef 2vw, #fecfef 4vw) !important; animation: moveStripes 0.5s linear infinite; }
     @keyframes moveStripes { 0% {background-position: 0 0;} 100% {background-position: 5.65vw 0;} }
@@ -156,7 +155,6 @@
     .tick-anim { animation: elasticTick 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     @keyframes elasticTick { 0% { transform: scale(0.8); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
     
-    /* 🎉 派對歡樂倒數文字 */
     .panic-timer { animation: partyTick 0.4s infinite alternate !important; color: #e056fd !important; text-shadow: 0 0 3vh #e056fd, 0 0.5vh 0 #686de0 !important; }
     @keyframes partyTick { 0% { transform: scale(1.2) rotate(-5deg); } 100% { transform: scale(1.5) rotate(5deg); } }
     
@@ -177,7 +175,6 @@
     #scoreList { list-style: none; padding: 0; overflow-y: hidden; display: flex; flex-direction: column; gap: 1vh; flex: 1; justify-content: center;}
     .rank-item { background: linear-gradient(90deg, #fff, #f8f9fa); padding: 1.5vh 2.5vw; border-radius: 2vh; box-shadow: 0 0.8vh 1.5vh rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; font-size: clamp(20px, 3.5vh, 40px); border-left: 0.8vh solid #ff4b2b; animation: slideInLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
     
-    /* 💀 淘汰顯示特效 */
     .eliminated-item { background: linear-gradient(90deg, #555, #333) !important; color: #fff; text-decoration: line-through; opacity: 0.8; border-left: 0.8vh solid #000; filter: grayscale(80%); }
     .eliminated-item .rank-score { color: #aaa !important; }
 
@@ -203,7 +200,6 @@
     <div style="font-size: 4vh; color: #f1c40f; font-weight: bold;">(再次按下空白鍵恢復遊戲)</div>
   </div>
 
-  <!-- 🎉 巨大化彩虹倒數特效 -->
   <div id="giantTimerOverlay">5</div>
 
   <div id="eventWarning">
@@ -245,7 +241,8 @@
         <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgSabotage" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚔️ 戰術干擾 (冰凍/洗牌/50-50/護盾)</label>
         <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgGhost" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ☠️ 靈魂急救 (生存依賴模式)</label>
         <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgExtreme" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚖️ 極限心理戰 (背叛者/拍賣/地雷/閃憶)</label>
-        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer; background:rgba(255,255,255,0.5); padding:0.5vh; border-radius:1vh;"><input type="checkbox" id="cfgAvatarAnim" style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 🎭 動態頭像進場 (百人以上建議關閉)</label>
+        <!-- 🚨 預設開啟果凍頭像進場，保留震撼體驗 -->
+        <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer; background:rgba(255,255,255,0.5); padding:0.5vh; border-radius:1vh;"><input type="checkbox" id="cfgAvatarAnim" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 🎭 動態頭像進場 (百人以上建議關閉)</label>
       </div>
 
       <!-- 第三欄：🏆 錦標賽/大逃殺設定 -->
@@ -268,7 +265,6 @@
   </div>
 
   <div id="lobbyScreen" class="glass-panel" style="display:none; width: 95vw;">
-    <!-- 新增連線人數顯示 -->
     <div style="position: absolute; top: 3vh; right: 3vw; background: rgba(255,255,255,0.95); color: #4a3472; padding: 1vh 2vw; border-radius: 2vh; font-size: 3vh; font-weight: 900; box-shadow: 0 1vh 2vh rgba(0,0,0,0.15); border: 0.4vh solid #4a3472; z-index: 10;">
       👥 目前連線：<span id="lobbyPlayerCount">0</span> 人
     </div>
@@ -295,7 +291,6 @@
 
     <!-- ⚡ 即時作答進場區 -->
     <div id="answeredContainer">
-      <!-- 更新作答進度人數 -->
       <div id="answeredCountTitle">⚡ 已完成作答 <span id="answeredCount">0</span> / <span id="totalActivePlayers">0</span> 人 ⚡</div>
       <div id="answeredGrid"></div>
     </div>
@@ -334,7 +329,6 @@
   <audio id="bgmPodiumObj" loop src="music/podium.mp3"></audio>
 
   <script>
-    // 確保題庫被完整載入
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSChl0vRMFeEVPH4K5T8OC6R4EXWDsoqwJA68DQxQc58IH1zxaG-A1uly4lZT1jr6x8rJIMGPjJ0vRU/pub?output=csv"; 
 
     // ========== 柔和化音樂與真實 BGM 引擎 ==========
@@ -353,7 +347,6 @@
       bgmLobby = document.getElementById('bgmLobbyObj'); 
       bgmNormal = document.getElementById('bgmNormalObj');
       bgmFast = document.getElementById('bgmFastObj');
-      
       if (document.getElementById('bgmRoundObj')) bgmRound = document.getElementById('bgmRoundObj');
       if (document.getElementById('bgmPodiumObj')) bgmPodium = document.getElementById('bgmPodiumObj');
       
@@ -364,7 +357,6 @@
       if(bgmPodium) bgmPodium.volume = 0.6;
     }
 
-    // ========== 🌟 雙軌 BGM 疊加音量閃避引擎 (Audio Ducking) ==========
     function startLobbyBGM() {
         stopBGM();
         if (!bgmLobby) return;
@@ -391,7 +383,7 @@
     function overlayFastBGM(isFast) {
         if (!bgmFast || !bgmNormal) return;
         if (isFast) {
-            bgmNormal.volume = 0.1; // 降低常駐派對音
+            bgmNormal.volume = 0.1; 
             if (bgmFast.paused) {
                 bgmFast.currentTime = 0; 
                 let playPromise = bgmFast.play();
@@ -400,7 +392,7 @@
                 }
             }
         } else {
-            bgmNormal.volume = 0.3; // 恢復正常音量
+            bgmNormal.volume = 0.3; 
             bgmFast.pause();
             bgmFast.currentTime = 0;
         }
@@ -446,14 +438,12 @@
     function playWin() { initAudio(); playTone(523, 'triangle', 0.1); setTimeout(() => playTone(659, 'triangle', 0.1), 100); setTimeout(() => playTone(783, 'triangle', 0.1), 200); setTimeout(() => playTone(1046, 'triangle', 0.6), 300); }
     function playFirstBlood() { initAudio(); playTone(880, 'triangle', 0.1); setTimeout(() => playTone(1108, 'triangle', 0.1), 100); setTimeout(() => playTone(1318, 'triangle', 0.4), 200); } 
     
-    // 🌟 動態進場專屬泡泡音效
     function playPopSound() { 
       initAudio(); 
       const randomFreq = 800 + Math.random() * 400; 
       playTone(randomFreq, 'sine', 0.05, 0.08); 
     }
 
-    // ========== 全域絕對暫停機制 ==========
     let isGlobalPaused = false;
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
@@ -477,7 +467,7 @@
     let currentRoundData = []; let groupTimerInterval;
     let currentScrambledCorrect = []; 
     let highestBidder = null; let highestBid = 0;
-    let currentMatchups = []; // 錦標賽隊伍對戰組合
+    let currentMatchups = []; 
     
     const shapeList = ['▲','◆','●','■','★','✚','✦','✖','▼','⬣'];
 
@@ -529,7 +519,6 @@
     }
 
     function initLobby() {
-      // 🌟 強制瞬間合法解鎖所有主機端音軌 (Promise 安全寫法)
       if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
       if(audioCtx.state === 'suspended') audioCtx.resume();
       
@@ -570,7 +559,7 @@
         useGhost: document.getElementById('cfgGhost').checked,
         useExtreme: document.getElementById('cfgExtreme').checked,
         useTournament: document.getElementById('cfgTournament').checked,
-        useAvatarAnim: document.getElementById('cfgAvatarAnim') ? document.getElementById('cfgAvatarAnim').checked : false, // ✅ 讀取開關
+        useAvatarAnim: document.getElementById('cfgAvatarAnim') ? document.getElementById('cfgAvatarAnim').checked : true, 
         tournInterval: parseInt(document.getElementById('cfgTournInterval').value) || 3,
         tournElimCount: parseInt(document.getElementById('cfgTournElimCount').value) || 1
       };
@@ -653,6 +642,9 @@
         if (isGlobalPaused) return; 
         timeLeft--; 
         if(document.getElementById('groupTimerText')) document.getElementById('groupTimerText').innerText = timeLeft;
+        
+        broadcast({ type: 'TIMER_SYNC', timeLeft: timeLeft, isFast: false, maxTime: gameConfig.groupTime, timerStyle: 0 });
+
         if(timeLeft <= 0) { clearInterval(groupTimerInterval); autoAssignAndStart(); }
       }, 1000);
     }
@@ -752,7 +744,7 @@
             questions = results.data.slice(1).map(row => {
               if(!row || row.length < 3 || !row[0] || row[0].trim() === '') return null;
               const type = row[0].trim().toLowerCase();
-              const q = row[1] ? row[1].trim() : "請看圖片作答"; // 🚨 防呆
+              const q = row[1] ? row[1].trim() : "請看圖片作答";
               const correctArray = row[2].toString().split(',').map(n => parseInt(n.trim()));
               const modeRaw = row[3] ? row[3].trim().toLowerCase() : 'normal';
               const mediaUrl = row[4] ? row[4].trim() : '';
@@ -803,20 +795,20 @@
       let countEl = document.getElementById('answeredCount');
       if (countEl) countEl.innerText = currentRank;
 
-      // 🌟 動態進場邏輯：依據開關決定是否產生頭像標籤
+      // 🌟 果凍頭像進場：由管理員面板控制
       if (gameConfig.useAvatarAnim) {
           let playerAvatar = playerStats[conn.playerName] ? playerStats[conn.playerName].avatar : '👤';
-          let medal = '✅'; let extraClass = '';
-          if (currentRank === 1) { medal = '🥇'; extraClass = 'top-1'; }
-          else if (currentRank === 2) { medal = '🥈'; extraClass = 'top-2'; }
-          else if (currentRank === 3) { medal = '🥉'; extraClass = 'top-3'; }
+          let tagNode = createPlayerTagElement(conn.playerName, playerAvatar);
+          
+          let medal = '✅'; 
+          if (currentRank === 1) { medal = '🥇'; tagNode.style.border = '0.4vh solid #f1c40f'; }
+          else if (currentRank === 2) { medal = '🥈'; tagNode.style.border = '0.4vh solid #bdc3c7'; }
+          else if (currentRank === 3) { medal = '🥉'; tagNode.style.border = '0.4vh solid #cd7f32'; }
 
-          let tagHTML = document.createElement('div');
-          tagHTML.className = `answered-tag ${extraClass}`;
-          tagHTML.innerHTML = `<span style="font-size:2.5vh;">${medal}</span> <span style="font-size: 3vh; filter: drop-shadow(0 0.2vh 0.2vh rgba(0,0,0,0.2));">${playerAvatar}</span> <span>${conn.playerName}</span>`;
+          tagNode.innerHTML = `<span style="font-size:2.5vh; margin-right:0.5vw;">${medal}</span>` + tagNode.innerHTML;
           
           let gridEl = document.getElementById('answeredGrid');
-          if (gridEl) gridEl.appendChild(tagHTML);
+          if (gridEl) gridEl.appendChild(tagNode);
       }
 
       if (typeof playPopSound === 'function') playPopSound();
@@ -945,6 +937,8 @@
         document.getElementById('warningSub').innerText = `出價最高的隊伍獲得唯一作答權！\n答對雙倍標金，答錯沒收標金！`;
         playWarning(); startPartyBGM(); overlayFastBGM(true); 
         
+        broadcast({ type: 'AUCTION_PHASE', time: 10 });
+
         let auctionTime = 10;
         let aInt = setInterval(() => {
           if (isGlobalPaused) return; 
@@ -1075,6 +1069,7 @@
       } 
       else {
         optBox.innerHTML = '';
+        
         let optCount = qData.options.length;
         if (optCount === 1) { optBox.style.gridTemplateColumns = "1fr"; }
         else if (optCount === 2 || optCount === 4) { optBox.style.gridTemplateColumns = "repeat(2, 1fr)"; }
