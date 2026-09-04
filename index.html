@@ -151,7 +151,6 @@
 </head>
 <body>
 
-  <!-- 手機端全域暫停畫面 -->
   <div id="playerPauseOverlay">
     <div class="pause-icon-mobile">⏸️</div>
     <h2 style="font-size: 5dvh; margin: 1dvh 0; font-weight: 900;">遊戲暫停中</h2>
@@ -165,7 +164,6 @@
     <p style="font-size: 3dvh; font-weight:bold; color: #fff;">勝敗乃兵家常事，請繼續觀戰！</p>
   </div>
 
-  <!-- 巨大化倒數特效 (手機端最後5秒) -->
   <div id="giantTimerOverlay">5</div>
 
   <div id="freezeOverlay" onclick="breakIce()">
@@ -251,7 +249,6 @@
     </div>
   </div>
 
-  <!-- ✅ 隱藏的 Audio 標籤解決瀏覽器音效預載問題 -->
   <audio id="bgmNormalObj" loop src="https://assets.mixkit.co/music/preview/mixkit-funny-quirky-comedy-track-71.mp3"></audio>
   <audio id="bgmFastObj" loop src="https://assets.mixkit.co/music/preview/mixkit-clapping-comedy-background-music-260.mp3"></audio>
 
@@ -260,40 +257,51 @@
     let audioCtx;
     let bgmNormal; 
     let bgmFast; 
-    let currentBGMType = null;
 
     function initAudio() { 
-      if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); } 
+      if(!audioCtx) { 
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+          if(audioCtx.state === 'suspended') audioCtx.resume(); 
+      } 
       
-      // 使用 HTML Audio Element 綁定播放，徹底解決手機/電腦自動播放限制
       bgmNormal = document.getElementById('bgmNormalObj');
       bgmFast = document.getElementById('bgmFastObj');
-      bgmNormal.volume = 0.3; bgmFast.volume = 0.5;
-
-      bgmNormal.play().then(()=>bgmNormal.pause()).catch(e=>{});
-      bgmFast.play().then(()=>bgmFast.pause()).catch(e=>{});
+      bgmNormal.volume = 0.3; 
+      bgmFast.volume = 0.5;
     }
 
-    // ========== 🌟 雙軌 BGM 疊加引擎 ==========
+    // ========== 🌟 雙軌 BGM 疊加音量閃避引擎 (Audio Ducking) ==========
     function startPartyBGM() {
-        if (bgmNormal && bgmNormal.paused) {
+        if (!bgmNormal) return;
+        if (bgmNormal.paused) {
             bgmNormal.volume = 0.3;
-            bgmNormal.play().catch(e => console.log("等待互動以播放 BGM"));
+            let playPromise = bgmNormal.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(e => console.log("等待互動以播放 BGM"));
+            }
         }
     }
 
     function overlayFastBGM(isFast) {
         if (!bgmFast || !bgmNormal) return;
         if (isFast) {
-            bgmNormal.volume = 0.1; // 降低主音樂音量
+            bgmNormal.volume = 0.1; // 降低常駐派對音
             if (bgmFast.paused) {
                 bgmFast.currentTime = 0; 
-                bgmFast.play().catch(e=>{});
+                let playPromise = bgmFast.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => console.log("等待互動以播放快節奏 BGM"));
+                }
             }
         } else {
             bgmNormal.volume = 0.3; // 恢復正常音量
             bgmFast.pause();
         }
+    }
+
+    function stopBGM() {
+        if(bgmNormal) { bgmNormal.pause(); bgmNormal.currentTime = 0; }
+        if(bgmFast) { bgmFast.pause(); bgmFast.currentTime = 0; }
     }
 
     function playTone(freq, type, duration, vol=0.1) { 
@@ -364,7 +372,6 @@
         hostConnection.on('data', (data) => {
           
           if (data.type === 'ELIMINATED') {
-            // 💀 淘汰處理
             isEliminated = true;
             document.getElementById('eliminatedOverlay').style.display = 'flex';
             overlayFastBGM(false);
@@ -395,6 +402,7 @@
                 timeBar.className = 'striped-bar bar-normal';
                 timeBar.style.width = `${progress}%`;
                 timeBar.style.background = '';
+                // 雷射外框發光同步到手機端
                 let hue = (data.timeLeft/data.maxTime) * 120;
                 let spread = (1 - (data.timeLeft/data.maxTime)) * 4 + 1; 
                 document.getElementById('gameScreen').style.border = `0.8dvh solid hsl(${hue}, 100%, 50%)`;
@@ -419,6 +427,8 @@
               document.getElementById('gameScreen').classList.remove('panel-shake');
               document.body.classList.remove('panic-lighting');
               giantTimerEl.style.display = 'none';
+              if (data.timeLeft > 5) overlayFastBGM(false); // 確保 5 秒外關閉疊加
+              
               if ((data.timerStyle === 0 || data.timerStyle === 2) && progress > 50 && data.timeLeft > 5) { 
                   timeBar.className = 'striped-bar bar-warning'; 
               }
@@ -431,7 +441,7 @@
               giantTimerEl.style.display = 'none';
               document.getElementById('gameScreen').style.border = 'none';
               document.getElementById('gameScreen').style.boxShadow = 'none';
-              overlayFastBGM(false); // 停止快節奏
+              overlayFastBGM(false);
             }
           }
           else if (data.type === 'GAME_PAUSED') {
@@ -497,8 +507,8 @@
             }
           }
           else if (data.type === 'WAGER_PHASE' || data.type === 'BOUNTY_PHASE' || data.type === 'AUCTION_PHASE') {
-            if (isEliminated) return; // 淘汰者不參與押注
-            vibrate(100); 
+            if (isEliminated) return; 
+            vibrate(100); overlayFastBGM(false);
             document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting'); document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('gameScreen').style.border = 'none'; document.getElementById('gameScreen').style.boxShadow = 'none';
             document.getElementById('btnGrid').style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; document.getElementById('submitBtn').style.display = 'none'; document.getElementById('coopText').style.display = 'none';
             document.getElementById('wagerBox').style.display = 'flex';
@@ -623,7 +633,6 @@
               
               let shuffled = (data.qType === 'match_click') ? Array.from({length: data.options.length}, (_, i) => i).sort(() => Math.random() - 0.5) : Array.from({length: data.options.length}, (_, i) => i);
               
-              // 動態網格防破版引擎
               let optCount = data.options.length;
               if (optCount <= 8) { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; }
               else { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; } 
@@ -757,7 +766,7 @@
       }
       
       vibrate(80); playCoinSound(); document.body.className = ''; document.body.style.background = myTeamGrad; 
-      document.getElementById('skillBar').style.display = 'none'; document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting');
+      document.getElementById('skillBar').style.display = 'none'; overlayFastBGM(false); document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting');
       document.getElementById('gameScreen').style.border = 'none';
       document.getElementById('gameScreen').style.boxShadow = 'none';
 
