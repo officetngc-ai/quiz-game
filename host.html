@@ -110,7 +110,7 @@
 
     /* 網格選項自適應排版 */
     #optionsContainer { display: grid; gap: 2vh 2vw; margin-top: 2vh; flex: 1; min-height: 0; width: 100%; box-sizing: border-box; }
-    .option { width: 100%; height: 100%; padding: 1.5vh 2vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .option { width: 100%; height: 100%; padding: 1.5vh 2vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.98); }
     .opt-text { font-size: clamp(20px, 4vw, 70px); font-weight: 900; line-height: 1.2; word-break: break-word; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); }
 
     .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1vh 0 #b32a18;} 
@@ -122,8 +122,14 @@
     .color-6 { background: linear-gradient(135deg, #2c3e50, #34495e); box-shadow: 0 1vh 0 #1a252f;}
     .color-7 { background: linear-gradient(135deg, #e84393, #fd79a8); box-shadow: 0 1vh 0 #b33971;}
 
+    @keyframes superBounce {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.02); opacity: 1; }
+      100% { transform: scale(0.98); opacity: 1; } /* 保持 0.98 防止重疊 */
+    }
+
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
-    @keyframes floatOpt { 0%, 100% { transform: translateY(0px) rotate(0deg); } 33% { transform: translateY(-0.8vh) rotate(1deg); } 66% { transform: translateY(0.5vh) rotate(-1deg); } }
+    @keyframes floatOpt { 0%, 100% { transform: scale(0.98) translateY(0px) rotate(0deg); } 33% { transform: scale(0.98) translateY(-0.8vh) rotate(1deg); } 66% { transform: scale(0.98) translateY(0.5vh) rotate(-1deg); } }
 
     /* 解決放大重疊問題：縮小錯誤項，完美光暈正確項 */
     .option.dimmed { opacity: 0.15; transform: scale(0.85); filter: grayscale(100%); animation: none !important; box-shadow: none !important; z-index: 1;}
@@ -351,6 +357,7 @@
       bgmLobby = document.getElementById('bgmLobbyObj'); 
       bgmNormal = document.getElementById('bgmNormalObj');
       bgmFast = document.getElementById('bgmFastObj');
+      
       if (document.getElementById('bgmRoundObj')) bgmRound = document.getElementById('bgmRoundObj');
       if (document.getElementById('bgmPodiumObj')) bgmPodium = document.getElementById('bgmPodiumObj');
       
@@ -361,7 +368,7 @@
       if(bgmPodium) bgmPodium.volume = 0.6;
     }
 
-    // ========== 🌟 雙軌 BGM 疊加音量閃避引擎 (Audio Ducking) ==========
+    // 🆕 專屬大廳音樂啟動函式
     function startLobbyBGM() {
         stopBGM();
         if (!bgmLobby) return;
@@ -373,6 +380,7 @@
         }
     }
 
+    // ========== 🌟 雙軌 BGM 疊加音量閃避引擎 (Audio Ducking) ==========
     function startPartyBGM() {
         stopBGM(); // 確保進入答題時，先關閉大廳等其他無關音樂
         
@@ -444,14 +452,12 @@
     function playWin() { initAudio(); playTone(523, 'triangle', 0.1); setTimeout(() => playTone(659, 'triangle', 0.1), 100); setTimeout(() => playTone(783, 'triangle', 0.1), 200); setTimeout(() => playTone(1046, 'triangle', 0.6), 300); }
     function playFirstBlood() { initAudio(); playTone(880, 'triangle', 0.1); setTimeout(() => playTone(1108, 'triangle', 0.1), 100); setTimeout(() => playTone(1318, 'triangle', 0.4), 200); } 
     
-    // 🌟 動態進場專屬泡泡音效
     function playPopSound() { 
       initAudio(); 
       const randomFreq = 800 + Math.random() * 400; 
       playTone(randomFreq, 'sine', 0.05, 0.08); 
     }
 
-    // ========== 全域絕對暫停機制 ==========
     let isGlobalPaused = false;
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
@@ -475,7 +481,7 @@
     let currentRoundData = []; let groupTimerInterval;
     let currentScrambledCorrect = []; 
     let highestBidder = null; let highestBid = 0;
-    let currentMatchups = []; // 錦標賽隊伍對戰組合
+    let currentMatchups = []; 
     
     const shapeList = ['▲','◆','●','■','★','✚','✦','✖','▼','⬣'];
 
@@ -889,8 +895,9 @@
       }
       earnedScore = Math.floor(earnedScore * multiplier);
       
+      // 🚨 修正：防呆確保 0 分就是 0 分，避免 Falsy 判定錯誤
       if (qData.mode === 'wager' && gameConfig.useEconomy) {
-        let wagerAmt = conn.wager || 0;
+        let wagerAmt = parseInt(conn.wager) || 0; 
         if (isCorrect) earnedScore += wagerAmt; else earnedScore -= wagerAmt; 
       } else if (qData.mode === 'auction' && gameConfig.useExtreme) {
         if (isCorrect) earnedScore += highestBid; else earnedScore -= highestBid;
@@ -941,7 +948,7 @@
       // 🚨 防呆機制：如果讀取到 undefined (超過題庫範圍或解析出錯)，強制導向結算畫面，避免卡死
       if (!qData) { showTeamPodium(); return; }
 
-      // 初始化畫面
+      // 🧹 初始化畫面 (嚴格清除上題殘留)
       document.getElementById('optionsContainer').style.display = 'grid'; // 確保網格顯示
       document.getElementById('sliderResult').style.display = 'none';
       document.getElementById('sliderResult').innerHTML = ''; // 確保排序文字被清空
@@ -1110,6 +1117,7 @@
         });
         document.querySelectorAll('.option').forEach((opt, i) => {
           opt.style.animation = 'none'; opt.offsetHeight;
+          // 🚨 修正：確保動畫在 scale(0.98) 結束以維持安全間距
           opt.style.animation = `superBounce 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) ${i*0.1}s both`;
           setTimeout(() => { if (isAcceptingAnswers) opt.classList.add('floating-opt'); }, 600 + i*100);
         });
@@ -1297,7 +1305,7 @@
       document.getElementById('timerText').classList.remove('panic-timer');
       document.getElementById('giantTimerOverlay').style.display = 'none';
 
-      // 🚨 修補致命錯誤：這行能避免 qData 遺失，保證23題順暢執行
+      // 🚨 修補致命錯誤：這行能避免 qData 遺失，保證順暢執行
       const qData = questions[currentQIndex]; 
       if (!qData) return; // 絕對防呆盾牌
       
@@ -1370,7 +1378,7 @@
             }
 
             if(currentMode === 'bounty' && conn.bountyTarget != null) {
-              let wagerAmt = parseInt(conn.wager) || 0; // 🚨 安全修正：防止 0 分被判定為 500 分
+              let wagerAmt = parseInt(conn.wager) || 0; // 🚨 安全修正：防止 0 分被判定為空值
               let targetFailed = true;
               if(gameConfig.isTeamMode) { connections.forEach(tc => { if(playerStats[tc.playerName]?.teamId == conn.bountyTarget && tc.tempResult?.isCorrect) targetFailed = false; }); } 
               else { let tc = connections.find(c => c.playerName == conn.bountyTarget); if (tc && tc.tempResult && tc.tempResult.isCorrect) targetFailed = false; }
