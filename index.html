@@ -94,7 +94,6 @@
     
     .ans-btn { flex: 1 1 0; min-height: 0; height: auto; width: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 1dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.96); position: relative; overflow: hidden; margin:0; padding: 1.5dvh 2vw; box-sizing: border-box;}
     
-    /* ✅ 字體極限自適應縮放，利用 vmin 加上極限彈性，保證不破版 */
     .opt-text { font-size: clamp(14px, 4.5vmin, 45px); line-height: 1.15; word-break: break-word; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; padding: 0 5px;}
 
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
@@ -104,13 +103,11 @@
     .color-4 { background: linear-gradient(135deg, #8e44ad, #9b59b6); box-shadow: 0 1.5dvh 0 #732d91;} .color-5 { background: linear-gradient(135deg, #e67e22, #f39c12); box-shadow: 0 1.5dvh 0 #d35400;} .color-6 { background: linear-gradient(135deg, #2c3e50, #34495e); box-shadow: 0 1.5dvh 0 #1a252f;} .color-7 { background: linear-gradient(135deg, #e84393, #fd79a8); box-shadow: 0 1.5dvh 0 #b33971;}
 
     .ans-btn.active { opacity: 1; pointer-events: auto; animation: superPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-    /* 🚨 降低基準縮放，絕對防止邊緣重疊 */
     @keyframes superPop { 0% {transform: scale(0) rotate(-10deg);} 80% {transform: scale(1.02) rotate(5deg);} 100% {transform: scale(0.96) rotate(0deg);} }
 
     body.fast-mode .ans-btn.active:not(.selected) { animation: feverPulse 0.4s infinite alternate; }
     @keyframes feverPulse { from {transform: scale(0.96);} to {transform: scale(1.02); filter: brightness(1.2);} }
     
-    /* 修正重疊問題：選中時內縮並發光 */
     .ans-btn.selected { transform: scale(0.9) translateY(1.5dvh) !important; box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 3dvh rgba(255,255,255,0.8), inset 0 0 2dvh rgba(0,0,0,0.5); color: rgba(255,255,255,1); border: 0.6dvh solid #fff; animation: none;}
     
     .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none;}
@@ -307,13 +304,10 @@
 
     function joinGame() {
       if (!autoPin) return alert("請掃描大螢幕的 QR Code！");
-      initAudio(); vibrate(50); playClickSound(); 
+      initAudio(); 
+      vibrate(50); playClickSound(); 
       const myName = document.getElementById('playerName').value.trim();
       if (!myName) return alert('忘記輸入名字囉！');
-
-      // 🌟 強制瞬間解鎖手機音訊 (解決手機無聲音問題)
-      if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-      if(audioCtx.state === 'suspended') audioCtx.resume();
 
       myAvatar = avatarsList[Math.floor(Math.random() * avatarsList.length)];
       document.getElementById('myAvatarBadge').innerText = myAvatar;
@@ -463,7 +457,7 @@
           else if (data.type === 'WAGER_PHASE' || data.type === 'BOUNTY_PHASE' || data.type === 'AUCTION_PHASE') {
             if (isEliminated) return; 
             vibrate(100); 
-            
+
             document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting'); document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('gameScreen').style.border = 'none'; document.getElementById('gameScreen').style.boxShadow = 'none';
             document.getElementById('btnGrid').style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; document.getElementById('submitBtn').style.display = 'none'; document.getElementById('coopText').style.display = 'none';
             document.getElementById('wagerBox').style.display = 'flex';
@@ -499,7 +493,7 @@
             vibrate(100); selectedAnswers.clear(); selectedOrder = []; currentQuestionType = data.qType; 
             myScore = data.score; 
             currentOptionsLength = data.options ? data.options.length : 0; 
-            currentOptions = data.options || []; // 🚨 儲存當前選項文字，以供排序題使用
+            currentOptions = data.options || []; 
             clearTimeout(memoryTimeout);
             
             document.getElementById('mobileTimerContainer').style.display = 'flex';
@@ -521,7 +515,6 @@
             if (data.streak > 0) { sb.style.display='inline-block'; sb.innerText=`🔥 連對加成 x${(1 + data.streak*0.2).toFixed(1)}`; } else { sb.style.display='none'; }
 
             const skillBar = document.getElementById('skillBar');
-            // 🚨 修正：嚴格檢查 data.useSabotage，主機端沒開就絕對隱藏道具
             if (data.useSabotage === true && data.score >= 200 && !data.isGhost) skillBar.style.display = 'flex'; else skillBar.style.display = 'none';
             
             if (data.isGhost) {
@@ -567,9 +560,22 @@
               btnGrid.style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'flex';
               const list = document.getElementById('dragList'); list.innerHTML = '';
               let initialOrder = Array.from({length: data.options.length}, (_, i) => i).sort(() => Math.random() - 0.5); 
-              initialOrder.forEach(idx => { list.innerHTML += `<li data-id="${idx}"><span class="drag-handle">☰</span> <span style="flex:1; text-align:left;">${data.options[idx]}</span></li>`; });
+              
+              initialOrder.forEach(idx => { 
+                  let isImg = data.options[idx].trim().startsWith('http');
+                  let contentHtml = isImg 
+                      ? `<img src="${data.options[idx].trim()}" style="max-height: 6dvh; object-fit: contain; border-radius: 1dvh; pointer-events: none;">` 
+                      : data.options[idx];
+                  list.innerHTML += `<li data-id="${idx}"><span class="drag-handle">☰</span> <span style="flex:1; text-align:left; display:flex; align-items:center;">${contentHtml}</span></li>`; 
+              });
+              
               if(sortableInstance) sortableInstance.destroy();
-              sortableInstance = new Sortable(list, { animation: 150, ghostClass: 'sortable-ghost', delay: 150, delayOnTouchOnly: true });
+              sortableInstance = new Sortable(list, { 
+                  animation: 150, 
+                  ghostClass: 'sortable-ghost',
+                  delay: 150,
+                  delayOnTouchOnly: true
+              });
             }
             else {
               document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; btnGrid.style.display = 'grid';
@@ -586,21 +592,31 @@
               else { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; } 
 
               data.options.forEach((optText, i) => {
-                  let textContent = (data.qType === 'match_click' || data.qType === 'order') ? data.options[i] : shapeList[i % shapeList.length];
+                  let textContent;
+                  let isImg = false;
+                  if (data.qType === 'match_click' || data.qType === 'order') {
+                      isImg = data.options[i].trim().startsWith('http');
+                      textContent = isImg 
+                          ? `<img src="${data.options[i].trim()}" style="max-width:90%; max-height:8dvh; object-fit:contain; border-radius:1.5dvh; pointer-events:none;">` 
+                          : data.options[i];
+                  } else {
+                      textContent = shapeList[i % shapeList.length];
+                  }
+
                   let btnHTML = `<button class="ans-btn color-${i % 8} active" onclick="toggleSelection(${i}, event)" style="animation-delay: ${i * 0.05}s; order: ${shuffled[i]};">
-                                    <span class="opt-text">${textContent}</span>
+                                    <span class="opt-text" style="${isImg ? 'display:flex; justify-content:center; align-items:center; width:100%; height:100%; padding:0;' : ''} pointer-events:none;">${textContent}</span>
                                  </button>`;
                   btnGrid.innerHTML += btnHTML;
               });
 
               document.querySelectorAll('.ans-btn').forEach((b, i) => { 
-                if (data.qMode === 'chameleon' && gameConfig.useExtreme) b.classList.add('chameleon-fx');
-                if (data.qMode === 'auction' && gameConfig.useExtreme && !data.isAuctionWinner) b.classList.add('locked'); 
+                if (data.qMode === 'chameleon' && gameCfg.useExtreme) b.classList.add('chameleon-fx');
+                if (data.qMode === 'auction' && gameCfg.useExtreme && !data.isAuctionWinner) b.classList.add('locked'); 
                 
                 setTimeout(() => { if(!b.classList.contains('locked')) b.classList.add('floating-opt'); }, 600 + i*100);
               });
 
-              if (data.qMode === 'memory' && gameConfig.useExtreme) {
+              if (data.qMode === 'memory' && gameCfg.useExtreme) {
                   memoryTimeout = setTimeout(() => {
                       document.querySelectorAll('.opt-text').forEach(t => t.classList.add('memory-hide'));
                   }, 3000);
@@ -679,12 +695,11 @@
       if (currentQuestionType === 'order' || currentQuestionType === 'match_click') {
         if(!selectedOrder.includes(index)) {
           selectedOrder.push(index); 
-          // 🚨 修正 4：雙重保險，確保抓到該按鈕的實際文字
-          let btnText = btn.querySelector('.opt-text') ? btn.querySelector('.opt-text').innerText.trim() : "選項";
-          let textContent = currentOptions[index] ? currentOptions[index] : btnText;
-          
-          let textArray = selectedOrder.map(i => currentOptions[i] || document.querySelectorAll('.ans-btn')[i].innerText.trim() || "選項");
-          document.getElementById('orderDisplay').innerText = '序列：' + textArray.join(' ➡️ ');
+          let textArray = selectedOrder.map(i => {
+              let val = currentOptions[i] || document.querySelectorAll('.ans-btn')[i].innerText.trim() || "選項";
+              return val.startsWith('http') ? `<img src="${val}" style="height:3dvh; vertical-align:middle; border-radius:0.5dvh;">` : val;
+          });
+          document.getElementById('orderDisplay').innerHTML = '序列：' + textArray.join(' ➡️ ');
           btn.classList.add('locked'); btn.classList.remove('floating-opt');
         }
       } 
