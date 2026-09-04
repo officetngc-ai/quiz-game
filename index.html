@@ -90,31 +90,32 @@
     #traitorWarning { display: none; background: #000; color: #e74c3c; border: 0.5dvh solid #c0392b; padding: 1.5dvh; border-radius: 3dvh; font-size: clamp(16px, 2.5dvh, 22px); font-weight: 900; margin-bottom: 1dvh; box-shadow: 0 0 2dvh rgba(231, 76, 60, 0.8); animation: pulseWin 1s infinite; flex-shrink: 0;}
 
     /* ========== 網格彈性極限壓縮佈局 (絕對防溢出核心) ========== */
-    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1dvh 2vw; flex: 1 1 0; min-height: 0; width: 100%; margin-bottom: 1dvh; overflow: hidden;}
+    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2dvh 3vw; flex: 1 1 0; min-height: 0; width: 100%; margin-bottom: 2dvh; padding: 1vw; overflow: hidden;}
     
-    .ans-btn { flex: 1 1 0; min-height: 0; height: 100%; width: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 1dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.9); position: relative; overflow: hidden; margin:0; padding: 1dvh 2vw; box-sizing: border-box;}
+    .ans-btn { flex: 1 1 0; min-height: 0; height: auto; width: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 1dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.96); position: relative; overflow: hidden; margin:0; padding: 1.5dvh 2vw; box-sizing: border-box;}
     
     /* ✅ 字體極限自適應縮放，利用 vmin 加上極限彈性，保證不破版 */
-    .opt-text { font-size: clamp(14px, 5vmin, 40px); line-height: 1.1; word-break: break-word; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden;}
+    .opt-text { font-size: clamp(14px, 4.5vmin, 45px); line-height: 1.15; word-break: break-word; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; padding: 0 5px;}
 
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
-    @keyframes floatOpt { 0%, 100% { transform: translateY(0px) rotate(0deg); } 33% { transform: translateY(-0.5dvh) rotate(1deg); } 66% { transform: translateY(0.3dvh) rotate(-1deg); } }
+    @keyframes floatOpt { 0%, 100% { transform: scale(0.96) translateY(0px) rotate(0deg); } 33% { transform: scale(0.96) translateY(-0.5dvh) rotate(1deg); } 66% { transform: scale(0.96) translateY(0.3dvh) rotate(-1deg); } }
 
     .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1.5dvh 0 #c0392b; } .color-1 { background: linear-gradient(135deg, #0072ff, #00c6ff); box-shadow: 0 1.5dvh 0 #0056b3; } .color-2 { background: linear-gradient(135deg, #f9d423, #ff4e50); box-shadow: 0 1.5dvh 0 #b33200; } .color-3 { background: linear-gradient(135deg, #11998e, #38ef7d); box-shadow: 0 1.5dvh 0 #0e7a5c; } 
     .color-4 { background: linear-gradient(135deg, #8e44ad, #9b59b6); box-shadow: 0 1.5dvh 0 #732d91;} .color-5 { background: linear-gradient(135deg, #e67e22, #f39c12); box-shadow: 0 1.5dvh 0 #d35400;} .color-6 { background: linear-gradient(135deg, #2c3e50, #34495e); box-shadow: 0 1.5dvh 0 #1a252f;} .color-7 { background: linear-gradient(135deg, #e84393, #fd79a8); box-shadow: 0 1.5dvh 0 #b33971;}
 
     .ans-btn.active { opacity: 1; pointer-events: auto; animation: superPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-    @keyframes superPop { 0% {transform: scale(0) rotate(-10deg);} 80% {transform: scale(1.05) rotate(5deg);} 100% {transform: scale(1) rotate(0deg);} }
+    /* 🚨 降低基準縮放，絕對防止邊緣重疊 */
+    @keyframes superPop { 0% {transform: scale(0) rotate(-10deg);} 80% {transform: scale(1.02) rotate(5deg);} 100% {transform: scale(0.96) rotate(0deg);} }
 
-    body.fast-mode .ans-btn.active:not(.selected) { animation: feverPulse 0.3s infinite alternate; }
-    @keyframes feverPulse { from {transform: scale(1);} to {transform: scale(1.02); filter: brightness(1.2);} }
+    body.fast-mode .ans-btn.active:not(.selected) { animation: feverPulse 0.4s infinite alternate; }
+    @keyframes feverPulse { from {transform: scale(0.96);} to {transform: scale(1.02); filter: brightness(1.2);} }
     
     /* 修正重疊問題：選中時內縮並發光 */
-    .ans-btn.selected { transform: scale(0.95) translateY(1.5dvh) !important; box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 3dvh rgba(255,255,255,0.8), inset 0 0 2dvh rgba(0,0,0,0.5); color: rgba(255,255,255,1); border: 0.6dvh solid #fff; animation: none;}
+    .ans-btn.selected { transform: scale(0.9) translateY(1.5dvh) !important; box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 3dvh rgba(255,255,255,0.8), inset 0 0 2dvh rgba(0,0,0,0.5); color: rgba(255,255,255,1); border: 0.6dvh solid #fff; animation: none;}
     
     .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none;}
     @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
-    .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.85); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
+    .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.9); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
 
     /* 拉桿、連連看區塊彈性適配 */
     #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1 1 0; min-height: 0; background: rgba(255,255,255,0.9); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; box-sizing: border-box;}
@@ -130,8 +131,9 @@
 
     /* ✅ 讓 DragList 保有原始高度並且可滾動，防止極限擠壓 */
     #dragBox { display:none; flex-direction:column; align-items:center; flex:1 1 0; min-height: 0; width:100%; margin-bottom: 1dvh; overflow: hidden; box-sizing: border-box;}
-    #dragList { list-style:none; padding:0; width:95%; margin:0; display:flex; flex-direction:column; gap:1dvh; flex: 1 1 0; min-height: 0; overflow-y: auto;}
-    #dragList li { flex: 0 0 auto; min-height: fit-content; background: white; padding: 1.5dvh 2vw; border-radius: 2dvh; font-size: clamp(14px, 4vmin, 26px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: grab; border-left: 1.5dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box; overflow: hidden; word-break: break-word;}
+    #dragList { list-style:none; padding:0; width:95%; margin:0; display:flex; flex-direction:column; gap:1dvh; flex: 1 1 0; min-height: 0; overflow-y: auto; touch-action: pan-y;}
+    #dragList li { flex: 0 0 auto; min-height: fit-content; background: white; padding: 1.5dvh 4vw; border-radius: 2dvh; font-size: clamp(16px, 4.5vmin, 28px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: flex-start; gap: 3vw; border-left: 1.5dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box; overflow: hidden; word-break: break-word;}
+    .drag-handle { color: #bdc3c7; font-size: 4dvh; cursor: grab;}
     .sortable-ghost { opacity: 0.4; background: #f1c40f !important; }
 
     #submitBtn { display: none; width: 100%; background: linear-gradient(135deg, #a18cd1, #fbc2eb); box-shadow: 0 1dvh 0 #89609e; color: #fff; margin: 0 0 1dvh 0; flex-shrink: 0;}
@@ -458,7 +460,7 @@
           else if (data.type === 'WAGER_PHASE' || data.type === 'BOUNTY_PHASE' || data.type === 'AUCTION_PHASE') {
             if (isEliminated) return; 
             vibrate(100); 
-
+            
             document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting'); document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('gameScreen').style.border = 'none'; document.getElementById('gameScreen').style.boxShadow = 'none';
             document.getElementById('btnGrid').style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; document.getElementById('submitBtn').style.display = 'none'; document.getElementById('coopText').style.display = 'none';
             document.getElementById('wagerBox').style.display = 'flex';
@@ -497,6 +499,7 @@
             currentOptions = data.options || []; // 🚨 儲存當前選項文字，以供排序題使用
             clearTimeout(memoryTimeout);
             
+            // UI 初始設定
             document.getElementById('mobileTimerContainer').style.display = 'flex';
             document.getElementById('mobileTimerBar').className = 'striped-bar bar-normal';
             document.getElementById('mobileTimerBar').style.width = '100%';
@@ -516,7 +519,7 @@
             if (data.streak > 0) { sb.style.display='inline-block'; sb.innerText=`🔥 連對加成 x${(1 + data.streak*0.2).toFixed(1)}`; } else { sb.style.display='none'; }
 
             const skillBar = document.getElementById('skillBar');
-            // 🚨 修正：嚴格檢查 data.useSabotage，主機端沒開就絕對隱藏道具
+            // 🚨 修正：嚴格檢查 data.useSabotage，主機端有開才顯示道具
             if (data.useSabotage === true && data.score >= 200 && !data.isGhost) skillBar.style.display = 'flex'; else skillBar.style.display = 'none';
             
             if (data.isGhost) {
@@ -562,9 +565,20 @@
               btnGrid.style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'flex';
               const list = document.getElementById('dragList'); list.innerHTML = '';
               let initialOrder = Array.from({length: data.options.length}, (_, i) => i).sort(() => Math.random() - 0.5); 
-              initialOrder.forEach(idx => { list.innerHTML += `<li data-id="${idx}">↕️ ${data.options[idx]}</li>`; });
+              
+              // 🚨 修正：加入漢堡選單圖示提示拖曳，並增強排版
+              initialOrder.forEach(idx => { 
+                  list.innerHTML += `<li data-id="${idx}"><span class="drag-handle">☰</span> <span style="flex:1; text-align:left;">${data.options[idx]}</span></li>`; 
+              });
+              
               if(sortableInstance) sortableInstance.destroy();
-              sortableInstance = new Sortable(list, { animation: 150, ghostClass: 'sortable-ghost' });
+              // 🚨 修正：加入 150ms 的 delay 防止觸控滑動網頁時誤觸拖曳
+              sortableInstance = new Sortable(list, { 
+                  animation: 150, 
+                  ghostClass: 'sortable-ghost',
+                  delay: 150,
+                  delayOnTouchOnly: true
+              });
             }
             else {
               document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; btnGrid.style.display = 'grid';
