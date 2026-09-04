@@ -102,16 +102,22 @@
     .fog-anim { animation: fogClear var(--fog-time) linear forwards; }
     @keyframes fogClear { 0% { filter: blur(3vh); } 100% { filter: blur(0); } }
 
-    /* 連連看題型排版優化 */
-    #matchPromptsContainer { display: none; flex-wrap: wrap; justify-content: center; gap: 1.5vw; margin-top: 1vh; flex: 1; min-height: 0; align-content: center; overflow: hidden;}
-    .match-prompt-item { flex: 1 1 auto; max-width: 48%; min-width: 150px; background: white; border-radius: 2vh; padding: 2vh 2vw; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: clamp(24px, 4vh, 48px); font-weight: 900; position: relative; color: #333;}
-    .match-prompt-item img { max-width: 100%; max-height: 12vh; border-radius: 1vh; object-fit: contain;}
+    /* 連連看題型排版動態優化 */
+    #matchPromptsContainer { display: none; gap: 1.5vw; margin-top: 1vh; flex: 1 1 auto; min-height: 0; width: 100%; box-sizing: border-box; }
+    .match-prompt-item { width: 100%; height: 100%; background: white; border-radius: 2vh; padding: 2vh 2vw; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: clamp(20px, 4vh, 48px); font-weight: 900; position: relative; color: #333; box-sizing: border-box; }
+    .match-prompt-item img { max-width: 100%; max-height: 10vh; border-radius: 1vh; object-fit: contain;}
     .match-badge { position: absolute; top: -1.5vh; left: -1.5vh; background: #e74c3c; color: white; width: 6vh; height: 6vh; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3.5vh; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.3); z-index: 5;}
 
-    /* 網格選項自適應排版 */
-    #optionsContainer { display: grid; gap: 2vh 2vw; margin-top: 2vh; flex: 1; min-height: 0; width: 100%; box-sizing: border-box; }
-    .option { width: 100%; height: 100%; padding: 2vh 2vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .opt-text { word-break: break-word; line-height: 1.2; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); }
+    /* 網格選項自適應排版 (完全防溢出) */
+    #optionsContainer { display: grid; gap: 2vh 2vw; margin-top: 2vh; flex: 1 1 auto; min-height: 0; width: 100%; box-sizing: border-box; }
+    .option { width: 100%; height: 100%; padding: 2vh 2vw; font-size: clamp(18px, 4vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .opt-text { word-break: break-word; line-height: 1.2; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); max-height: 100%; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+
+    @keyframes superBounce {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
 
     .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1vh 0 #b32a18;} 
     .color-1 { background: linear-gradient(135deg, #0072ff, #00c6ff); box-shadow: 0 1vh 0 #0056b3;} 
@@ -319,7 +325,7 @@
     <div class="podium-place place-3" style="order: 3;"><div class="podium-score" id="score-3"></div><div class="podium-name" id="name-3"></div><div class="podium-block">3</div></div>
   </div>
 
-<!-- ✅ 雙軌 BGM 引擎 + 頒獎典禮專屬音樂 -->
+  <!-- ✅ 雙軌 BGM 引擎 + 頒獎典禮專屬音樂 -->
   <audio id="bgmLobbyObj" loop src="https://assets.mixkit.co/music/preview/mixkit-games-worldbeat-466.mp3"></audio>
   <audio id="bgmNormalObj" loop src="https://assets.mixkit.co/music/preview/mixkit-funny-quirky-comedy-track-71.mp3"></audio>
   <audio id="bgmFastObj" loop src="https://assets.mixkit.co/music/preview/mixkit-clapping-comedy-background-music-260.mp3"></audio>
@@ -330,7 +336,7 @@
     // 確保題庫被完整載入
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSChl0vRMFeEVPH4K5T8OC6R4EXWDsoqwJA68DQxQc58IH1zxaG-A1uly4lZT1jr6x8rJIMGPjJ0vRU/pub?output=csv"; 
 
-// ========== 柔和化音樂與真實 BGM 引擎 ==========
+    // ========== 柔和化音樂與真實 BGM 引擎 ==========
     let audioCtx;
     let bgmLobby;
     let bgmNormal;
@@ -343,38 +349,33 @@
     function initAudio() { 
       if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); } 
       
-      bgmLobby = document.getElementById('bgmLobbyObj'); // 🆕 綁定大廳音樂
+      bgmLobby = document.getElementById('bgmLobbyObj');
       bgmNormal = document.getElementById('bgmNormalObj');
       bgmFast = document.getElementById('bgmFastObj');
-      
-      // 安全綁定 host.html 專屬音樂
       if (document.getElementById('bgmRoundObj')) bgmRound = document.getElementById('bgmRoundObj');
       if (document.getElementById('bgmPodiumObj')) bgmPodium = document.getElementById('bgmPodiumObj');
       
-      if(bgmLobby) bgmLobby.volume = 0.3; // 🆕 設定音量
+      if(bgmLobby) bgmLobby.volume = 0.3; 
       if(bgmNormal) bgmNormal.volume = 0.3; 
       if(bgmFast) bgmFast.volume = 0.5;
       if(bgmRound) bgmRound.volume = 0.4;
       if(bgmPodium) bgmPodium.volume = 0.6;
-
-      // 預載解鎖
-      if(bgmLobby) bgmLobby.play().then(()=>bgmLobby.pause()).catch(e=>{});
-      if(bgmNormal) bgmNormal.play().then(()=>bgmNormal.pause()).catch(e=>{});
-      if(bgmFast) bgmFast.play().then(()=>bgmFast.pause()).catch(e=>{});
     }
 
-    // 🆕 專屬大廳音樂啟動函式
+    // ========== 🌟 雙軌 BGM 疊加音量閃避引擎 (Audio Ducking) ==========
     function startLobbyBGM() {
         stopBGM();
         if (!bgmLobby) return;
         bgmLobby.volume = 0.3;
         currentBGM = bgmLobby;
-        bgmLobby.play().catch(e => console.log("等待互動以播放大廳 BGM"));
+        let playPromise = bgmLobby.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(e => console.log("等待互動以播放大廳 BGM"));
+        }
     }
 
-    // ========== 🌟 雙軌 BGM 疊加音量閃避引擎 (Audio Ducking) ==========
     function startPartyBGM() {
-        if(currentBGM === bgmLobby) stopBGM(); // 🆕 確保從大廳進入答題時，先關閉大廳音樂
+        if(currentBGM === bgmLobby) stopBGM(); 
         
         if (!bgmNormal) return;
         if (bgmNormal.paused) {
@@ -405,7 +406,7 @@
     }
     
     function stopBGM() {
-        if(bgmLobby) { bgmLobby.pause(); bgmLobby.currentTime = 0; } // 🆕 新增停止大廳音樂
+        if(bgmLobby) { bgmLobby.pause(); bgmLobby.currentTime = 0; } 
         if(bgmNormal) { bgmNormal.pause(); bgmNormal.currentTime = 0; }
         if(bgmFast) { bgmFast.pause(); bgmFast.currentTime = 0; }
         if(typeof bgmRound !== 'undefined' && bgmRound) { bgmRound.pause(); bgmRound.currentTime = 0; }
@@ -1033,8 +1034,11 @@
       else {
         optBox.innerHTML = '';
         
+        // 【動態防破版】依照選項數量自動切換 Grid 排版
         let optCount = qData.options.length;
-        if (optCount <= 4) { optBox.style.gridTemplateColumns = "repeat(2, 1fr)"; }
+        if (optCount === 1) { optBox.style.gridTemplateColumns = "1fr"; }
+        else if (optCount === 2 || optCount === 4) { optBox.style.gridTemplateColumns = "repeat(2, 1fr)"; }
+        else if (optCount === 3) { optBox.style.gridTemplateColumns = "repeat(3, 1fr)"; }
         else if (optCount <= 6) { optBox.style.gridTemplateColumns = "repeat(3, 1fr)"; }
         else { optBox.style.gridTemplateColumns = "repeat(4, 1fr)"; }
 
