@@ -94,8 +94,8 @@
     
     .ans-btn { min-height: 0; height: 100%; width: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 1dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.9); position: relative; overflow: hidden; margin:0; padding: 2dvh; box-sizing: border-box;}
     
-    /* 字體使用 clamp，確保文字太長時自動縮小，不斷字不溢出 */
-    .opt-text { font-size: clamp(16px, 4dvh, 50px); line-height: 1.2; word-break: break-word; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); max-height: 100%; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+    /* ✅ 字體極限自適應縮放，利用 vmin 自動彈性調整，不再破版 */
+    .opt-text { font-size: clamp(16px, 4.5vmin, 50px); line-height: 1.2; word-break: break-word; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); max-height: 100%; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; }
 
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
     @keyframes floatOpt { 0%, 100% { transform: translateY(0px) rotate(0deg); } 33% { transform: translateY(-0.5dvh) rotate(1deg); } 66% { transform: translateY(0.3dvh) rotate(-1deg); } }
@@ -114,7 +114,7 @@
     
     .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none;}
     @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
-    .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.9); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
+    .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.85); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
 
     /* 拉桿、連連看區塊彈性適配 */
     #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1; min-height: 0; background: rgba(255,255,255,0.9); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; box-sizing: border-box;}
@@ -272,13 +272,13 @@
 
     // ========== 🌟 雙軌 BGM 疊加音量閃避引擎 (Audio Ducking) ==========
     function startPartyBGM() {
+        stopBGM(); 
         if (!bgmNormal) return;
-        if (bgmNormal.paused) {
-            bgmNormal.volume = 0.3;
-            let playPromise = bgmNormal.play();
-            if (playPromise !== undefined) {
-                playPromise.catch(e => console.log("等待互動以播放 BGM"));
-            }
+        bgmNormal.currentTime = 0;
+        bgmNormal.volume = 0.3;
+        let playPromise = bgmNormal.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(e => console.log("等待互動以播放 BGM"));
         }
     }
 
@@ -295,13 +295,13 @@
             }
         } else {
             bgmNormal.volume = 0.3; 
-            bgmFast.pause();
+            if(!bgmFast.paused) bgmFast.pause();
         }
     }
 
     function stopBGM() {
-        if(bgmNormal) { bgmNormal.pause(); bgmNormal.currentTime = 0; }
-        if(bgmFast) { bgmFast.pause(); bgmFast.currentTime = 0; }
+        if(bgmNormal && !bgmNormal.paused) { bgmNormal.pause(); bgmNormal.currentTime = 0; }
+        if(bgmFast && !bgmFast.paused) { bgmFast.pause(); bgmFast.currentTime = 0; }
     }
 
     function playTone(freq, type, duration, vol=0.1) { 
@@ -335,7 +335,7 @@
     
     let myAvatar = "";
     let isGlobalPaused = false; 
-    let isEliminated = false; // 💀 紀錄自己是否已出局
+    let isEliminated = false; 
 
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -347,7 +347,22 @@
 
     function joinGame() {
       if (!autoPin) return alert("請掃描大螢幕的 QR Code！");
-      initAudio(); vibrate(50); playClickSound(); 
+      initAudio(); 
+
+      // 🌟 強制解鎖手機音訊：利用使用者的點擊瞬間，靜音播放並暫停，合法取得瀏覽器音效權限！
+      let allAudios = [bgmNormal, bgmFast];
+      allAudios.forEach(bgm => {
+          if (bgm) {
+              bgm.muted = true;
+              bgm.play().then(() => {
+                  bgm.pause();
+                  bgm.currentTime = 0;
+                  bgm.muted = false;
+              }).catch(e => console.log("Audio unlock issue:", e));
+          }
+      });
+
+      vibrate(50); playClickSound(); 
       const myName = document.getElementById('playerName').value.trim();
       if (!myName) return alert('忘記輸入名字囉！');
 
@@ -502,7 +517,7 @@
           }
           else if (data.type === 'WAGER_PHASE' || data.type === 'BOUNTY_PHASE' || data.type === 'AUCTION_PHASE') {
             if (isEliminated) return; 
-            vibrate(100); overlayFastBGM(false);
+            vibrate(100); stopBGM(); 
             document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting'); document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('gameScreen').style.border = 'none'; document.getElementById('gameScreen').style.boxShadow = 'none';
             document.getElementById('btnGrid').style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; document.getElementById('submitBtn').style.display = 'none'; document.getElementById('coopText').style.display = 'none';
             document.getElementById('wagerBox').style.display = 'flex';
@@ -662,7 +677,7 @@
             }
           } 
           else if (data.type === 'DISABLE_BUTTONS') {
-            overlayFastBGM(false); 
+            stopBGM(); // 確保停火時關閉答題音樂
             document.getElementById('mobileTimerContainer').style.display = 'none';
             document.body.className = ''; document.body.style.background = myTeamGrad; clearTimeout(memoryTimeout);
             document.getElementById('gameStatus').innerText = "⏳ 停火！請抬頭看大螢幕";
@@ -754,7 +769,7 @@
       }
       
       vibrate(80); playCoinSound(); document.body.className = ''; document.body.style.background = myTeamGrad; 
-      document.getElementById('skillBar').style.display = 'none'; overlayFastBGM(false); document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting');
+      document.getElementById('skillBar').style.display = 'none'; stopBGM(); document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting');
       document.getElementById('gameScreen').style.border = 'none';
       document.getElementById('gameScreen').style.boxShadow = 'none';
 
