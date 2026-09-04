@@ -64,7 +64,7 @@
 
     /* ========== 巨大化中央倒數特效 (最後5秒) ========== */
     #giantTimerOverlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9000; pointer-events: none; font-size: 60dvh; font-weight: 900; background: linear-gradient(135deg, #ff0844, #ffb199, #fbc2eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent; filter: drop-shadow(0 0 5dvh rgba(255, 105, 180, 0.6)); animation: giantPartyPop 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; line-height: 1; margin:0; padding:0;}
-    @keyframes giantPartyPop { 0% { transform: translate(-50%, -50%) scale(0.5) rotate(-10deg); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.2) rotate(10deg); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.8) rotate(0deg); opacity: 0; } }
+    @keyframes giantPartyPop { 0% { transform: translate(-50%, -50%) scale(0.5) rotate(-10deg); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.1); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.8) rotate(0deg); opacity: 0; } }
     
     .panel-shake { animation: boxShake 0.3s infinite !important; }
     @keyframes boxShake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-1vw) rotate(-1deg); } 75% { transform: translateX(1vw) rotate(1deg); } }
@@ -90,12 +90,18 @@
     #traitorWarning { display: none; background: #000; color: #e74c3c; border: 0.5dvh solid #c0392b; padding: 1.5dvh; border-radius: 3dvh; font-size: clamp(16px, 2.5dvh, 22px); font-weight: 900; margin-bottom: 1dvh; box-shadow: 0 0 2dvh rgba(231, 76, 60, 0.8); animation: pulseWin 1s infinite; flex-shrink: 0;}
 
     /* ========== 網格彈性自適應佈局 (完全防溢出核心) ========== */
-    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5dvh; flex: 1 1 auto; min-height: 0; grid-auto-rows: minmax(0, 1fr); margin-bottom: 1dvh;}
+    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5dvh 2vw; flex: 1 1 auto; min-height: 0; grid-auto-rows: minmax(0, 1fr); margin-bottom: 1dvh; width: 100%;}
     
-    .ans-btn { min-height: 0; height: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 1dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.9); position: relative; overflow: hidden; margin:0; padding: 2dvh; box-sizing: border-box;}
+    .ans-btn { min-height: 0; height: 100%; width: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 1dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.9); position: relative; overflow: hidden; margin:0; padding: 2dvh; box-sizing: border-box;}
     
     /* 字體使用 clamp，確保文字太長時自動縮小，不斷字不溢出 */
-    .opt-text { font-size: clamp(16px, 4dvh, 50px); line-height: 1.2; word-break: break-word; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); }
+    .opt-text { font-size: clamp(16px, 4dvh, 50px); line-height: 1.2; word-break: break-word; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); max-height: 100%; overflow: hidden; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+
+    @keyframes superBounce {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
 
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
     @keyframes floatOpt { 0%, 100% { transform: translateY(0px) rotate(0deg); } 33% { transform: translateY(-0.5dvh) rotate(1deg); } 66% { transform: translateY(0.3dvh) rotate(-1deg); } }
@@ -114,7 +120,7 @@
     
     .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none;}
     @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
-    .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.85); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
+    .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.9); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
 
     /* 拉桿、連連看區塊彈性適配 */
     #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1; min-height: 0; background: rgba(255,255,255,0.9); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; box-sizing: border-box;}
@@ -130,7 +136,7 @@
 
     #dragBox { display:none; flex-direction:column; align-items:center; flex:1 1 auto; min-height: 0; width:100%; margin-bottom: 1.5dvh; overflow: hidden; box-sizing: border-box;}
     #dragList { list-style:none; padding:0; width:95%; margin:0; display:flex; flex-direction:column; gap:1.5dvh; flex: 1; min-height: 0; overflow-y: auto;}
-    #dragList li { flex: 0 0 auto; background: white; padding: 2dvh; border-radius: 2dvh; font-size: clamp(16px, 3.5dvh, 30px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: grab; border-left: 1.5dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box;}
+    #dragList li { flex: 0 0 auto; min-height: fit-content; background: white; padding: 2dvh; border-radius: 2dvh; font-size: clamp(16px, 3.5dvh, 30px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; cursor: grab; border-left: 1.5dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box;}
     .sortable-ghost { opacity: 0.4; background: #f1c40f !important; }
 
     #submitBtn { display: none; width: 100%; background: linear-gradient(135deg, #a18cd1, #fbc2eb); box-shadow: 0 1dvh 0 #89609e; color: #fff; margin: 0 0 1dvh 0; flex-shrink: 0;}
@@ -249,62 +255,36 @@
     </div>
   </div>
 
-  <audio id="bgmLobbyObj" loop src="https://assets.mixkit.co/music/preview/mixkit-games-worldbeat-466.mp3"></audio>
+  <!-- ✅ 隱藏的 Audio 標籤解決瀏覽器音效預載問題 (手機端只需這兩個) -->
   <audio id="bgmNormalObj" loop src="https://assets.mixkit.co/music/preview/mixkit-funny-quirky-comedy-track-71.mp3"></audio>
   <audio id="bgmFastObj" loop src="https://assets.mixkit.co/music/preview/mixkit-clapping-comedy-background-music-260.mp3"></audio>
 
   <script>
     // ========== 手機端音效與真實 BGM 引擎 ==========
     let audioCtx;
-    let bgmLobby;
     let bgmNormal; 
     let bgmFast; 
 
-    let currentBGM = null;
-
     function initAudio() { 
-      if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); } 
+      if(!audioCtx) { 
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+          if(audioCtx.state === 'suspended') audioCtx.resume(); 
+      } 
       
-      bgmLobby = document.getElementById('bgmLobbyObj'); // 🆕 綁定大廳音樂
       bgmNormal = document.getElementById('bgmNormalObj');
       bgmFast = document.getElementById('bgmFastObj');
-      
-      // 安全綁定 host.html 專屬音樂
-      if (document.getElementById('bgmRoundObj')) bgmRound = document.getElementById('bgmRoundObj');
-      if (document.getElementById('bgmPodiumObj')) bgmPodium = document.getElementById('bgmPodiumObj');
-      
-      if(bgmLobby) bgmLobby.volume = 0.3; // 🆕 設定音量
       if(bgmNormal) bgmNormal.volume = 0.3; 
       if(bgmFast) bgmFast.volume = 0.5;
-      if(bgmRound) bgmRound.volume = 0.4;
-      if(bgmPodium) bgmPodium.volume = 0.6;
-
-      // 預載解鎖
-      if(bgmLobby) bgmLobby.play().then(()=>bgmLobby.pause()).catch(e=>{});
-      if(bgmNormal) bgmNormal.play().then(()=>bgmNormal.pause()).catch(e=>{});
-      if(bgmFast) bgmFast.play().then(()=>bgmFast.pause()).catch(e=>{});
-    }
-
-    // 🆕 專屬大廳音樂啟動函式
-    function startLobbyBGM() {
-        stopBGM();
-        if (!bgmLobby) return;
-        bgmLobby.volume = 0.3;
-        currentBGM = bgmLobby;
-        bgmLobby.play().catch(e => console.log("等待互動以播放大廳 BGM"));
     }
 
     // ========== 🌟 雙軌 BGM 疊加音量閃避引擎 (Audio Ducking) ==========
     function startPartyBGM() {
-        if(currentBGM === bgmLobby) stopBGM(); // 🆕 確保從大廳進入答題時，先關閉大廳音樂
-        
         if (!bgmNormal) return;
         if (bgmNormal.paused) {
             bgmNormal.volume = 0.3;
-            currentBGM = bgmNormal;
             let playPromise = bgmNormal.play();
             if (playPromise !== undefined) {
-                playPromise.catch(e => console.log("等待互動以播放答題 BGM"));
+                playPromise.catch(e => console.log("等待互動以播放 BGM"));
             }
         }
     }
@@ -325,14 +305,10 @@
             bgmFast.pause();
         }
     }
-    
+
     function stopBGM() {
-        if(bgmLobby) { bgmLobby.pause(); bgmLobby.currentTime = 0; } // 🆕 新增停止大廳音樂
         if(bgmNormal) { bgmNormal.pause(); bgmNormal.currentTime = 0; }
         if(bgmFast) { bgmFast.pause(); bgmFast.currentTime = 0; }
-        if(typeof bgmRound !== 'undefined' && bgmRound) { bgmRound.pause(); bgmRound.currentTime = 0; }
-        if(typeof bgmPodium !== 'undefined' && bgmPodium) { bgmPodium.pause(); bgmPodium.currentTime = 0; }
-        currentBGM = null;
     }
 
     function playTone(freq, type, duration, vol=0.1) { 
@@ -396,8 +372,6 @@
           vibrate([50, 100, 50]); 
           hostConnection.send({ type: 'JOIN', name: myName });
           hostConnection.send({ type: 'SYNC_AVATAR', avatar: myAvatar });
-          
-          startPartyBGM(); // 成功加入遊戲後啟動全域常駐 BGM
         });
 
         hostConnection.on('data', (data) => {
@@ -405,7 +379,7 @@
           if (data.type === 'ELIMINATED') {
             isEliminated = true;
             document.getElementById('eliminatedOverlay').style.display = 'flex';
-            overlayFastBGM(false);
+            stopBGM();
             vibrate([500, 200, 500]); 
           }
           else if (data.type === 'TIMER_SYNC') {
@@ -458,8 +432,6 @@
               document.getElementById('gameScreen').classList.remove('panel-shake');
               document.body.classList.remove('panic-lighting');
               giantTimerEl.style.display = 'none';
-              if (data.timeLeft > 5) overlayFastBGM(false); // 確保 5 秒外關閉疊加
-              
               if ((data.timerStyle === 0 || data.timerStyle === 2) && progress > 50 && data.timeLeft > 5) { 
                   timeBar.className = 'striped-bar bar-warning'; 
               }
@@ -581,7 +553,7 @@
             startPartyBGM(); // 確保常駐 BGM 正在播放
             overlayFastBGM(data.isFast); // 根據是否為極速題疊加 BGM
             
-            // UI 初始設定，等待第一次 TIMER_SYNC 更新
+            // UI 初始設定
             document.getElementById('mobileTimerContainer').style.display = 'flex';
             document.getElementById('mobileTimerBar').className = 'striped-bar bar-normal';
             document.getElementById('mobileTimerBar').style.width = '100%';
@@ -665,7 +637,7 @@
               let shuffled = (data.qType === 'match_click') ? Array.from({length: data.options.length}, (_, i) => i).sort(() => Math.random() - 0.5) : Array.from({length: data.options.length}, (_, i) => i);
               
               let optCount = data.options.length;
-              if (optCount <= 8) { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; }
+              if (optCount <= 4) { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; }
               else { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; } 
 
               data.options.forEach((optText, i) => {
