@@ -110,8 +110,9 @@
 
     /* 網格選項自適應排版 */
     #optionsContainer { display: grid; gap: 2vh 2vw; margin-top: 2vh; flex: 1; min-height: 0; width: 100%; box-sizing: border-box; }
-    .option { width: 100%; height: 100%; padding: 2vh 2vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    .opt-text { word-break: break-word; line-height: 1.2; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); }
+    .option { width: 100%; height: 100%; padding: 1.5vh 2vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    /* ✅ 字體極限自適應縮放，利用 vw/vh 自動彈性調整，不再破版 */
+    .opt-text { font-size: clamp(20px, 4vw, 70px); font-weight: 900; line-height: 1.2; word-break: break-word; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); }
 
     .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1vh 0 #b32a18;} 
     .color-1 { background: linear-gradient(135deg, #0072ff, #00c6ff); box-shadow: 0 1vh 0 #0056b3;} 
@@ -129,7 +130,7 @@
     .option.dimmed { opacity: 0.15; transform: scale(0.85); filter: grayscale(100%); animation: none !important; box-shadow: none !important; z-index: 1;}
     .option.highlight { transform: scale(1.02) !important; box-shadow: 0 0 5vh rgba(255, 215, 0, 1), inset 0 0 2vh rgba(255,255,255,0.8) !important; border: 0.8vh solid #FFD700; z-index: 20; animation: none !important; background: linear-gradient(135deg, #f1c40f, #f39c12) !important; color: #000; text-shadow: 0 0.2vh 0.5vh rgba(255,255,255,0.8); }
 
-    #sliderResult { display: none; font-size: clamp(30px, 6vh, 80px); font-weight: 900; color: #2ecc71; margin-top: 2vh; background: rgba(255,255,255,0.9); padding: 1vh 3vw; border-radius: 2vh; flex-shrink: 0;}
+    #sliderResult { display: none; margin-top: 2vh; background: rgba(255,255,255,0.9); padding: 2vh 3vw; border-radius: 2vh; flex-shrink: 0;}
 
     /* ========== 答題即時進場區 (防溢出設計) ========== */
     #answeredContainer { margin-top: 1.5vh; padding-top: 1.5vh; border-top: 0.3vh dashed rgba(0,0,0,0.1); flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; width: 100%;}
@@ -346,7 +347,6 @@
       bgmLobby = document.getElementById('bgmLobbyObj'); 
       bgmNormal = document.getElementById('bgmNormalObj');
       bgmFast = document.getElementById('bgmFastObj');
-      
       if (document.getElementById('bgmRoundObj')) bgmRound = document.getElementById('bgmRoundObj');
       if (document.getElementById('bgmPodiumObj')) bgmPodium = document.getElementById('bgmPodiumObj');
       
@@ -355,28 +355,19 @@
       if(bgmFast) bgmFast.volume = 0.5;
       if(bgmRound) bgmRound.volume = 0.4;
       if(bgmPodium) bgmPodium.volume = 0.6;
-
-      // 預載解鎖
-      if(bgmLobby) bgmLobby.play().then(()=>bgmLobby.pause()).catch(e=>{});
-      if(bgmNormal) bgmNormal.play().then(()=>bgmNormal.pause()).catch(e=>{});
-      if(bgmFast) bgmFast.play().then(()=>bgmFast.pause()).catch(e=>{});
     }
 
-    // 🆕 專屬大廳音樂啟動函式
+    // ========== 🌟 雙軌 BGM 疊加音量閃避引擎 (Audio Ducking) ==========
     function startLobbyBGM() {
         stopBGM();
         if (!bgmLobby) return;
         bgmLobby.volume = 0.3;
         currentBGM = bgmLobby;
-        let playPromise = bgmLobby.play();
-        if (playPromise !== undefined) {
-            playPromise.catch(e => console.log("等待互動以播放大廳 BGM"));
-        }
+        bgmLobby.play().catch(e => console.log("等待互動以播放大廳 BGM"));
     }
 
-    // ========== 🌟 雙軌 BGM 疊加音量閃避引擎 (Audio Ducking) ==========
     function startPartyBGM() {
-        if(currentBGM === bgmLobby) stopBGM(); 
+        stopBGM(); // 確保進入答題時，先關閉大廳等其他無關音樂
         
         if (!bgmNormal) return;
         if (bgmNormal.paused) {
@@ -402,17 +393,27 @@
             }
         } else {
             bgmNormal.volume = 0.3; // 恢復正常音量
-            bgmFast.pause();
+            if(!bgmFast.paused) bgmFast.pause();
         }
     }
     
     function stopBGM() {
-        if(bgmLobby) { bgmLobby.pause(); bgmLobby.currentTime = 0; } 
-        if(bgmNormal) { bgmNormal.pause(); bgmNormal.currentTime = 0; }
-        if(bgmFast) { bgmFast.pause(); bgmFast.currentTime = 0; }
-        if(typeof bgmRound !== 'undefined' && bgmRound) { bgmRound.pause(); bgmRound.currentTime = 0; }
-        if(typeof bgmPodium !== 'undefined' && bgmPodium) { bgmPodium.pause(); bgmPodium.currentTime = 0; }
+        if(bgmLobby && !bgmLobby.paused) { bgmLobby.pause(); bgmLobby.currentTime = 0; } 
+        if(bgmNormal && !bgmNormal.paused) { bgmNormal.pause(); bgmNormal.currentTime = 0; }
+        if(bgmFast && !bgmFast.paused) { bgmFast.pause(); bgmFast.currentTime = 0; }
+        if(typeof bgmRound !== 'undefined' && bgmRound && !bgmRound.paused) { bgmRound.pause(); bgmRound.currentTime = 0; }
+        if(typeof bgmPodium !== 'undefined' && bgmPodium && !bgmPodium.paused) { bgmPodium.pause(); bgmPodium.currentTime = 0; }
         currentBGM = null;
+    }
+
+    function playRoundBGM() {
+        stopBGM();
+        if(bgmRound) bgmRound.play().catch(e=>{});
+    }
+
+    function playPodiumBGM() {
+        stopBGM();
+        if(bgmPodium) bgmPodium.play().catch(e=>{});
     }
 
     function playTone(freq, type, duration, vol=0.1) { 
@@ -436,14 +437,12 @@
     function playWin() { initAudio(); playTone(523, 'triangle', 0.1); setTimeout(() => playTone(659, 'triangle', 0.1), 100); setTimeout(() => playTone(783, 'triangle', 0.1), 200); setTimeout(() => playTone(1046, 'triangle', 0.6), 300); }
     function playFirstBlood() { initAudio(); playTone(880, 'triangle', 0.1); setTimeout(() => playTone(1108, 'triangle', 0.1), 100); setTimeout(() => playTone(1318, 'triangle', 0.4), 200); } 
     
-    // 🌟 動態進場專屬泡泡音效
     function playPopSound() { 
       initAudio(); 
       const randomFreq = 800 + Math.random() * 400; 
       playTone(randomFreq, 'sine', 0.05, 0.08); 
     }
 
-    // ========== 全域絕對暫停機制 ==========
     let isGlobalPaused = false;
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
@@ -467,7 +466,7 @@
     let currentRoundData = []; let groupTimerInterval;
     let currentScrambledCorrect = []; 
     let highestBidder = null; let highestBid = 0;
-    let currentMatchups = []; // 錦標賽隊伍對戰組合
+    let currentMatchups = []; 
     
     const shapeList = ['▲','◆','●','■','★','✚','✦','✖','▼','⬣'];
 
@@ -520,7 +519,22 @@
 
     function initLobby() {
       initAudio();
-      startLobbyBGM(); // 開啟常駐背景音
+      
+      // 強制瞬間解鎖所有主機端音軌
+      let allAudios = [bgmNormal, bgmFast, bgmRound, bgmPodium];
+      allAudios.forEach(bgm => {
+          if (bgm) {
+              bgm.muted = true;
+              bgm.play().then(() => {
+                  bgm.pause();
+                  bgm.currentTime = 0;
+                  bgm.muted = false;
+              }).catch(e => console.log("Audio unlock blocked:", e));
+          }
+      });
+
+      // 些微延遲後再播放大廳音樂，確保解鎖不撞車
+      setTimeout(() => { startLobbyBGM(); }, 200); 
 
       let shuffleInput = parseInt(document.getElementById('cfgShuffle').value);
       gameConfig = {
@@ -977,7 +991,6 @@
       playStart(); overlayFastBGM(isFastMode); 
       document.getElementById('questionBox').style.display = 'flex'; document.getElementById('qText').innerText = qData.q;
       
-      // 清空即時作答區
       let answeredGrid = document.getElementById('answeredGrid');
       let answeredCount = document.getElementById('answeredCount');
       if(answeredGrid) answeredGrid.innerHTML = '';
@@ -1042,7 +1055,6 @@
       else {
         optBox.innerHTML = '';
         
-        // 【動態防破版】依照選項數量自動切換 Grid 排版
         let optCount = qData.options.length;
         if (optCount <= 4) { optBox.style.gridTemplateColumns = "repeat(2, 1fr)"; }
         else if (optCount <= 6) { optBox.style.gridTemplateColumns = "repeat(3, 1fr)"; }
@@ -1268,10 +1280,26 @@
       if (qType === 'slider' && gameConfig.useAdvType) {
         document.getElementById('sliderResult').innerText = `精準正解是：${correctAns[0]}！`;
       } 
-      else if ((qType === 'match_drag' || qType === 'match_click') && gameConfig.useAdvType) {
+      // ✅ 新增：如果是「排序題」，公佈時直接顯示正確的排序文字，不再只是反白選項
+      else if ((qType === 'order' || qType === 'match_drag' || qType === 'match_click') && gameConfig.useAdvType) {
         let opts = questions[currentQIndex].options;
-        let correctStr = currentScrambledCorrect.map(i => opts[i]).join(' ➡️ ');
-        document.getElementById('matchPromptsContainer').innerHTML = `<h3 style='width:100%; color:#2ecc71; font-size:4vh;'>正解順序：<br>${correctStr}</h3>`;
+        let correctStr = "";
+        
+        if (qType === 'order') {
+            correctStr = qData.correct.map(i => opts[i]).join(' ➡️ ');
+            document.getElementById('sliderResult').style.display = 'block';
+            document.getElementById('sliderResult').innerHTML = `<span style="color:#2ecc71; font-size:clamp(20px, 4vh, 40px); font-weight:900;">正解順序：<br>${correctStr}</span>`;
+            
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt) => {
+              opt.classList.remove('floating-opt');
+              opt.style.animation = 'none'; 
+              opt.classList.add('dimmed');
+            });
+        } else {
+            correctStr = currentScrambledCorrect.map(i => opts[i]).join(' ➡️ ');
+            document.getElementById('matchPromptsContainer').innerHTML = `<h3 style='width:100%; color:#2ecc71; font-size:4vh;'>正解順序：<br>${correctStr}</h3>`;
+        }
       } 
       else {
         const options = document.querySelectorAll('.option');
@@ -1352,8 +1380,7 @@
                 document.getElementById('leaderboard').style.display = 'flex'; 
                 renderLeaderboard(); 
                 document.getElementById('nextBtnLeader').style.display = 'inline-block'; 
-                stopBGM();
-                if(bgmRound) bgmRound.play().catch(e=>{}); // ✅ 播放小結算排行榜音樂
+                playRoundBGM(); // ✅ 確保切換畫面時精準播放小結算配樂
             }
         }, delay);
 
@@ -1361,8 +1388,7 @@
     }
 
     function showRoundRanking(mode) {
-      stopBGM();
-      if(bgmRound) bgmRound.play().catch(e=>{}); // ✅ 播放小結算排行榜音樂
+      playRoundBGM(); // ✅ 確保切換畫面時精準播放小結算配樂
 
       document.getElementById('roundRanking').style.display = 'flex';
       const top3Container = document.getElementById('roundTop3'); top3Container.innerHTML = '';
@@ -1405,8 +1431,7 @@
       renderLeaderboard(); 
       document.getElementById('nextBtnLeader').style.display = 'inline-block'; 
       if (bgmRound && bgmRound.paused) {
-         stopBGM();
-         bgmRound.play().catch(e=>{});
+         playRoundBGM();
       }
     }
 
@@ -1449,8 +1474,7 @@
     }
 
     function showTeamPodium() {
-      stopBGM();
-      if(bgmPodium) bgmPodium.play().catch(e=>{}); // ✅ 播放總冠軍史詩音樂
+      playPodiumBGM(); // ✅ 播放總冠軍史詩音樂
       playWin(); 
       document.body.className = "bg-podium";
       document.getElementById('questionBox').style.display = 'none'; document.getElementById('leaderboard').style.display = 'none';
