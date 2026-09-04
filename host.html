@@ -111,7 +111,6 @@
     /* 網格選項自適應排版 */
     #optionsContainer { display: grid; gap: 2vh 2vw; margin-top: 2vh; flex: 1; min-height: 0; width: 100%; box-sizing: border-box; }
     .option { width: 100%; height: 100%; padding: 1.5vh 2vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    /* ✅ 字體極限自適應縮放，利用 vw/vh 自動彈性調整，不再破版 */
     .opt-text { font-size: clamp(20px, 4vw, 70px); font-weight: 900; line-height: 1.2; word-break: break-word; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); }
 
     .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1vh 0 #b32a18;} 
@@ -251,7 +250,7 @@
       <div style="flex:1; background: rgba(241, 196, 15, 0.2); border-left: 0.5vw solid #f1c40f; padding: 1.5vh; border-radius: 2vh; display:flex; flex-direction:column; justify-content:center;">
         <h3 style="margin:0 0 1vh 0; color:#f39c12; font-size: 3vh;">🏆 殘酷淘汰模式</h3>
         <label style="display:flex; align-items:center; margin: 1vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;">
-            <input type="checkbox" id="cfgTournament" style="width:3vh; height:3vh; margin-right:1vw;"> 啟 tilt 淘汰制 (大逃殺/對戰)
+            <input type="checkbox" id="cfgTournament" style="width:3vh; height:3vh; margin-right:1vw;"> 啟動淘汰制 (大逃殺/對戰)
         </label>
         <div class="setup-row" style="background:transparent; padding:0;">
             <span>每幾題結算淘汰：</span>
@@ -1300,6 +1299,8 @@
 
       // 🚨 修補致命錯誤：這行能避免 qData 遺失，保證23題順暢執行
       const qData = questions[currentQIndex]; 
+      if (!qData) return; // 絕對防呆盾牌
+      
       const currentMode = qData.mode; 
       const qType = qData.type; 
       let correctAns = qData.correct;
@@ -1369,7 +1370,8 @@
             }
 
             if(currentMode === 'bounty' && conn.bountyTarget != null) {
-              let wagerAmt = conn.wager || 500; let targetFailed = true;
+              let wagerAmt = parseInt(conn.wager) || 0; // 🚨 安全修正：防止 0 分被判定為 500 分
+              let targetFailed = true;
               if(gameConfig.isTeamMode) { connections.forEach(tc => { if(playerStats[tc.playerName]?.teamId == conn.bountyTarget && tc.tempResult?.isCorrect) targetFailed = false; }); } 
               else { let tc = connections.find(c => c.playerName == conn.bountyTarget); if (tc && tc.tempResult && tc.tempResult.isCorrect) targetFailed = false; }
               if(targetFailed) { stats.score += wagerAmt; conn.send({type:'SKILL_SUCCESS', msg:`賞金獵取成功！+${wagerAmt}分`}); }
@@ -1471,7 +1473,9 @@
       document.getElementById('leaderboard').style.display = 'flex'; 
       renderLeaderboard(); 
       document.getElementById('nextBtnLeader').style.display = 'inline-block'; 
-      playRoundBGM(); // 確保維持播放小結算配樂
+      if (bgmRound && bgmRound.paused) {
+         playRoundBGM();
+      }
     }
 
     function renderLeaderboard() {
