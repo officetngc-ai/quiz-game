@@ -327,6 +327,7 @@
   <audio id="bgmPodiumObj" loop src="https://assets.mixkit.co/music/preview/mixkit-winning-elevation-111.mp3"></audio>
 
   <script>
+    // 確保題庫被完整載入
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSChl0vRMFeEVPH4K5T8OC6R4EXWDsoqwJA68DQxQc58IH1zxaG-A1uly4lZT1jr6x8rJIMGPjJ0vRU/pub?output=csv"; 
 
     // ========== 柔和化音樂與真實 BGM 引擎 ==========
@@ -367,7 +368,10 @@
         if (!bgmLobby) return;
         bgmLobby.volume = 0.3;
         currentBGM = bgmLobby;
-        bgmLobby.play().catch(e => console.log("等待互動以播放大廳 BGM"));
+        let playPromise = bgmLobby.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(e => console.log("等待互動以播放大廳 BGM"));
+        }
     }
 
     // ========== 🌟 雙軌 BGM 疊加音量閃避引擎 (Audio Ducking) ==========
@@ -572,6 +576,12 @@
             playJoin(); conn.playerName = data.name;
             if(!playerStats[data.name]) playerStats[data.name] = { teamId: -1, score: 0, correctCount: 0, fastWins: 0, fastScore: 0, streak: 0, hasShield: false, isGhost: false, isTraitor: false, avatar: '👤', isEliminated: false };
             
+            // 💀 防錯：如果淘汰玩家斷線重連，瞬間把他打回原形
+            if (playerStats[data.name].isEliminated) {
+                 conn.send({ type: 'ELIMINATED' });
+                 return;
+            }
+
             if (gameConfig.isTeamMode) {
               conn.send({ type: 'TEAM_SELECTION_START', teams: teamsData, max: gameConfig.maxPerTeam, css: document.getElementById('dynamicTeamStyles').innerHTML, cfg: gameConfig });
             } else {
@@ -682,7 +692,7 @@
     function autoAssignAndStart() {
       clearInterval(groupTimerInterval);
       if (gameConfig.isTeamMode) {
-        let unassignedConns = connections.filter(c => c.playerName && playerStats[c.playerName].teamId === -1);
+        let unassignedConns = connections.filter(c => c.playerName && playerStats[c.playerName].teamId === -1 && !playerStats[c.playerName].isEliminated);
         unassignedConns.sort(() => Math.random() - 0.5);
         unassignedConns.forEach(conn => {
           let availableTeams = teamsData.filter(t => t.players.length < gameConfig.maxPerTeam);
@@ -967,6 +977,7 @@
       playStart(); overlayFastBGM(isFastMode); 
       document.getElementById('questionBox').style.display = 'flex'; document.getElementById('qText').innerText = qData.q;
       
+      // 清空即時作答區
       let answeredGrid = document.getElementById('answeredGrid');
       let answeredCount = document.getElementById('answeredCount');
       if(answeredGrid) answeredGrid.innerHTML = '';
@@ -1031,6 +1042,7 @@
       else {
         optBox.innerHTML = '';
         
+        // 【動態防破版】依照選項數量自動切換 Grid 排版
         let optCount = qData.options.length;
         if (optCount <= 4) { optBox.style.gridTemplateColumns = "repeat(2, 1fr)"; }
         else if (optCount <= 6) { optBox.style.gridTemplateColumns = "repeat(3, 1fr)"; }
