@@ -115,7 +115,7 @@
     
     .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none;}
     @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
-    .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.9); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
+    .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.85); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
 
     /* 拉桿、連連看區塊彈性適配 */
     #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1 1 0; min-height: 0; background: rgba(255,255,255,0.9); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; box-sizing: border-box;}
@@ -307,10 +307,13 @@
 
     function joinGame() {
       if (!autoPin) return alert("請掃描大螢幕的 QR Code！");
-      initAudio(); 
-      vibrate(50); playClickSound(); 
+      initAudio(); vibrate(50); playClickSound(); 
       const myName = document.getElementById('playerName').value.trim();
       if (!myName) return alert('忘記輸入名字囉！');
+
+      // 🌟 強制瞬間解鎖手機音訊 (解決手機無聲音問題)
+      if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      if(audioCtx.state === 'suspended') audioCtx.resume();
 
       myAvatar = avatarsList[Math.floor(Math.random() * avatarsList.length)];
       document.getElementById('myAvatarBadge').innerText = myAvatar;
@@ -499,7 +502,6 @@
             currentOptions = data.options || []; // 🚨 儲存當前選項文字，以供排序題使用
             clearTimeout(memoryTimeout);
             
-            // UI 初始設定
             document.getElementById('mobileTimerContainer').style.display = 'flex';
             document.getElementById('mobileTimerBar').className = 'striped-bar bar-normal';
             document.getElementById('mobileTimerBar').style.width = '100%';
@@ -519,7 +521,7 @@
             if (data.streak > 0) { sb.style.display='inline-block'; sb.innerText=`🔥 連對加成 x${(1 + data.streak*0.2).toFixed(1)}`; } else { sb.style.display='none'; }
 
             const skillBar = document.getElementById('skillBar');
-            // 🚨 修正：嚴格檢查 data.useSabotage，主機端有開才顯示道具
+            // 🚨 修正：嚴格檢查 data.useSabotage，主機端沒開就絕對隱藏道具
             if (data.useSabotage === true && data.score >= 200 && !data.isGhost) skillBar.style.display = 'flex'; else skillBar.style.display = 'none';
             
             if (data.isGhost) {
@@ -565,20 +567,9 @@
               btnGrid.style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'flex';
               const list = document.getElementById('dragList'); list.innerHTML = '';
               let initialOrder = Array.from({length: data.options.length}, (_, i) => i).sort(() => Math.random() - 0.5); 
-              
-              // 🚨 修正：加入漢堡選單圖示提示拖曳，並增強排版
-              initialOrder.forEach(idx => { 
-                  list.innerHTML += `<li data-id="${idx}"><span class="drag-handle">☰</span> <span style="flex:1; text-align:left;">${data.options[idx]}</span></li>`; 
-              });
-              
+              initialOrder.forEach(idx => { list.innerHTML += `<li data-id="${idx}"><span class="drag-handle">☰</span> <span style="flex:1; text-align:left;">${data.options[idx]}</span></li>`; });
               if(sortableInstance) sortableInstance.destroy();
-              // 🚨 修正：加入 150ms 的 delay 防止觸控滑動網頁時誤觸拖曳
-              sortableInstance = new Sortable(list, { 
-                  animation: 150, 
-                  ghostClass: 'sortable-ghost',
-                  delay: 150,
-                  delayOnTouchOnly: true
-              });
+              sortableInstance = new Sortable(list, { animation: 150, ghostClass: 'sortable-ghost', delay: 150, delayOnTouchOnly: true });
             }
             else {
               document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; btnGrid.style.display = 'grid';
@@ -603,13 +594,13 @@
               });
 
               document.querySelectorAll('.ans-btn').forEach((b, i) => { 
-                if (data.qMode === 'chameleon' && gameCfg.useExtreme) b.classList.add('chameleon-fx');
-                if (data.qMode === 'auction' && gameCfg.useExtreme && !data.isAuctionWinner) b.classList.add('locked'); 
+                if (data.qMode === 'chameleon' && gameConfig.useExtreme) b.classList.add('chameleon-fx');
+                if (data.qMode === 'auction' && gameConfig.useExtreme && !data.isAuctionWinner) b.classList.add('locked'); 
                 
                 setTimeout(() => { if(!b.classList.contains('locked')) b.classList.add('floating-opt'); }, 600 + i*100);
               });
 
-              if (data.qMode === 'memory' && gameCfg.useExtreme) {
+              if (data.qMode === 'memory' && gameConfig.useExtreme) {
                   memoryTimeout = setTimeout(() => {
                       document.querySelectorAll('.opt-text').forEach(t => t.classList.add('memory-hide'));
                   }, 3000);
