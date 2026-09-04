@@ -9,6 +9,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap" rel="stylesheet">
   <style id="dynamicTeamStyles"></style>
   <style>
+    /* ========== 全域無卷軸絕對壓縮配置 (防破版核心) ========== */
     body { font-family: 'Nunito', sans-serif; text-align: center; background: #e0e5ec; margin:0; padding:0; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; transition: all 0.5s ease; box-sizing: border-box;}
     
     .fast-mode { background: repeating-linear-gradient(45deg, #f1c40f, #f1c40f 5dvh, #e67e22 5dvh, #e67e22 10dvh); background-size: 200% 200%; animation: feverRush 0.8s linear infinite; box-shadow: inset 0 0 5dvh rgba(211,84,0,0.8); }
@@ -20,6 +21,7 @@
     @keyframes chameleonBlur { 0% { filter: blur(0); opacity: 1; } 100% { filter: blur(1dvh); opacity: 0.2; } }
     .memory-hide { color: transparent !important; text-shadow: 0 0 2dvh rgba(255,255,255,0.8); pointer-events: none;}
 
+    /* ========== 🚨 全域派對狂歡光影 (手機端最後5秒) ========== */
     body.panic-lighting::after {
         content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
         box-shadow: inset 0 0 10dvh 3dvh rgba(255, 105, 180, 0.5); 
@@ -31,11 +33,13 @@
         100% { box-shadow: inset 0 0 15dvh 5dvh rgba(255, 255, 0, 0.4); } 
     }
 
+    /* ========== 全域暫停與淘汰畫面 ========== */
     #playerPauseOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 99999; flex-direction: column; justify-content: center; align-items: center; color: white; }
     .pause-icon-mobile { font-size: 15dvh; animation: superPop 1s infinite alternate; }
 
     #eliminatedOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.95); z-index: 100000; flex-direction: column; justify-content: center; align-items: center; color: white; backdrop-filter: blur(10px); }
 
+    /* ========== 登入畫面綜藝感 ========== */
     #loginScreen { padding: 4dvh 5vw; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; position: relative;}
     #loginScreen h2 { font-size: clamp(24px, 5dvh, 42px); margin-bottom: 2dvh; text-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.3); animation: floatBtn 3s infinite alternate; z-index: 10;}
     .floating-emoji { position: absolute; font-size: 8dvh; opacity: 0.2; animation: floatAround 10s infinite linear; z-index: 1;}
@@ -45,8 +49,10 @@
     .action-btn { padding: 2.5dvh; font-size: clamp(20px, 4dvh, 32px); width: 90%; margin-top: 2dvh; border-radius: 3dvh; border: none; font-weight: 900; cursor: pointer; transition: 0.1s; background: #FFD700; color: #d35400; box-shadow: 0 1dvh 0 #e67e22, 0 1.5dvh 2dvh rgba(0,0,0,0.2); font-family: inherit; z-index: 10; box-sizing: border-box; flex-shrink: 0;}
     .action-btn:active { transform: translateY(1dvh); box-shadow: 0 0 0 #e67e22; } 
 
+    /* ========== 玩家頂部身分牌 ========== */
     #playerTopBar { display: none; background: rgba(255,255,255,0.95); padding: 1.5dvh 4vw; border-radius: 4dvh; margin: 1dvh auto 0.5dvh auto; font-weight: 900; font-size: clamp(18px, 3dvh, 24px); color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.15); align-items: center; justify-content: center; gap: 2vw; max-width: 90%; flex-shrink: 0; animation: superPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-sizing: border-box;}
 
+    /* ========== 顯眼的底部進度條計時器 ========== */
     #mobileTimerContainer { display: none; width: 100%; align-items: center; gap: 2vw; background: rgba(0,0,0,0.1); padding: 1dvh; border-radius: 3dvh; box-sizing: border-box; flex-shrink: 0; margin-bottom: 1.5dvh;}
     .timer-bar-wrap { flex: 1; height: 2.5dvh; background: rgba(255,255,255,0.8); border-radius: 1.5dvh; overflow: hidden; box-shadow: inset 0 0.5dvh 1dvh rgba(0,0,0,0.2); }
     .striped-bar { height: 100%; width: 100%; transition: width 1s linear, background 0.5s ease; background-size: 200% 200%; }
@@ -56,6 +62,7 @@
     @keyframes stripemove { 0% { background-position: 0 0; } 100% { background-position: 10dvh 0; } }
     #mobileTimerText { font-size: clamp(20px, 4dvh, 40px); font-weight: 900; color: #333; width: 8vw; text-align: right; text-shadow: 0.2dvh 0.2dvh 0 rgba(255,255,255,0.8);}
 
+    /* ========== 巨大化中央倒數特效 (最後5秒) ========== */
     #giantTimerOverlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9000; pointer-events: none; font-size: 60dvh; font-weight: 900; background: linear-gradient(135deg, #ff0844, #ffb199, #fbc2eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent; filter: drop-shadow(0 0 5dvh rgba(255, 105, 180, 0.6)); animation: giantPartyPop 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; line-height: 1; margin:0; padding:0;}
     @keyframes giantPartyPop { 0% { transform: translate(-50%, -50%) scale(0.5) rotate(-10deg); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.2) rotate(10deg); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.8) rotate(0deg); opacity: 0; } }
     
@@ -82,10 +89,12 @@
     #ghostOverlay { display: none; position: absolute; top:30%; left:0; width:100%; z-index: 50; flex-direction: column; align-items:center;}
     #traitorWarning { display: none; background: #000; color: #e74c3c; border: 0.5dvh solid #c0392b; padding: 1.5dvh; border-radius: 3dvh; font-size: clamp(16px, 2.5dvh, 22px); font-weight: 900; margin-bottom: 1dvh; box-shadow: 0 0 2dvh rgba(231, 76, 60, 0.8); animation: pulseWin 1s infinite; flex-shrink: 0;}
 
+    /* ========== 網格彈性極限壓縮佈局 (絕對防溢出核心) ========== */
     #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2dvh 3vw; flex: 1 1 0; min-height: 0; width: 100%; margin-bottom: 2dvh; padding: 1vw; overflow: hidden;}
     
     .ans-btn { flex: 1 1 0; min-height: 0; height: auto; width: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 1dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.96); position: relative; overflow: hidden; margin:0; padding: 1.5dvh 2vw; box-sizing: border-box;}
     
+    /* ✅ 字體極限自適應縮放，利用 vmin 加上極限彈性，保證不破版 */
     .opt-text { font-size: clamp(14px, 4.5vmin, 45px); line-height: 1.15; word-break: break-word; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; padding: 0 5px;}
 
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
@@ -95,17 +104,20 @@
     .color-4 { background: linear-gradient(135deg, #8e44ad, #9b59b6); box-shadow: 0 1.5dvh 0 #732d91;} .color-5 { background: linear-gradient(135deg, #e67e22, #f39c12); box-shadow: 0 1.5dvh 0 #d35400;} .color-6 { background: linear-gradient(135deg, #2c3e50, #34495e); box-shadow: 0 1.5dvh 0 #1a252f;} .color-7 { background: linear-gradient(135deg, #e84393, #fd79a8); box-shadow: 0 1.5dvh 0 #b33971;}
 
     .ans-btn.active { opacity: 1; pointer-events: auto; animation: superPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    /* 🚨 降低基準縮放，絕對防止邊緣重疊 */
     @keyframes superPop { 0% {transform: scale(0) rotate(-10deg);} 80% {transform: scale(1.02) rotate(5deg);} 100% {transform: scale(0.96) rotate(0deg);} }
 
     body.fast-mode .ans-btn.active:not(.selected) { animation: feverPulse 0.4s infinite alternate; }
     @keyframes feverPulse { from {transform: scale(0.96);} to {transform: scale(1.02); filter: brightness(1.2);} }
     
+    /* 修正重疊問題：選中時內縮並發光 */
     .ans-btn.selected { transform: scale(0.9) translateY(1.5dvh) !important; box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 3dvh rgba(255,255,255,0.8), inset 0 0 2dvh rgba(0,0,0,0.5); color: rgba(255,255,255,1); border: 0.6dvh solid #fff; animation: none;}
     
     .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none;}
     @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
     .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.85); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
 
+    /* 拉桿、連連看區塊彈性適配 */
     #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1 1 0; min-height: 0; background: rgba(255,255,255,0.9); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; box-sizing: border-box;}
     input[type=range] { -webkit-appearance: none; appearance: none; width: 90%; margin: 3dvh 0; height: 2dvh; border-radius: 1dvh; background: #d3d3d3; outline: none; touch-action: none; }
     input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 6dvh; height: 6dvh; border-radius: 50%; background: #3498db; cursor: pointer; box-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.3);}
@@ -117,6 +129,7 @@
     #orderDisplay { display: none; background: rgba(255,255,255,0.8); padding: 1dvh; border-radius: 2dvh; margin-bottom: 1dvh; font-size: clamp(16px, 3dvh, 24px); font-weight: 900; min-height: 5dvh; color: #333; flex-shrink: 0;}
     #resetOrderBtn { display: none; background: #e74c3c; color: white; border: none; border-radius: 1dvh; padding: 0.5dvh 3vw; font-weight: bold; margin-bottom: 1dvh; cursor:pointer; flex-shrink: 0;}
 
+    /* ✅ 讓 DragList 保有原始高度並且可滾動，防止極限擠壓 */
     #dragBox { display:none; flex-direction:column; align-items:center; flex:1 1 0; min-height: 0; width:100%; margin-bottom: 1dvh; overflow: hidden; box-sizing: border-box;}
     #dragList { list-style:none; padding:0; width:95%; margin:0; display:flex; flex-direction:column; gap:1dvh; flex: 1 1 0; min-height: 0; overflow-y: auto; touch-action: pan-y;}
     #dragList li { flex: 0 0 auto; min-height: fit-content; background: white; padding: 1.5dvh 4vw; border-radius: 2dvh; font-size: clamp(16px, 4.5vmin, 28px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: flex-start; gap: 3vw; border-left: 1.5dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box; overflow: hidden; word-break: break-word;}
@@ -242,8 +255,8 @@
 
   <script>
     let audioCtx;
-    // 🚨 徹底移除所有背景音樂物件 (bgmNormal / bgmFast) 的宣告與使用，確保不報錯
 
+    // 手機端僅保留絕對必要的音效產生器，徹底移除 BGM 避免錯亂！
     function initAudio() { 
       if(!audioCtx) { 
           audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
@@ -283,7 +296,7 @@
     let myAvatar = "";
     let isGlobalPaused = false; 
     let isEliminated = false; 
-    let mobileTimerInterval = null; // 🌟 負責控制手機端本地倒數的變數[cite: 1]
+    let mobileTimerInterval = null; 
 
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
@@ -390,7 +403,7 @@
           else if (data.type === 'WAGER_PHASE' || data.type === 'BOUNTY_PHASE' || data.type === 'AUCTION_PHASE') {
             if (isEliminated) return; 
             vibrate(100); 
-
+            
             document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting'); document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('gameScreen').style.border = 'none'; document.getElementById('gameScreen').style.boxShadow = 'none';
             document.getElementById('btnGrid').style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; document.getElementById('submitBtn').style.display = 'none'; document.getElementById('coopText').style.display = 'none';
             document.getElementById('wagerBox').style.display = 'flex';
@@ -420,7 +433,6 @@
               });
             } else { tgtSelect.style.display = 'none'; }
 
-            // 🌟 啟動本地倒數計時[cite: 1]
             startMobileTimer(data.time || 10, isAuctionMode, 0);
           }
           else if (data.type === 'ENABLE_BUTTONS') {
@@ -527,17 +539,12 @@
               if (optCount <= 4) { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; }
               else { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; } 
 
+              // 🌟 選項無條件全面支援文字與圖片渲染
               data.options.forEach((optText, i) => {
-                  let textContent;
-                  let isImg = false;
-                  if (data.qType === 'match_click' || data.qType === 'order') {
-                      isImg = data.options[i].trim().startsWith('http');
-                      textContent = isImg 
-                          ? `<img src="${data.options[i].trim()}" style="max-width:90%; max-height:8dvh; object-fit:contain; border-radius:1.5dvh; pointer-events:none;">` 
-                          : data.options[i];
-                  } else {
-                      textContent = shapeList[i % shapeList.length];
-                  }
+                  let isImg = data.options[i].trim().startsWith('http');
+                  let textContent = isImg 
+                      ? `<img src="${data.options[i].trim()}" style="max-width:90%; max-height:8dvh; object-fit:contain; border-radius:1.5dvh; pointer-events:none;">` 
+                      : data.options[i];
 
                   let btnHTML = `<button class="ans-btn color-${i % 8} active" onclick="toggleSelection(${i}, event)" style="animation-delay: ${i * 0.05}s; order: ${shuffled[i]};">
                                     <span class="opt-text" style="${isImg ? 'display:flex; justify-content:center; align-items:center; width:100%; height:100%; padding:0;' : ''} pointer-events:none;">${textContent}</span>
@@ -546,13 +553,13 @@
               });
 
               document.querySelectorAll('.ans-btn').forEach((b, i) => { 
-                if (data.qMode === 'chameleon' && gameConfig.useExtreme) b.classList.add('chameleon-fx');
-                if (data.qMode === 'auction' && gameConfig.useExtreme && !data.isAuctionWinner) b.classList.add('locked'); 
+                if (data.qMode === 'chameleon' && gameCfg.useExtreme) b.classList.add('chameleon-fx');
+                if (data.qMode === 'auction' && gameCfg.useExtreme && !data.isAuctionWinner) b.classList.add('locked'); 
                 
                 setTimeout(() => { if(!b.classList.contains('locked')) b.classList.add('floating-opt'); }, 600 + i*100);
               });
 
-              if (data.qMode === 'memory' && gameConfig.useExtreme) {
+              if (data.qMode === 'memory' && gameCfg.useExtreme) {
                   memoryTimeout = setTimeout(() => {
                       document.querySelectorAll('.opt-text').forEach(t => t.classList.add('memory-hide'));
                   }, 3000);
@@ -573,11 +580,10 @@
               }
             }
 
-            // 🌟 啟動本地倒數計時[cite: 1]
             startMobileTimer(data.time || (data.isFast ? 10 : 15), data.isFast, data.timerStyle || 0);
           } 
           else if (data.type === 'DISABLE_BUTTONS') {
-            clearInterval(mobileTimerInterval); // 🚨 停止本地倒數
+            clearInterval(mobileTimerInterval); 
             document.getElementById('mobileTimerContainer').style.display = 'none';
             document.body.className = ''; document.body.style.background = myTeamGrad; clearTimeout(memoryTimeout);
             document.getElementById('gameStatus').innerText = "⏳ 停火！請抬頭看大螢幕";
@@ -603,7 +609,6 @@
       }); 
     }
 
-    // 🌟 手機端專屬：本地獨立倒數計時引擎[cite: 1]
     function startMobileTimer(maxTime, isFast, timerStyle) {
       clearInterval(mobileTimerInterval); 
       const timerContainer = document.getElementById('mobileTimerContainer'); 
