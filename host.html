@@ -611,7 +611,14 @@
       document.getElementById('setupScreen').style.display = 'none'; document.body.className = 'bg-lobby';
       document.getElementById('lobbyScreen').style.display = 'flex';
 
-      peer = new Peer('minikahoot-' + roomCode);
+      peer = new Peer('minikahoot-' + roomCode, {
+          config: {
+              'iceServers': [
+                  { urls: 'stun:stun.l.google.com:19302' },
+                  { urls: 'stun:stun1.l.google.com:19302' }
+              ]
+          }
+      });
       peer.on('open', (id) => {
         new QRCode(document.getElementById("qrcode"), { text: window.location.href.replace('host.html', '') + "?pin=" + roomCode, width: 140, height: 140, colorDark : "#ff4b2b", colorLight : "#fff", correctLevel : QRCode.CorrectLevel.H });
         loadQuestions(); 
