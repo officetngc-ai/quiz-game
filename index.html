@@ -1,808 +1,795 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>玩家控制器 - 實境淘汰賽版</title>
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap" rel="stylesheet">
-  <style id="dynamicTeamStyles"></style>
-  <style>
-    /* ========== 全域無卷軸絕對壓縮配置 (防破版核心) ========== */
-    body { font-family: 'Nunito', sans-serif; text-align: center; background: #e0e5ec; margin:0; padding:0; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; transition: all 0.5s ease; box-sizing: border-box;}
-    
-    .fast-mode { background: repeating-linear-gradient(45deg, #f1c40f, #f1c40f 5dvh, #e67e22 5dvh, #e67e22 10dvh); background-size: 200% 200%; animation: feverRush 0.8s linear infinite; box-shadow: inset 0 0 5dvh rgba(211,84,0,0.8); }
-    .shuffle-mode { background: repeating-radial-gradient(circle, #8e44ad, #8e44ad 5dvh, #9b59b6 5dvh, #9b59b6 10dvh); animation: spinBg 1s linear infinite; box-shadow: inset 0 0 5dvh rgba(142, 68, 173, 0.9); }
-    @keyframes feverRush { 0% {background-position: 0% 0%;} 100% {background-position: 100% 100%;} }
-    @keyframes spinBg { from { background-position: 0 0; } to { background-position: 10dvh 10dvh; } }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>玩家控制器 - 實境淘汰賽版</title>
+  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap" rel="stylesheet">
+  <style id="dynamicTeamStyles"></style>
+  <style>
+    /* ========== 全域無卷軸絕對壓縮配置 (防破版核心) ========== */
+    body { font-family: 'Nunito', sans-serif; text-align: center; background: #e0e5ec; margin:0; padding:0; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; transition: all 0.5s ease; box-sizing: border-box;}
+    
+    .fast-mode { background: repeating-linear-gradient(45deg, #f1c40f, #f1c40f 5dvh, #e67e22 5dvh, #e67e22 10dvh); background-size: 200% 200%; animation: feverRush 0.8s linear infinite; box-shadow: inset 0 0 5dvh rgba(211,84,0,0.8); }
+    .shuffle-mode { background: repeating-radial-gradient(circle, #8e44ad, #8e44ad 5dvh, #9b59b6 5dvh, #9b59b6 10dvh); animation: spinBg 1s linear infinite; box-shadow: inset 0 0 5dvh rgba(142, 68, 173, 0.9); }
+    @keyframes feverRush { 0% {background-position: 0% 0%;} 100% {background-position: 100% 100%;} }
+    @keyframes spinBg { from { background-position: 0 0; } to { background-position: 10dvh 10dvh; } }
 
-    .chameleon-fx { animation: chameleonBlur 2s infinite alternate; }
-    @keyframes chameleonBlur { 0% { filter: blur(0); opacity: 1; } 100% { filter: blur(1dvh); opacity: 0.2; } }
-    .memory-hide { color: transparent !important; text-shadow: 0 0 2dvh rgba(255,255,255,0.8); pointer-events: none;}
+    .chameleon-fx { animation: chameleonBlur 2s infinite alternate; }
+    @keyframes chameleonBlur { 0% { filter: blur(0); opacity: 1; } 100% { filter: blur(1dvh); opacity: 0.2; } }
+    .memory-hide { color: transparent !important; text-shadow: 0 0 2dvh rgba(255,255,255,0.8); pointer-events: none;}
 
-    /* ========== 🚨 全域派對狂歡光影 (手機端最後5秒) ========== */
-    body.panic-lighting::after {
-        content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
-        box-shadow: inset 0 0 10dvh 3dvh rgba(255, 105, 180, 0.5); 
-        pointer-events: none; z-index: 9998;
-        animation: partyFlashMobile 0.5s infinite alternate;
-    }
-    @keyframes partyFlashMobile {
-        0% { box-shadow: inset 0 0 5dvh 1dvh rgba(0, 255, 255, 0.3); } 
-        100% { box-shadow: inset 0 0 15dvh 5dvh rgba(255, 255, 0, 0.4); } 
-    }
+    /* ========== 🚨 全域派對狂歡光影 (手機端最後5秒) ========== */
+    body.panic-lighting::after {
+        content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
+        box-shadow: inset 0 0 10dvh 3dvh rgba(255, 105, 180, 0.5); 
+        pointer-events: none; z-index: 9998;
+        animation: partyFlashMobile 0.5s infinite alternate;
+    }
+    @keyframes partyFlashMobile {
+        0% { box-shadow: inset 0 0 5dvh 1dvh rgba(0, 255, 255, 0.3); } 
+        100% { box-shadow: inset 0 0 15dvh 5dvh rgba(255, 255, 0, 0.4); } 
+    }
 
-    /* ========== 全域暫停與淘汰畫面 ========== */
-    #playerPauseOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 99999; flex-direction: column; justify-content: center; align-items: center; color: white; }
-    .pause-icon-mobile { font-size: 15dvh; animation: superPop 1s infinite alternate; }
+    /* ========== 全域暫停與淘汰畫面 ========== */
+    #playerPauseOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.85); backdrop-filter: blur(5px); z-index: 99999; flex-direction: column; justify-content: center; align-items: center; color: white; }
+    .pause-icon-mobile { font-size: 15dvh; animation: superPop 1s infinite alternate; }
 
-    #eliminatedOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.95); z-index: 100000; flex-direction: column; justify-content: center; align-items: center; color: white; backdrop-filter: blur(10px); }
+    #eliminatedOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.95); z-index: 100000; flex-direction: column; justify-content: center; align-items: center; color: white; backdrop-filter: blur(10px); }
 
-    /* ========== 登入畫面綜藝感 ========== */
-    #loginScreen { padding: 4dvh 5vw; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; position: relative;}
-    #loginScreen h2 { font-size: clamp(24px, 5dvh, 42px); margin-bottom: 2dvh; text-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.3); animation: floatBtn 3s infinite alternate; z-index: 10;}
-    .floating-emoji { position: absolute; font-size: 8dvh; opacity: 0.2; animation: floatAround 10s infinite linear; z-index: 1;}
-    @keyframes floatAround { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(5vw, -5dvh) rotate(180deg); } 100% { transform: translate(0, 0) rotate(360deg); } }
+    /* ========== 登入畫面綜藝感 ========== */
+    #loginScreen { padding: 4dvh 5vw; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; position: relative;}
+    #loginScreen h2 { font-size: clamp(24px, 5dvh, 42px); margin-bottom: 2dvh; text-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.3); animation: floatBtn 3s infinite alternate; z-index: 10;}
+    .floating-emoji { position: absolute; font-size: 8dvh; opacity: 0.2; animation: floatAround 10s infinite linear; z-index: 1;}
+    @keyframes floatAround { 0% { transform: translate(0, 0) rotate(0deg); } 50% { transform: translate(5vw, -5dvh) rotate(180deg); } 100% { transform: translate(0, 0) rotate(360deg); } }
 
-    .input-field { padding: 2.5dvh; font-size: clamp(18px, 3.5dvh, 26px); width: 90%; margin: 2dvh 0; border-radius: 3dvh; border: none; text-align: center; font-weight: 900; color: #333; box-shadow: 0 1dvh 2dvh rgba(0,0,0,0.15); font-family: inherit; outline: none; z-index: 10; box-sizing: border-box;}
-    .action-btn { padding: 2.5dvh; font-size: clamp(20px, 4dvh, 32px); width: 90%; margin-top: 2dvh; border-radius: 3dvh; border: none; font-weight: 900; cursor: pointer; transition: 0.1s; background: #FFD700; color: #d35400; box-shadow: 0 1dvh 0 #e67e22, 0 1.5dvh 2dvh rgba(0,0,0,0.2); font-family: inherit; z-index: 10; box-sizing: border-box; flex-shrink: 0;}
-    .action-btn:active { transform: translateY(1dvh); box-shadow: 0 0 0 #e67e22; } 
+    .input-field { padding: 2.5dvh; font-size: clamp(18px, 3.5dvh, 26px); width: 90%; margin: 2dvh 0; border-radius: 3dvh; border: none; text-align: center; font-weight: 900; color: #333; box-shadow: 0 1dvh 2dvh rgba(0,0,0,0.15); font-family: inherit; outline: none; z-index: 10; box-sizing: border-box;}
+    .action-btn { padding: 2.5dvh; font-size: clamp(20px, 4dvh, 32px); width: 90%; margin-top: 2dvh; border-radius: 3dvh; border: none; font-weight: 900; cursor: pointer; transition: 0.1s; background: #FFD700; color: #d35400; box-shadow: 0 1dvh 0 #e67e22, 0 1.5dvh 2dvh rgba(0,0,0,0.2); font-family: inherit; z-index: 10; box-sizing: border-box; flex-shrink: 0;}
+    .action-btn:active { transform: translateY(1dvh); box-shadow: 0 0 0 #e67e22; } 
 
-    /* ========== 玩家頂部身分牌 ========== */
-    #playerTopBar { display: none; background: rgba(255,255,255,0.95); padding: 1.5dvh 4vw; border-radius: 4dvh; margin: 1dvh auto 0.5dvh auto; font-weight: 900; font-size: clamp(18px, 3dvh, 24px); color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.15); align-items: center; justify-content: center; gap: 2vw; max-width: 90%; flex-shrink: 0; animation: superPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-sizing: border-box;}
+    /* ========== 玩家頂部身分牌 ========== */
+    #playerTopBar { display: none; background: rgba(255,255,255,0.95); padding: 1.5dvh 4vw; border-radius: 4dvh; margin: 1dvh auto 0.5dvh auto; font-weight: 900; font-size: clamp(18px, 3dvh, 24px); color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.15); align-items: center; justify-content: center; gap: 2vw; max-width: 90%; flex-shrink: 0; animation: superPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-sizing: border-box;}
 
-    /* ========== 顯眼的底部進度條計時器 ========== */
-    #mobileTimerContainer { display: none; width: 100%; align-items: center; gap: 2vw; background: rgba(0,0,0,0.1); padding: 1dvh; border-radius: 3dvh; box-sizing: border-box; flex-shrink: 0; margin-bottom: 1.5dvh;}
-    .timer-bar-wrap { flex: 1; height: 2.5dvh; background: rgba(255,255,255,0.8); border-radius: 1.5dvh; overflow: hidden; box-shadow: inset 0 0.5dvh 1dvh rgba(0,0,0,0.2); }
-    .striped-bar { height: 100%; width: 100%; transition: width 1s linear, background 0.5s ease; background-size: 200% 200%; }
-    .bar-normal { background-image: repeating-linear-gradient(45deg, #3498db, #3498db 2dvh, #2980b9 2dvh, #2980b9 4dvh); animation: stripemove 2s linear infinite; }
-    .bar-warning { background-image: repeating-linear-gradient(45deg, #f1c40f, #f1c40f 2dvh, #f39c12 2dvh, #f39c12 4dvh); animation: stripemove 1s linear infinite; }
-    .bar-panic { background-image: repeating-linear-gradient(45deg, #ff0844, #ff0844 2dvh, #ffb199 2dvh, #ffb199 4dvh); animation: stripemove 0.4s linear infinite; }
-    @keyframes stripemove { 0% { background-position: 0 0; } 100% { background-position: 10dvh 0; } }
-    #mobileTimerText { font-size: clamp(20px, 4dvh, 40px); font-weight: 900; color: #333; width: 8vw; text-align: right; text-shadow: 0.2dvh 0.2dvh 0 rgba(255,255,255,0.8);}
+    /* ========== 顯眼的底部進度條計時器 ========== */
+    #mobileTimerContainer { display: none; width: 100%; align-items: center; gap: 2vw; background: rgba(0,0,0,0.1); padding: 1dvh; border-radius: 3dvh; box-sizing: border-box; flex-shrink: 0; margin-bottom: 1.5dvh;}
+    .timer-bar-wrap { flex: 1; height: 2.5dvh; background: rgba(255,255,255,0.8); border-radius: 1.5dvh; overflow: hidden; box-shadow: inset 0 0.5dvh 1dvh rgba(0,0,0,0.2); }
+    .striped-bar { height: 100%; width: 100%; transition: width 1s linear, background 0.5s ease; background-size: 200% 200%; }
+    .bar-normal { background-image: repeating-linear-gradient(45deg, #3498db, #3498db 2dvh, #2980b9 2dvh, #2980b9 4dvh); animation: stripemove 2s linear infinite; }
+    .bar-warning { background-image: repeating-linear-gradient(45deg, #f1c40f, #f1c40f 2dvh, #f39c12 2dvh, #f39c12 4dvh); animation: stripemove 1s linear infinite; }
+    .bar-panic { background-image: repeating-linear-gradient(45deg, #ff0844, #ff0844 2dvh, #ffb199 2dvh, #ffb199 4dvh); animation: stripemove 0.4s linear infinite; }
+    @keyframes stripemove { 0% { background-position: 0 0; } 100% { background-position: 10dvh 0; } }
+    #mobileTimerText { font-size: clamp(20px, 4dvh, 40px); font-weight: 900; color: #333; width: 8vw; text-align: right; text-shadow: 0.2dvh 0.2dvh 0 rgba(255,255,255,0.8);}
 
-    /* ========== 巨大化中央倒數特效 (最後5秒) ========== */
-    #giantTimerOverlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9000; pointer-events: none; font-size: 60dvh; font-weight: 900; background: linear-gradient(135deg, #ff0844, #ffb199, #fbc2eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent; filter: drop-shadow(0 0 5dvh rgba(255, 105, 180, 0.6)); animation: giantPartyPop 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; line-height: 1; margin:0; padding:0;}
-    @keyframes giantPartyPop { 0% { transform: translate(-50%, -50%) scale(0.5) rotate(-10deg); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.2) rotate(10deg); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.8) rotate(0deg); opacity: 0; } }
-    
-    .panel-shake { animation: boxShake 0.3s infinite !important; }
-    @keyframes boxShake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-1vw) rotate(-1deg); } 75% { transform: translateX(1vw) rotate(1deg); } }
+    /* ========== 巨大化中央倒數特效 (最後5秒) ========== */
+    #giantTimerOverlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9000; pointer-events: none; font-size: 60dvh; font-weight: 900; background: linear-gradient(135deg, #ff0844, #ffb199, #fbc2eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent; filter: drop-shadow(0 0 5dvh rgba(255, 105, 180, 0.6)); animation: giantPartyPop 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; line-height: 1; margin:0; padding:0;}
+    @keyframes giantPartyPop { 0% { transform: translate(-50%, -50%) scale(0.5) rotate(-10deg); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.2) rotate(10deg); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.8) rotate(0deg); opacity: 0; } }
+    
+    .panel-shake { animation: boxShake 0.3s infinite !important; }
+    @keyframes boxShake { 0%, 100% { transform: translateX(0) rotate(0deg); } 25% { transform: translateX(-1vw) rotate(-1deg); } 75% { transform: translateX(1vw) rotate(1deg); } }
 
-    #teamScreen { display: none; flex-direction: column; height: 100%; justify-content: flex-start; padding: 5dvh 5vw; background: rgba(0,0,0,0.1); overflow-y: auto; box-sizing: border-box;}
-    #teamList { display: flex; flex-direction: column; gap: 2dvh; margin-top: 2dvh;}
-    .team-btn { padding: 3dvh; font-size: clamp(20px, 3.5dvh, 28px); font-weight: 900; color: white; border: none; border-radius: 3dvh; cursor: pointer; box-shadow: 0 1dvh 0 rgba(0,0,0,0.2); transition: 0.2s; text-shadow: 0.1dvh 0.1dvh 0.3dvh rgba(0,0,0,0.3);}
-    .team-btn:active { transform: translateY(1dvh); box-shadow: 0 0 0 rgba(0,0,0,0); }
-    .team-btn:disabled { opacity: 0.4; filter: grayscale(100%); pointer-events: none;}
+    #teamScreen { display: none; flex-direction: column; height: 100%; justify-content: flex-start; padding: 5dvh 5vw; background: rgba(0,0,0,0.1); overflow-y: auto; box-sizing: border-box;}
+    #teamList { display: flex; flex-direction: column; gap: 2dvh; margin-top: 2dvh;}
+    .team-btn { padding: 3dvh; font-size: clamp(20px, 3.5dvh, 28px); font-weight: 900; color: white; border: none; border-radius: 3dvh; cursor: pointer; box-shadow: 0 1dvh 0 rgba(0,0,0,0.2); transition: 0.2s; text-shadow: 0.1dvh 0.1dvh 0.3dvh rgba(0,0,0,0.3);}
+    .team-btn:active { transform: translateY(1dvh); box-shadow: 0 0 0 rgba(0,0,0,0); }
+    .team-btn:disabled { opacity: 0.4; filter: grayscale(100%); pointer-events: none;}
 
-    #gameScreen { display: none; flex-direction: column; height: 100dvh; justify-content: flex-start; padding: 2dvh 2vw; box-sizing: border-box; position: relative; transition: border 0.3s, box-shadow 0.3s; overflow: hidden;}
-    
-    #gameStatus { background: white; padding: 1.5dvh 2vw; border-radius: 3dvh; font-size: clamp(16px, 3dvh, 24px); font-weight: 900; color: #333; box-shadow: 0 1dvh 2dvh rgba(0,0,0,0.1); margin-bottom: 1dvh; transition: 0.3s; z-index: 10; flex-shrink: 0;}
-    .status-shuffle { font-size: clamp(20px, 4dvh, 32px) !important; color: #fff !important; background: #8e44ad !important; animation: popUp 0.5s forwards; }
-    @keyframes popUp { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
+    #gameScreen { display: none; flex-direction: column; height: 100dvh; justify-content: flex-start; padding: 2dvh 2vw; box-sizing: border-box; position: relative; transition: border 0.3s, box-shadow 0.3s; overflow: hidden;}
+    
+    #gameStatus { background: white; padding: 1.5dvh 2vw; border-radius: 3dvh; font-size: clamp(16px, 3dvh, 24px); font-weight: 900; color: #333; box-shadow: 0 1dvh 2dvh rgba(0,0,0,0.1); margin-bottom: 1dvh; transition: 0.3s; z-index: 10; flex-shrink: 0;}
+    .status-shuffle { font-size: clamp(20px, 4dvh, 32px) !important; color: #fff !important; background: #8e44ad !important; animation: popUp 0.5s forwards; }
+    @keyframes popUp { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
 
-    #streakBadge { display:none; background: linear-gradient(45deg, #ff4b2b, #f1c40f); color: white; padding: 0.8dvh 3vw; border-radius: 3dvh; font-size: clamp(14px, 2.5dvh, 20px); margin-bottom: 1dvh; animation: popBtn 0.5s infinite alternate; font-weight:bold; box-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.2);}
-    @keyframes popBtn { to { transform: scale(1.05); } }
-    #shieldBadge { display:none; background: #3498db; color: white; padding: 0.8dvh 3vw; border-radius: 3dvh; font-size: clamp(14px, 2.5dvh, 20px); margin-bottom: 1dvh; font-weight:bold; box-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.2); margin-left: 2vw;}
+    #streakBadge { display:none; background: linear-gradient(45deg, #ff4b2b, #f1c40f); color: white; padding: 0.8dvh 3vw; border-radius: 3dvh; font-size: clamp(14px, 2.5dvh, 20px); margin-bottom: 1dvh; animation: popBtn 0.5s infinite alternate; font-weight:bold; box-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.2);}
+    @keyframes popBtn { to { transform: scale(1.05); } }
+    #shieldBadge { display:none; background: #3498db; color: white; padding: 0.8dvh 3vw; border-radius: 3dvh; font-size: clamp(14px, 2.5dvh, 20px); margin-bottom: 1dvh; font-weight:bold; box-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.2); margin-left: 2vw;}
 
-    body.ghost-mode #gameScreen { filter: grayscale(100%); opacity: 0.8; pointer-events: none; }
-    #ghostOverlay { display: none; position: absolute; top:30%; left:0; width:100%; z-index: 50; flex-direction: column; align-items:center;}
-    #traitorWarning { display: none; background: #000; color: #e74c3c; border: 0.5dvh solid #c0392b; padding: 1.5dvh; border-radius: 3dvh; font-size: clamp(16px, 2.5dvh, 22px); font-weight: 900; margin-bottom: 1dvh; box-shadow: 0 0 2dvh rgba(231, 76, 60, 0.8); animation: pulseWin 1s infinite; flex-shrink: 0;}
+    body.ghost-mode #gameScreen { filter: grayscale(100%); opacity: 0.8; pointer-events: none; }
+    #ghostOverlay { display: none; position: absolute; top:30%; left:0; width:100%; z-index: 50; flex-direction: column; align-items:center;}
+    #traitorWarning { display: none; background: #000; color: #e74c3c; border: 0.5dvh solid #c0392b; padding: 1.5dvh; border-radius: 3dvh; font-size: clamp(16px, 2.5dvh, 22px); font-weight: 900; margin-bottom: 1dvh; box-shadow: 0 0 2dvh rgba(231, 76, 60, 0.8); animation: pulseWin 1s infinite; flex-shrink: 0;}
 
-    /* ========== 網格彈性極限壓縮佈局 (絕對防溢出核心) ========== */
-    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2dvh 3vw; flex: 1 1 0; min-height: 0; width: 100%; margin-bottom: 2dvh; padding: 1vw; overflow: hidden;}
-    
-    .ans-btn { flex: 1 1 0; min-height: 0; height: auto; width: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 1dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.96); position: relative; overflow: hidden; margin:0; padding: 1.5dvh 2vw; box-sizing: border-box;}
-    
-    /* ✅ 字體極限自適應縮放，利用 vmin 加上極限彈性，保證不破版 */
-    .opt-text { font-size: clamp(14px, 4.5vmin, 45px); line-height: 1.15; word-break: break-word; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; padding: 0 5px;}
+    /* ========== 網格彈性極限壓縮佈局 (絕對防溢出核心) ========== */
+    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2dvh 3vw; flex: 1 1 0; min-height: 0; width: 100%; margin-bottom: 2dvh; padding: 1vw; overflow: hidden;}
+    
+    .ans-btn { flex: 1 1 0; min-height: 0; height: auto; width: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 1dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.96); position: relative; overflow: hidden; margin:0; padding: 1.5dvh 2vw; box-sizing: border-box;}
+    
+    /* ✅ 字體極限自適應縮放，利用 vmin 加上極限彈性，保證不破版 */
+    .opt-text { font-size: clamp(14px, 4.5vmin, 45px); line-height: 1.15; word-break: break-word; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; padding: 0 5px;}
 
-    .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
-    @keyframes floatOpt { 0%, 100% { transform: scale(0.96) translateY(0px) rotate(0deg); } 33% { transform: scale(0.96) translateY(-0.5dvh) rotate(1deg); } 66% { transform: scale(0.96) translateY(0.3dvh) rotate(-1deg); } }
+    .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
+    @keyframes floatOpt { 0%, 100% { transform: scale(0.96) translateY(0px) rotate(0deg); } 33% { transform: scale(0.96) translateY(-0.5dvh) rotate(1deg); } 66% { transform: scale(0.96) translateY(0.3dvh) rotate(-1deg); } }
 
-    .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1.5dvh 0 #c0392b; } .color-1 { background: linear-gradient(135deg, #0072ff, #00c6ff); box-shadow: 0 1.5dvh 0 #0056b3; } .color-2 { background: linear-gradient(135deg, #f9d423, #ff4e50); box-shadow: 0 1.5dvh 0 #b33200; } .color-3 { background: linear-gradient(135deg, #11998e, #38ef7d); box-shadow: 0 1.5dvh 0 #0e7a5c; } 
-    .color-4 { background: linear-gradient(135deg, #8e44ad, #9b59b6); box-shadow: 0 1.5dvh 0 #732d91;} .color-5 { background: linear-gradient(135deg, #e67e22, #f39c12); box-shadow: 0 1.5dvh 0 #d35400;} .color-6 { background: linear-gradient(135deg, #2c3e50, #34495e); box-shadow: 0 1.5dvh 0 #1a252f;} .color-7 { background: linear-gradient(135deg, #e84393, #fd79a8); box-shadow: 0 1.5dvh 0 #b33971;}
+    .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1.5dvh 0 #c0392b; } .color-1 { background: linear-gradient(135deg, #0072ff, #00c6ff); box-shadow: 0 1.5dvh 0 #0056b3; } .color-2 { background: linear-gradient(135deg, #f9d423, #ff4e50); box-shadow: 0 1.5dvh 0 #b33200; } .color-3 { background: linear-gradient(135deg, #11998e, #38ef7d); box-shadow: 0 1.5dvh 0 #0e7a5c; } 
+    .color-4 { background: linear-gradient(135deg, #8e44ad, #9b59b6); box-shadow: 0 1.5dvh 0 #732d91;} .color-5 { background: linear-gradient(135deg, #e67e22, #f39c12); box-shadow: 0 1.5dvh 0 #d35400;} .color-6 { background: linear-gradient(135deg, #2c3e50, #34495e); box-shadow: 0 1.5dvh 0 #1a252f;} .color-7 { background: linear-gradient(135deg, #e84393, #fd79a8); box-shadow: 0 1.5dvh 0 #b33971;}
 
-    .ans-btn.active { opacity: 1; pointer-events: auto; animation: superPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-    /* 🚨 降低基準縮放，絕對防止邊緣重疊 */
-    @keyframes superPop { 0% {transform: scale(0) rotate(-10deg);} 80% {transform: scale(1.02) rotate(5deg);} 100% {transform: scale(0.96) rotate(0deg);} }
+    .ans-btn.active { opacity: 1; pointer-events: auto; animation: superPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+    /* 🚨 降低基準縮放，絕對防止邊緣重疊 */
+    @keyframes superPop { 0% {transform: scale(0) rotate(-10deg);} 80% {transform: scale(1.02) rotate(5deg);} 100% {transform: scale(0.96) rotate(0deg);} }
 
-    body.fast-mode .ans-btn.active:not(.selected) { animation: feverPulse 0.4s infinite alternate; }
-    @keyframes feverPulse { from {transform: scale(0.96);} to {transform: scale(1.02); filter: brightness(1.2);} }
-    
-    /* 修正重疊問題：選中時內縮並發光 */
-    .ans-btn.selected { transform: scale(0.9) translateY(1.5dvh) !important; box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 3dvh rgba(255,255,255,0.8), inset 0 0 2dvh rgba(0,0,0,0.5); color: rgba(255,255,255,1); border: 0.6dvh solid #fff; animation: none;}
-    
-    .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none;}
-    @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
-    .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.85); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
+    body.fast-mode .ans-btn.active:not(.selected) { animation: feverPulse 0.4s infinite alternate; }
+    @keyframes feverPulse { from {transform: scale(0.96);} to {transform: scale(1.02); filter: brightness(1.2);} }
+    
+    /* 修正重疊問題：選中時內縮並發光 */
+    .ans-btn.selected { transform: scale(0.9) translateY(1.5dvh) !important; box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 3dvh rgba(255,255,255,0.8), inset 0 0 2dvh rgba(0,0,0,0.5); color: rgba(255,255,255,1); border: 0.6dvh solid #fff; animation: none;}
+    
+    .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none;}
+    @keyframes rippleAnim { to { transform: scale(4); opacity: 0; } }
+    .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.85); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
 
-    /* 拉桿、連連看區塊彈性適配 */
-    #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1 1 0; min-height: 0; background: rgba(255,255,255,0.9); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; box-sizing: border-box;}
-    input[type=range] { -webkit-appearance: none; appearance: none; width: 90%; margin: 3dvh 0; height: 2dvh; border-radius: 1dvh; background: #d3d3d3; outline: none; touch-action: none; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 6dvh; height: 6dvh; border-radius: 50%; background: #3498db; cursor: pointer; box-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.3);}
-    #sliderValue { font-size: clamp(40px, 8dvh, 80px); font-weight: 900; color: #e74c3c; }
+    /* 拉桿、連連看區塊彈性適配 */
+    #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1 1 0; min-height: 0; background: rgba(255,255,255,0.9); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; box-sizing: border-box;}
+    input[type=range] { -webkit-appearance: none; appearance: none; width: 90%; margin: 3dvh 0; height: 2dvh; border-radius: 1dvh; background: #d3d3d3; outline: none; touch-action: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 6dvh; height: 6dvh; border-radius: 50%; background: #3498db; cursor: pointer; box-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.3);}
+    #sliderValue { font-size: clamp(40px, 8dvh, 80px); font-weight: 900; color: #e74c3c; }
 
-    #wagerBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1 1 0; min-height: 0; background: rgba(0,0,0,0.7); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; color: white; box-sizing: border-box;}
-    #wagerAmount { font-size: clamp(40px, 8dvh, 80px); font-weight: 900; color: #f1c40f; margin: 2dvh 0;}
+    #wagerBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1 1 0; min-height: 0; background: rgba(0,0,0,0.7); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; color: white; box-sizing: border-box;}
+    #wagerAmount { font-size: clamp(40px, 8dvh, 80px); font-weight: 900; color: #f1c40f; margin: 2dvh 0;}
 
-    #orderDisplay { display: none; background: rgba(255,255,255,0.8); padding: 1dvh; border-radius: 2dvh; margin-bottom: 1dvh; font-size: clamp(16px, 3dvh, 24px); font-weight: 900; min-height: 5dvh; color: #333; flex-shrink: 0;}
-    #resetOrderBtn { display: none; background: #e74c3c; color: white; border: none; border-radius: 1dvh; padding: 0.5dvh 3vw; font-weight: bold; margin-bottom: 1dvh; cursor:pointer; flex-shrink: 0;}
+    #orderDisplay { display: none; background: rgba(255,255,255,0.8); padding: 1dvh; border-radius: 2dvh; margin-bottom: 1dvh; font-size: clamp(16px, 3dvh, 24px); font-weight: 900; min-height: 5dvh; color: #333; flex-shrink: 0;}
+    #resetOrderBtn { display: none; background: #e74c3c; color: white; border: none; border-radius: 1dvh; padding: 0.5dvh 3vw; font-weight: bold; margin-bottom: 1dvh; cursor:pointer; flex-shrink: 0;}
 
-    /* ✅ 讓 DragList 保有原始高度並且可滾動，防止極限擠壓 */
-    #dragBox { display:none; flex-direction:column; align-items:center; flex:1 1 0; min-height: 0; width:100%; margin-bottom: 1dvh; overflow: hidden; box-sizing: border-box;}
-    #dragList { list-style:none; padding:0; width:95%; margin:0; display:flex; flex-direction:column; gap:1dvh; flex: 1 1 0; min-height: 0; overflow-y: auto; touch-action: pan-y;}
-    #dragList li { flex: 0 0 auto; min-height: fit-content; background: white; padding: 1.5dvh 4vw; border-radius: 2dvh; font-size: clamp(16px, 4.5vmin, 28px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: flex-start; gap: 3vw; border-left: 1.5dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box; overflow: hidden; word-break: break-word;}
-    .drag-handle { color: #bdc3c7; font-size: 4dvh; cursor: grab;}
-    .sortable-ghost { opacity: 0.4; background: #f1c40f !important; }
+    /* ✅ 讓 DragList 保有原始高度並且可滾動，防止極限擠壓 */
+    #dragBox { display:none; flex-direction:column; align-items:center; flex:1 1 0; min-height: 0; width:100%; margin-bottom: 1dvh; overflow: hidden; box-sizing: border-box;}
+    #dragList { list-style:none; padding:0; width:95%; margin:0; display:flex; flex-direction:column; gap:1dvh; flex: 1 1 0; min-height: 0; overflow-y: auto; touch-action: pan-y;}
+    #dragList li { flex: 0 0 auto; min-height: fit-content; background: white; padding: 1.5dvh 4vw; border-radius: 2dvh; font-size: clamp(16px, 4.5vmin, 28px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: flex-start; gap: 3vw; border-left: 1.5dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box; overflow: hidden; word-break: break-word;}
+    .drag-handle { color: #bdc3c7; font-size: 4dvh; cursor: grab;}
+    .sortable-ghost { opacity: 0.4; background: #f1c40f !important; }
 
-    #submitBtn { display: none; width: 100%; background: linear-gradient(135deg, #a18cd1, #fbc2eb); box-shadow: 0 1dvh 0 #89609e; color: #fff; margin: 0 0 1dvh 0; flex-shrink: 0;}
-    #submitBtn:active { transform: translateY(1dvh); box-shadow: 0 0 0 #89609e; }
+    #submitBtn { display: none; width: 100%; background: linear-gradient(135deg, #a18cd1, #fbc2eb); box-shadow: 0 1dvh 0 #89609e; color: #fff; margin: 0 0 1dvh 0; flex-shrink: 0;}
+    #submitBtn:active { transform: translateY(1dvh); box-shadow: 0 0 0 #89609e; }
 
-    #skillBar { display: none; flex-shrink: 0; justify-content: space-around; background: rgba(0,0,0,0.6); padding: 1dvh; border-radius: 3dvh; backdrop-filter: blur(5px); margin-bottom: 1dvh;}
-    .skill-btn { padding: 1.5dvh 1vw; font-size: clamp(12px, 2dvh, 16px); font-weight: 900; border-radius: 2dvh; border: none; color: white; cursor: pointer; transition: 0.1s; flex:1; margin:0 1vw;}
-    .skill-btn:active { transform: translateY(0.5dvh); box-shadow: none !important;}
-    .btn-freeze { background: #3498db; box-shadow: 0 0.5dvh 0 #2980b9; }
-    .btn-shield { background: #f39c12; box-shadow: 0 0.5dvh 0 #d35400; }
-    .btn-5050 { background: #9b59b6; box-shadow: 0 0.5dvh 0 #8e44ad; }
-    .btn-scramble { background: #e74c3c; box-shadow: 0 0.5dvh 0 #c0392b; }
+    #skillBar { display: none; flex-shrink: 0; justify-content: space-around; background: rgba(0,0,0,0.6); padding: 1dvh; border-radius: 3dvh; backdrop-filter: blur(5px); margin-bottom: 1dvh;}
+    .skill-btn { padding: 1.5dvh 1vw; font-size: clamp(12px, 2dvh, 16px); font-weight: 900; border-radius: 2dvh; border: none; color: white; cursor: pointer; transition: 0.1s; flex:1; margin:0 1vw;}
+    .skill-btn:active { transform: translateY(0.5dvh); box-shadow: none !important;}
+    .btn-freeze { background: #3498db; box-shadow: 0 0.5dvh 0 #2980b9; }
+    .btn-shield { background: #f39c12; box-shadow: 0 0.5dvh 0 #d35400; }
+    .btn-5050 { background: #9b59b6; box-shadow: 0 0.5dvh 0 #8e44ad; }
+    .btn-scramble { background: #e74c3c; box-shadow: 0 0.5dvh 0 #c0392b; }
 
-    #freezeOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(173, 216, 230, 0.85); backdrop-filter: blur(10px); z-index: 999; flex-direction: column; justify-content: center; align-items: center; color: #2c3e50; text-shadow: 0 0.2dvh 1dvh rgba(255,255,255,0.8);}
-    .ice-crack { font-size: 20dvh; animation: shake 0.1s infinite; margin-bottom:2dvh;}
-    @keyframes shake { 0% {transform: translateX(1vw) rotate(2deg);} 100% {transform: translateX(-1vw) rotate(-2deg);} }
-  </style>
+    #freezeOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(173, 216, 230, 0.85); backdrop-filter: blur(10px); z-index: 999; flex-direction: column; justify-content: center; align-items: center; color: #2c3e50; text-shadow: 0 0.2dvh 1dvh rgba(255,255,255,0.8);}
+    .ice-crack { font-size: 20dvh; animation: shake 0.1s infinite; margin-bottom:2dvh;}
+    @keyframes shake { 0% {transform: translateX(1vw) rotate(2deg);} 100% {transform: translateX(-1vw) rotate(-2deg);} }
+  </style>
 </head>
 <body>
 
-  <!-- 手機端全域暫停畫面 -->
-  <div id="playerPauseOverlay">
-    <div class="pause-icon-mobile">⏸️</div>
-    <h2 style="font-size: 5dvh; margin: 1dvh 0; font-weight: 900;">遊戲暫停中</h2>
-    <p style="font-size: 3dvh; font-weight: bold; color: #f1c40f;">請等待管理員恢復...</p>
-  </div>
-  
-  <!-- 💀 淘汰死亡畫面 -->
-  <div id="eliminatedOverlay">
-    <div style="font-size: 15dvh; margin-bottom: 2dvh;">💀</div>
-    <h2 style="font-size: 5dvh; font-weight:900; color: #ff4b2b; text-shadow: 0 0 2dvh rgba(255,0,0,0.8);">你已被淘汰</h2>
-    <p style="font-size: 3dvh; font-weight:bold; color: #fff;">勝敗乃兵家常事，請繼續觀戰！</p>
-  </div>
+  <!-- 手機端全域暫停畫面 -->
+  <div id="playerPauseOverlay">
+    <div class="pause-icon-mobile">⏸️</div>
+    <h2 style="font-size: 5dvh; margin: 1dvh 0; font-weight: 900;">遊戲暫停中</h2>
+    <p style="font-size: 3dvh; font-weight: bold; color: #f1c40f;">請等待管理員恢復...</p>
+  </div>
+  
+  <!-- 💀 淘汰死亡畫面 -->
+  <div id="eliminatedOverlay">
+    <div style="font-size: 15dvh; margin-bottom: 2dvh;">💀</div>
+    <h2 style="font-size: 5dvh; font-weight:900; color: #ff4b2b; text-shadow: 0 0 2dvh rgba(255,0,0,0.8);">你已被淘汰</h2>
+    <p style="font-size: 3dvh; font-weight:bold; color: #fff;">勝敗乃兵家常事，請繼續觀戰！</p>
+  </div>
 
-  <div id="giantTimerOverlay">5</div>
+  <div id="giantTimerOverlay">5</div>
 
-  <div id="freezeOverlay" onclick="breakIce()">
-    <div class="ice-crack">🧊</div>
-    <h2 style="font-size: 5dvh; font-weight:900;">你被凍結了！</h2>
-    <p style="font-size: 3dvh; font-weight:bold; background:#fff; padding:1.5dvh 4vw; border-radius:3dvh;">狂點螢幕來碎冰！</p>
-  </div>
+  <div id="freezeOverlay" onclick="breakIce()">
+    <div class="ice-crack">🧊</div>
+    <h2 style="font-size: 5dvh; font-weight:900;">你被凍結了！</h2>
+    <p style="font-size: 3dvh; font-weight:bold; background:#fff; padding:1.5dvh 4vw; border-radius:3dvh;">狂點螢幕來碎冰！</p>
+  </div>
 
-  <div id="loginScreen">
-    <div class="floating-emoji" style="top: 10%; left: 10%;">🎮</div>
-    <div class="floating-emoji" style="top: 70%; right: 15%;">🔥</div>
-    <div class="floating-emoji" style="top: 20%; right: 10%; font-size: 6dvh;">✨</div>
-    <div id="loginForm">
-      <h2>🎉 準備加入榮耀之戰！</h2>
-      <input type="text" id="playerName" class="input-field" placeholder="輸入你的大名">
-      <button class="action-btn" onclick="joinGame()">即刻登入 🚀</button>
-      <div id="statusText" style="margin-top: 2dvh; font-size: 2.5dvh; font-weight:bold; opacity: 0.9;"></div>
-    </div>
-  </div>
+  <div id="loginScreen">
+    <div class="floating-emoji" style="top: 10%; left: 10%;">🎮</div>
+    <div class="floating-emoji" style="top: 70%; right: 15%;">🔥</div>
+    <div class="floating-emoji" style="top: 20%; right: 10%; font-size: 6dvh;">✨</div>
+    <div id="loginForm">
+      <h2>🎉 準備加入榮耀之戰！</h2>
+      <input type="text" id="playerName" class="input-field" placeholder="輸入你的大名">
+      <button class="action-btn" onclick="joinGame()">即刻登入 🚀</button>
+      <div id="statusText" style="margin-top: 2dvh; font-size: 2.5dvh; font-weight:bold; opacity: 0.9;"></div>
+    </div>
+  </div>
 
-  <div id="teamScreen">
-    <h2 style="color: #333; font-size: 5dvh; text-shadow: 0 0.2dvh 0.5dvh rgba(255,255,255,0.8); margin: 0;">選擇你的陣營 🛡️</h2>
-    <div id="teamList"></div>
-  </div>
+  <div id="teamScreen">
+    <h2 style="color: #333; font-size: 5dvh; text-shadow: 0 0.2dvh 0.5dvh rgba(255,255,255,0.8); margin: 0;">選擇你的陣營 🛡️</h2>
+    <div id="teamList"></div>
+  </div>
 
-  <div id="gameScreen">
-    <div id="playerTopBar"><span id="myAvatarBadge" style="font-size: 4dvh; filter: drop-shadow(0 0.2dvh 0.2dvh rgba(0,0,0,0.2));"></span> <span id="myNameDisplay"></span></div>
-    
-    <div id="gameStatus">👀 備戰中，等待主持人的信號...</div>
+  <div id="gameScreen">
+    <div id="playerTopBar"><span id="myAvatarBadge" style="font-size: 4dvh; filter: drop-shadow(0 0.2dvh 0.2dvh rgba(0,0,0,0.2));"></span> <span id="myNameDisplay"></span></div>
+    
+    <div id="gameStatus">👀 備戰中，等待主持人的信號...</div>
 
-    <!-- 底部進度條計時器 -->
-    <div id="mobileTimerContainer">
-        <div class="timer-bar-wrap"><div id="mobileTimerBar" class="striped-bar bar-normal"></div></div>
-        <div id="mobileTimerText">--</div>
-    </div>
+    <!-- 底部進度條計時器 -->
+    <div id="mobileTimerContainer">
+        <div class="timer-bar-wrap"><div id="mobileTimerBar" class="striped-bar bar-normal"></div></div>
+        <div id="mobileTimerText">--</div>
+    </div>
 
-    <div style="flex-shrink: 0; margin-bottom: 1dvh;">
-      <span id="streakBadge"></span>
-      <span id="shieldBadge">🛡️ 護盾啟動</span>
-    </div>
-    
-    <div id="traitorWarning">☠️ 你是本局背叛者！<br>故意答錯並誤導隊友來吸取積分！</div>
+    <div style="flex-shrink: 0; margin-bottom: 1dvh;">
+      <span id="streakBadge"></span>
+      <span id="shieldBadge">🛡️ 護盾啟動</span>
+    </div>
+    
+    <div id="traitorWarning">☠️ 你是本局背叛者！<br>故意答錯並誤導隊友來吸取積分！</div>
 
-    <div id="ghostOverlay">
-      <span style="font-size: 10dvh;">👻</span>
-      <div style="background:#fff; color:#333; padding:1.5dvh; border-radius:2dvh; font-size: 2.5dvh; font-weight:bold; margin-top:1dvh;">靈魂狀態：等待隊伍救援復活</div>
-    </div>
-    
-    <div id="coopText" style="display:none; background:#fff; padding:3dvh; border-radius:3dvh; font-size:4dvh; font-weight:900; margin-bottom:2dvh; flex-shrink:0;"></div>
-    
-    <div id="orderDisplay"></div>
-    <button id="resetOrderBtn" onclick="resetOrder()">重置排序</button>
+    <div id="ghostOverlay">
+      <span style="font-size: 10dvh;">👻</span>
+      <div style="background:#fff; color:#333; padding:1.5dvh; border-radius:2dvh; font-size: 2.5dvh; font-weight:bold; margin-top:1dvh;">靈魂狀態：等待隊伍救援復活</div>
+    </div>
+    
+    <div id="coopText" style="display:none; background:#fff; padding:3dvh; border-radius:3dvh; font-size:4dvh; font-weight:900; margin-bottom:2dvh; flex-shrink:0;"></div>
+    
+    <div id="orderDisplay"></div>
+    <button id="resetOrderBtn" onclick="resetOrder()">重置排序</button>
 
-    <!-- 彈性網格選項區 -->
-    <div id="btnGrid"></div>
+    <!-- 彈性網格選項區 -->
+    <div id="btnGrid"></div>
 
-    <div id="dragBox">
-      <h3 style="color:#333; font-size: 3dvh; margin-top:0; flex-shrink:0;">上下拖曳排列對應順序</h3>
-      <ul id="dragList"></ul>
-    </div>
+    <div id="dragBox">
+      <h3 style="color:#333; font-size: 3dvh; margin-top:0; flex-shrink:0;">上下拖曳排列對應順序</h3>
+      <ul id="dragList"></ul>
+    </div>
 
-    <div id="sliderBox">
-      <span style="font-size: 3dvh; color:#666; font-weight:bold;">滑動拉桿選擇精準數值</span>
-      <div id="sliderValue">50</div>
-      <input type="range" id="ansSlider" min="0" max="100" value="50" oninput="document.getElementById('sliderValue').innerText = this.value">
-    </div>
+    <div id="sliderBox">
+      <span style="font-size: 3dvh; color:#666; font-weight:bold;">滑動拉桿選擇精準數值</span>
+      <div id="sliderValue">50</div>
+      <input type="range" id="ansSlider" min="0" max="100" value="50" oninput="document.getElementById('sliderValue').innerText = this.value">
+    </div>
 
-    <div id="wagerBox">
-      <span style="font-size: 3dvh; font-weight:bold;" id="wagerTitle">你要押注多少積分？</span>
-      <select id="bountyTarget" class="input-field" style="display:none;"></select>
-      <div id="wagerAmount">0</div>
-      <input type="range" id="wagerSlider" min="0" max="0" value="0" oninput="document.getElementById('wagerAmount').innerText = this.value">
-      <button class="action-btn" onclick="confirmWager()">確定送出 💰</button>
-    </div>
+    <div id="wagerBox">
+      <span style="font-size: 3dvh; font-weight:bold;" id="wagerTitle">你要押注多少積分？</span>
+      <select id="bountyTarget" class="input-field" style="display:none;"></select>
+      <div id="wagerAmount">0</div>
+      <input type="range" id="wagerSlider" min="0" max="0" value="0" oninput="document.getElementById('wagerAmount').innerText = this.value">
+      <button class="action-btn" onclick="confirmWager()">確定送出 💰</button>
+    </div>
 
-    <button id="submitBtn" class="action-btn" onclick="submitAnswers()">確認發射！✨</button>
+    <button id="submitBtn" class="action-btn" onclick="submitAnswers()">確認發射！✨</button>
 
-    <div id="skillBar">
-      <button class="skill-btn btn-freeze" onclick="useSkill('freeze')">❄️ 冰凍<br>(-500)</button>
-      <button class="skill-btn btn-scramble" onclick="useSkill('scramble')">🌪️ 洗牌<br>(-500)</button>
-      <button class="skill-btn btn-5050" onclick="useSkill('5050')">✂️ 50/50<br>(-200)</button>
-      <button class="skill-btn btn-shield" onclick="useSkill('shield')">🛡️ 護盾<br>(-300)</button>
-    </div>
-  </div>
+    <div id="skillBar">
+      <button class="skill-btn btn-freeze" onclick="useSkill('freeze')">❄️ 冰凍<br>(-500)</button>
+      <button class="skill-btn btn-scramble" onclick="useSkill('scramble')">🌪️ 洗牌<br>(-500)</button>
+      <button class="skill-btn btn-5050" onclick="useSkill('5050')">✂️ 50/50<br>(-200)</button>
+      <button class="skill-btn btn-shield" onclick="useSkill('shield')">🛡️ 護盾<br>(-300)</button>
+    </div>
+  </div>
 
-  <script>
-    let audioCtx;
+  <script>
+    let audioCtx;
 
-    function initAudio() { 
-      if(!audioCtx) { 
-          audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
-          if(audioCtx.state === 'suspended') audioCtx.resume(); 
-      } 
-    }
+    function initAudio() { 
+      if(!audioCtx) { 
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+          if(audioCtx.state === 'suspended') audioCtx.resume(); 
+      } 
+    }
 
-    function playTone(freq, type, duration, vol=0.1) { 
-      if(!audioCtx) return; 
-      const osc = audioCtx.createOscillator(); 
-      const gain = audioCtx.createGain(); 
-      osc.type = type; 
-      osc.frequency.setValueAtTime(freq, audioCtx.currentTime); 
-      gain.gain.setValueAtTime(vol, audioCtx.currentTime); 
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration); 
-      osc.connect(gain); gain.connect(audioCtx.destination); 
-      osc.start(); osc.stop(audioCtx.currentTime + duration); 
-    }
-    function playCoinSound() { initAudio(); playTone(987.77, 'sine', 0.1, 0.1); setTimeout(() => playTone(1318.51, 'sine', 0.3, 0.1), 100); }
-    function playClickSound() { initAudio(); playTone(800, 'square', 0.05, 0.05); }
-    function playShockSound() { initAudio(); playTone(200, 'sawtooth', 0.1); setTimeout(()=>playTone(300, 'sawtooth', 0.3), 100); }
-    function playTickFast() { initAudio(); playTone(800, 'square', 0.1, 0.08); } 
-    function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
+    function playTone(freq, type, duration, vol=0.1) { 
+      if(!audioCtx) return; 
+      const osc = audioCtx.createOscillator(); 
+      const gain = audioCtx.createGain(); 
+      osc.type = type; 
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime); 
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime); 
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration); 
+      osc.connect(gain); gain.connect(audioCtx.destination); 
+      osc.start(); osc.stop(audioCtx.currentTime + duration); 
+    }
+    function playCoinSound() { initAudio(); playTone(987.77, 'sine', 0.1, 0.1); setTimeout(() => playTone(1318.51, 'sine', 0.3, 0.1), 100); }
+    function playClickSound() { initAudio(); playTone(800, 'square', 0.05, 0.05); }
+    function playShockSound() { initAudio(); playTone(200, 'sawtooth', 0.1); setTimeout(()=>playTone(300, 'sawtooth', 0.3), 100); }
+    function playTickFast() { initAudio(); playTone(800, 'square', 0.1, 0.08); } 
+    function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
 
-    const avatarsList = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿','🦔','🐉','🐲'];
-    const shapeList = ['▲','◆','●','■','★','✚','✦','✖','▼','⬣'];
-    
-    let peer; let hostConnection; let currentQuestionType = 'single'; 
-    let selectedAnswers = new Set(); let selectedOrder = []; 
-    let autoPin = ""; let myTeamGrad = "linear-gradient(135deg, #1cb5e0, #000046)"; 
-    let myScore = 0; let iceHp = 0; let hasShield = false;
-    let isBountyMode = false; let isAuctionMode = false;
-    let sortableInstance = null; let memoryTimeout = null;
-    let currentOptions = []; 
-    let currentOptionsLength = 0;
-    
-    let myAvatar = "";
-    let isGlobalPaused = false; 
-    let isEliminated = false; 
-    let mobileTimerInterval = null; 
+    const avatarsList = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿','🦔','🐉','🐲'];
+    const shapeList = ['▲','◆','●','■','★','✚','✦','✖','▼','⬣'];
+    
+    let peer; let hostConnection; let currentQuestionType = 'single'; 
+    let selectedAnswers = new Set(); let selectedOrder = []; 
+    let autoPin = ""; let myTeamGrad = "linear-gradient(135deg, #1cb5e0, #000046)"; 
+    let myScore = 0; let iceHp = 0; let hasShield = false;
+    let isBountyMode = false; let isAuctionMode = false;
+    let sortableInstance = null; let memoryTimeout = null;
+    let currentOptions = []; 
+    let currentOptionsLength = 0;
+    
+    let myAvatar = "";
+    let isGlobalPaused = false; 
+    let isEliminated = false; 
+    let mobileTimerInterval = null; 
 
-    window.onload = () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      autoPin = urlParams.get('pin');
-      if (!autoPin) {
-        document.getElementById('loginForm').innerHTML = `<h2 style="color: #ffeaa7;">⚠️ 迷路了嗎？</h2><p style="font-size: 3dvh; line-height: 1.5;">請直接掃描大螢幕上的<br>QR Code 來加入派對！</p>`;
-      } else { document.getElementById('playerName').focus(); }
-    };
+    window.onload = () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      autoPin = urlParams.get('pin');
+      if (!autoPin) {
+        document.getElementById('loginForm').innerHTML = `<h2 style="color: #ffeaa7;">⚠️ 迷路了嗎？</h2><p style="font-size: 3dvh; line-height: 1.5;">請直接掃描大螢幕上的<br>QR Code 來加入派對！</p>`;
+      } else { document.getElementById('playerName').focus(); }
+    };
 
-    function joinGame() {
-      if (!autoPin) return alert("請掃描大螢幕的 QR Code！");
-      
-      if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-      if(audioCtx.state === 'suspended') audioCtx.resume();
-      
-      initAudio(); vibrate(50); playClickSound(); 
-      const myName = document.getElementById('playerName').value.trim();
-      if (!myName) return alert('忘記輸入名字囉！');
+    function joinGame() {
+      if (!autoPin) return alert("請掃描大螢幕的 QR Code！");
+      
+      if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      if(audioCtx.state === 'suspended') audioCtx.resume();
+      
+      initAudio(); vibrate(50); playClickSound(); 
+      const myName = document.getElementById('playerName').value.trim();
+      if (!myName) return alert('忘記輸入名字囉！');
 
-      myAvatar = avatarsList[Math.floor(Math.random() * avatarsList.length)];
-      document.getElementById('myAvatarBadge').innerText = myAvatar;
-      document.getElementById('myNameDisplay').innerText = myName;
+      myAvatar = avatarsList[Math.floor(Math.random() * avatarsList.length)];
+      document.getElementById('myAvatarBadge').innerText = myAvatar;
+      document.getElementById('myNameDisplay').innerText = myName;
 
-      document.getElementById('statusText').innerText = "📡 正在連線中...";
-      peer = new Peer({
-          config: {
-              'iceServers': [
-                  { urls: 'stun:stun.l.google.com:19302' },
-                  { urls: 'stun:stun1.l.google.com:19302' }
-              ]
-          }
-      });
+      document.getElementById('statusText').innerText = "📡 正在連線中...";
+      peer = new Peer();
 
-      peer.on('open', (id) => {
-        hostConnection = peer.connect('minikahoot-' + autoPin);
-        
-        hostConnection.on('open', () => {
-          vibrate([50, 100, 50]); 
-          hostConnection.send({ type: 'JOIN', name: myName });
-          hostConnection.send({ type: 'SYNC_AVATAR', avatar: myAvatar });
-        });
+      peer.on('open', (id) => {
+        hostConnection = peer.connect('minikahoot-' + autoPin);
+        
+        hostConnection.on('open', () => {
+          vibrate([50, 100, 50]); 
+          hostConnection.send({ type: 'JOIN', name: myName });
+          hostConnection.send({ type: 'SYNC_AVATAR', avatar: myAvatar });
+        });
 
-      peer.on('error', (err) => {
-          document.getElementById('statusText').innerText = "❌ 連線失敗，請重試";
-          alert("連線發生錯誤：" + err.type + "\n如果您使用的是行動網路，請嘗試連接 Wi-Fi 或重新掃描條碼。");
-      });
+        hostConnection.on('data', (data) => {
+          
+          if (data.type === 'ELIMINATED') {
+            isEliminated = true;
+            document.getElementById('eliminatedOverlay').style.display = 'flex';
+            vibrate([500, 200, 500]); 
+          }
+          else if (data.type === 'GAME_PAUSED') {
+            isGlobalPaused = data.isPaused;
+            document.getElementById('playerPauseOverlay').style.display = isGlobalPaused ? 'flex' : 'none';
+          }
+          else if (data.type === 'TEAM_SELECTION_START' || data.type === 'TEAM_UPDATED') {
+            document.getElementById('loginScreen').style.display = 'none';
+            if(data.css) document.getElementById('dynamicTeamStyles').innerHTML = data.css;
 
-        hostConnection.on('data', (data) => {
-          
-          if (data.type === 'ELIMINATED') {
-            isEliminated = true;
-            document.getElementById('eliminatedOverlay').style.display = 'flex';
-            vibrate([500, 200, 500]); 
-          }
-          else if (data.type === 'GAME_PAUSED') {
-            isGlobalPaused = data.isPaused;
-            document.getElementById('playerPauseOverlay').style.display = isGlobalPaused ? 'flex' : 'none';
-          }
-          else if (data.type === 'TEAM_SELECTION_START' || data.type === 'TEAM_UPDATED') {
-            document.getElementById('loginScreen').style.display = 'none';
-            if(data.css) document.getElementById('dynamicTeamStyles').innerHTML = data.css;
+            if(document.getElementById('gameScreen').style.display !== 'flex') {
+              document.getElementById('teamScreen').style.display = 'flex';
+              renderTeams(data.teams, data.max);
+            }
+          }
+          else if (data.type === 'INDIVIDUAL_MODE_WAIT') {
+            vibrate(100); playCoinSound();
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'flex';
+            document.getElementById('playerTopBar').style.display = 'inline-flex';
+            document.getElementById('gameStatus').innerText = `🛡️ 已加入英雄榜！等待戰鬥開始...`;
+            document.body.style.background = myTeamGrad;
+          }
+          else if (data.type === 'TEAM_ASSIGNED') {
+            vibrate(100); playCoinSound();
+            document.getElementById('teamScreen').style.display = 'none';
+            document.getElementById('gameScreen').style.display = 'flex';
+            document.getElementById('playerTopBar').style.display = 'inline-flex';
+            document.getElementById('gameStatus').innerText = `🛡️ 你已加入 ${data.teamName}！等待戰鬥開始...`;
+            myTeamGrad = data.teamGrad; document.body.style.background = myTeamGrad; 
+          }
+          else if (data.type === 'TEAM_SHUFFLE') {
+            playShockSound(); vibrate([100, 50, 100, 50, 200, 50, 300]); 
+            document.body.style.background = ''; document.body.className = 'shuffle-mode';
+            const statusEl = document.getElementById('gameStatus');
+            statusEl.classList.add('status-shuffle');
+            statusEl.innerHTML = `🌀 命運洗牌！<br>你被調往<br><span style="color:#FFD700;">${data.teamName}</span>！`;
+            myTeamGrad = data.teamGrad;
+            
+            setTimeout(() => {
+              document.body.className = ''; document.body.style.background = myTeamGrad;
+              statusEl.classList.remove('status-shuffle');
+              statusEl.innerText = `🛡️ 你現在是 ${data.teamName} 的一員了！`;
+              statusEl.style.background = "#fff"; statusEl.style.color = "#333";
+            }, 4500);
+          }
+          else if (data.type === 'SKILL_SUCCESS') {
+            alert(data.msg); 
+            if(data.msg.includes("護盾")) { hasShield = true; document.getElementById('shieldBadge').style.display = 'inline-block'; }
+          }
+          else if (data.type === 'SKILL_5050_RESULT') {
+            vibrate(100);
+            const options = document.querySelectorAll('.ans-btn');
+            data.wrongOpts.forEach(i => { if(options[i]) { options[i].style.opacity = '0.15'; options[i].style.transform = 'scale(0.85)'; options[i].classList.add('locked'); } });
+          }
+          else if (data.type === 'BE_ATTACKED') {
+            if (data.effect === 'freeze') {
+              iceHp = 5; document.getElementById('freezeOverlay').style.display = 'flex'; vibrate([200, 100, 200, 100, 200]);
+            } else if (data.effect === 'scramble') {
+              vibrate([100, 100, 100]);
+              document.querySelectorAll('.ans-btn').forEach(b => { b.style.order = Math.floor(Math.random() * currentOptionsLength); });
+            }
+          }
+          else if (data.type === 'WAGER_PHASE' || data.type === 'BOUNTY_PHASE' || data.type === 'AUCTION_PHASE') {
+            if (isEliminated) return; 
+            vibrate(100); 
+            
+            document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting'); document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('gameScreen').style.border = 'none'; document.getElementById('gameScreen').style.boxShadow = 'none';
+            document.getElementById('btnGrid').style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; document.getElementById('submitBtn').style.display = 'none'; document.getElementById('coopText').style.display = 'none';
+            document.getElementById('wagerBox').style.display = 'flex';
+            
+            isBountyMode = (data.type === 'BOUNTY_PHASE');
+            isAuctionMode = (data.type === 'AUCTION_PHASE');
+            
+            const wSlider = document.getElementById('wagerSlider');
+            wSlider.disabled = false;
+            wSlider.max = myScore > 0 ? myScore : 0; 
+            wSlider.value = 0; 
+            document.getElementById('wagerAmount').innerText = "0";
 
-            if(document.getElementById('gameScreen').style.display !== 'flex') {
-              document.getElementById('teamScreen').style.display = 'flex';
-              renderTeams(data.teams, data.max);
-            }
-          }
-          else if (data.type === 'INDIVIDUAL_MODE_WAIT') {
-            vibrate(100); playCoinSound();
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('gameScreen').style.display = 'flex';
-            document.getElementById('playerTopBar').style.display = 'inline-flex';
-            document.getElementById('gameStatus').innerText = `🛡️ 已加入英雄榜！等待戰鬥開始...`;
-            document.body.style.background = myTeamGrad;
-          }
-          else if (data.type === 'TEAM_ASSIGNED') {
-            vibrate(100); playCoinSound();
-            document.getElementById('teamScreen').style.display = 'none';
-            document.getElementById('gameScreen').style.display = 'flex';
-            document.getElementById('playerTopBar').style.display = 'inline-flex';
-            document.getElementById('gameStatus').innerText = `🛡️ 你已加入 ${data.teamName}！等待戰鬥開始...`;
-            myTeamGrad = data.teamGrad; document.body.style.background = myTeamGrad; 
-          }
-          else if (data.type === 'TEAM_SHUFFLE') {
-            playShockSound(); vibrate([100, 50, 100, 50, 200, 50, 300]); 
-            document.body.style.background = ''; document.body.className = 'shuffle-mode';
-            const statusEl = document.getElementById('gameStatus');
-            statusEl.classList.add('status-shuffle');
-            statusEl.innerHTML = `🌀 命運洗牌！<br>你被調往<br><span style="color:#FFD700;">${data.teamName}</span>！`;
-            myTeamGrad = data.teamGrad;
-            
-            setTimeout(() => {
-              document.body.className = ''; document.body.style.background = myTeamGrad;
-              statusEl.classList.remove('status-shuffle');
-              statusEl.innerText = `🛡️ 你現在是 ${data.teamName} 的一員了！`;
-              statusEl.style.background = "#fff"; statusEl.style.color = "#333";
-            }, 4500);
-          }
-          else if (data.type === 'SKILL_SUCCESS') {
-            alert(data.msg); 
-            if(data.msg.includes("護盾")) { hasShield = true; document.getElementById('shieldBadge').style.display = 'inline-block'; }
-          }
-          else if (data.type === 'SKILL_5050_RESULT') {
-            vibrate(100);
-            const options = document.querySelectorAll('.ans-btn');
-            data.wrongOpts.forEach(i => { if(options[i]) { options[i].style.opacity = '0.15'; options[i].style.transform = 'scale(0.85)'; options[i].classList.add('locked'); } });
-          }
-          else if (data.type === 'BE_ATTACKED') {
-            if (data.effect === 'freeze') {
-              iceHp = 5; document.getElementById('freezeOverlay').style.display = 'flex'; vibrate([200, 100, 200, 100, 200]);
-            } else if (data.effect === 'scramble') {
-              vibrate([100, 100, 100]);
-              document.querySelectorAll('.ans-btn').forEach(b => { b.style.order = Math.floor(Math.random() * currentOptionsLength); });
-            }
-          }
-          else if (data.type === 'WAGER_PHASE' || data.type === 'BOUNTY_PHASE' || data.type === 'AUCTION_PHASE') {
-            if (isEliminated) return; 
-            vibrate(100); 
-            
-            document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting'); document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('gameScreen').style.border = 'none'; document.getElementById('gameScreen').style.boxShadow = 'none';
-            document.getElementById('btnGrid').style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; document.getElementById('submitBtn').style.display = 'none'; document.getElementById('coopText').style.display = 'none';
-            document.getElementById('wagerBox').style.display = 'flex';
-            
-            isBountyMode = (data.type === 'BOUNTY_PHASE');
-            isAuctionMode = (data.type === 'AUCTION_PHASE');
-            
-            const wSlider = document.getElementById('wagerSlider');
-            wSlider.disabled = false;
-            wSlider.max = myScore > 0 ? myScore : 0; 
-            wSlider.value = 0; 
-            document.getElementById('wagerAmount').innerText = "0";
+            if(isAuctionMode) {
+                document.getElementById('gameStatus').innerText = "⚖️ 搶答拍賣開始！";
+                document.getElementById('wagerTitle').innerText = "出價爭奪唯一作答權：";
+            } else {
+                document.getElementById('gameStatus').innerText = isBountyMode ? "🎯 賞金獵人時刻！" : "💰 盲注時刻！";
+                document.getElementById('wagerTitle').innerText = isBountyMode ? "選擇要詛咒的對手或隊伍" : "你要押注多少積分？";
+            }
+            
+            const tgtSelect = document.getElementById('bountyTarget');
+            if (isBountyMode && data.teams) {
+              tgtSelect.style.display = 'block'; tgtSelect.innerHTML = '';
+              data.teams.forEach(t => {
+                 if(t.name !== document.getElementById('playerName').value) tgtSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+              });
+            } else { tgtSelect.style.display = 'none'; }
 
-            if(isAuctionMode) {
-                document.getElementById('gameStatus').innerText = "⚖️ 搶答拍賣開始！";
-                document.getElementById('wagerTitle').innerText = "出價爭奪唯一作答權：";
-            } else {
-                document.getElementById('gameStatus').innerText = isBountyMode ? "🎯 賞金獵人時刻！" : "💰 盲注時刻！";
-                document.getElementById('wagerTitle').innerText = isBountyMode ? "選擇要詛咒的對手或隊伍" : "你要押注多少積分？";
-            }
-            
-            const tgtSelect = document.getElementById('bountyTarget');
-            if (isBountyMode && data.teams) {
-              tgtSelect.style.display = 'block'; tgtSelect.innerHTML = '';
-              data.teams.forEach(t => {
-                 if(t.name !== document.getElementById('playerName').value) tgtSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
-              });
-            } else { tgtSelect.style.display = 'none'; }
+            startMobileTimer(data.time || 10, isAuctionMode, 0);
+          }
+          else if (data.type === 'ENABLE_BUTTONS') {
+            if (isEliminated) return; 
 
-            startMobileTimer(data.time || 10, isAuctionMode, 0);
-          }
-          else if (data.type === 'ENABLE_BUTTONS') {
-            if (isEliminated) return; 
+            vibrate(100); selectedAnswers.clear(); selectedOrder = []; currentQuestionType = data.qType; 
+            myScore = data.score; 
+            currentOptionsLength = data.options ? data.options.length : 0; 
+            currentOptions = data.options || []; 
+            clearTimeout(memoryTimeout);
+            
+            document.getElementById('mobileTimerContainer').style.display = 'flex';
+            document.getElementById('mobileTimerBar').className = 'striped-bar bar-normal';
+            document.getElementById('mobileTimerBar').style.width = '100%';
+            document.getElementById('mobileTimerBar').style.background = '';
+            document.getElementById('mobileTimerText').innerText = data.time || (data.isFast ? 10 : 15);
+            document.getElementById('gameScreen').classList.remove('panel-shake');
+            document.body.classList.remove('panic-lighting');
+            document.getElementById('giantTimerOverlay').style.display = 'none';
+            document.getElementById('gameScreen').style.border = 'none';
+            document.getElementById('gameScreen').style.boxShadow = 'none';
 
-            vibrate(100); selectedAnswers.clear(); selectedOrder = []; currentQuestionType = data.qType; 
-            myScore = data.score; 
-            currentOptionsLength = data.options ? data.options.length : 0; 
-            currentOptions = data.options || []; 
-            clearTimeout(memoryTimeout);
-            
-            document.getElementById('mobileTimerContainer').style.display = 'flex';
-            document.getElementById('mobileTimerBar').className = 'striped-bar bar-normal';
-            document.getElementById('mobileTimerBar').style.width = '100%';
-            document.getElementById('mobileTimerBar').style.background = '';
-            document.getElementById('mobileTimerText').innerText = data.time || (data.isFast ? 10 : 15);
-            document.getElementById('gameScreen').classList.remove('panel-shake');
-            document.body.classList.remove('panic-lighting');
-            document.getElementById('giantTimerOverlay').style.display = 'none';
-            document.getElementById('gameScreen').style.border = 'none';
-            document.getElementById('gameScreen').style.boxShadow = 'none';
+            document.getElementById('wagerBox').style.display = 'none';
+            document.getElementById('traitorWarning').style.display = data.isTraitor ? 'block' : 'none';
+            
+            if (!hasShield) document.getElementById('shieldBadge').style.display = 'none';
+            const sb = document.getElementById('streakBadge');
+            if (data.streak > 0) { sb.style.display='inline-block'; sb.innerText=`🔥 連對加成 x${(1 + data.streak*0.2).toFixed(1)}`; } else { sb.style.display='none'; }
 
-            document.getElementById('wagerBox').style.display = 'none';
-            document.getElementById('traitorWarning').style.display = data.isTraitor ? 'block' : 'none';
-            
-            if (!hasShield) document.getElementById('shieldBadge').style.display = 'none';
-            const sb = document.getElementById('streakBadge');
-            if (data.streak > 0) { sb.style.display='inline-block'; sb.innerText=`🔥 連對加成 x${(1 + data.streak*0.2).toFixed(1)}`; } else { sb.style.display='none'; }
+            const skillBar = document.getElementById('skillBar');
+            if (data.useSabotage === true && data.score >= 200 && !data.isGhost) skillBar.style.display = 'flex'; else skillBar.style.display = 'none';
+            
+            if (data.isGhost) {
+              document.body.classList.add('ghost-mode'); document.getElementById('ghostOverlay').style.display = 'flex';
+            } else {
+              document.body.classList.remove('ghost-mode'); document.getElementById('ghostOverlay').style.display = 'none';
+            }
 
-            const skillBar = document.getElementById('skillBar');
-            if (data.useSabotage === true && data.score >= 200 && !data.isGhost) skillBar.style.display = 'flex'; else skillBar.style.display = 'none';
-            
-            if (data.isGhost) {
-              document.body.classList.add('ghost-mode'); document.getElementById('ghostOverlay').style.display = 'flex';
-            } else {
-              document.body.classList.remove('ghost-mode'); document.getElementById('ghostOverlay').style.display = 'none';
-            }
+            if (data.isFast) {
+              document.body.style.background = ''; document.body.className = 'fast-mode';
+              document.getElementById('gameStatus').innerText = "⚡ 搶答極速對決！快按！";
+              document.getElementById('gameStatus').style.background = "#c0392b"; document.getElementById('gameStatus').style.color = "#fff";
+              vibrate([30, 30, 30, 30]); 
+            } else {
+              document.body.className = ''; document.body.style.background = myTeamGrad; 
+              document.getElementById('gameStatus').innerText = data.qType === 'single' ? "✨ 單選題，請作答" : (data.qType === 'slider' ? "🎚️ 拉動滑桿作答" : (data.qType.startsWith('match_') ? "🔗 請對應連連看順序" : (data.qType === 'order' ? "🔢 依序點擊作答" : "🌟 多選題，選好送出！")));
+              document.getElementById('gameStatus').style.background = "#fff"; document.getElementById('gameStatus').style.color = "#333";
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.style.display = 'block'; submitBtn.style.opacity = '1'; submitBtn.style.pointerEvents = 'auto'; submitBtn.innerText = "確認發射！✨";
 
-            if (data.isFast) {
-              document.body.style.background = ''; document.body.className = 'fast-mode';
-              document.getElementById('gameStatus').innerText = "⚡ 搶答極速對決！快按！";
-              document.getElementById('gameStatus').style.background = "#c0392b"; document.getElementById('gameStatus').style.color = "#fff";
-              vibrate([30, 30, 30, 30]); 
-            } else {
-              document.body.className = ''; document.body.style.background = myTeamGrad; 
-              document.getElementById('gameStatus').innerText = data.qType === 'single' ? "✨ 單選題，請作答" : (data.qType === 'slider' ? "🎚️ 拉動滑桿作答" : (data.qType.startsWith('match_') ? "🔗 請對應連連看順序" : (data.qType === 'order' ? "🔢 依序點擊作答" : "🌟 多選題，選好送出！")));
-              document.getElementById('gameStatus').style.background = "#fff"; document.getElementById('gameStatus').style.color = "#333";
-            }
-            
-            const submitBtn = document.getElementById('submitBtn');
-            submitBtn.style.display = 'block'; submitBtn.style.opacity = '1'; submitBtn.style.pointerEvents = 'auto'; submitBtn.innerText = "確認發射！✨";
+            document.getElementById('orderDisplay').style.display = 'none'; document.getElementById('resetOrderBtn').style.display = 'none';
+            document.getElementById('coopText').style.display = 'none';
+            
+            const btnGrid = document.getElementById('btnGrid');
+            btnGrid.innerHTML = '';
+            
+            if (data.isAuctionWinner !== undefined && !data.isAuctionWinner) {
+               document.getElementById('gameStatus').innerText = `⚖️ 本題由 ${data.aucWinnerName} 得標！`;
+               document.getElementById('gameStatus').style.background = "#333"; document.getElementById('gameStatus').style.color = "#f1c40f";
+               submitBtn.style.display = 'none';
+            }
+            
+            if (data.qType === 'slider') {
+              btnGrid.style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; document.getElementById('sliderBox').style.display = 'flex';
+              const sld = document.getElementById('ansSlider');
+              sld.disabled = false;
+              sld.min = data.min || 0; sld.max = data.max || 100; sld.value = Math.floor((parseInt(sld.min)+parseInt(sld.max))/2);
+              document.getElementById('sliderValue').innerText = sld.value;
+            } 
+            else if (data.qType === 'match_drag') {
+              btnGrid.style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'flex';
+              const list = document.getElementById('dragList'); list.innerHTML = '';
+              let initialOrder = Array.from({length: data.options.length}, (_, i) => i).sort(() => Math.random() - 0.5); 
+              
+              initialOrder.forEach(idx => { 
+                  let isImg = data.options[idx].trim().startsWith('http');
+                  let contentHtml = isImg 
+                      ? `<img src="${data.options[idx].trim()}" style="max-height: 6dvh; object-fit: contain; border-radius: 1dvh; pointer-events: none;">` 
+                      : data.options[idx];
+                  list.innerHTML += `<li data-id="${idx}"><span class="drag-handle">☰</span> <span style="flex:1; text-align:left; display:flex; align-items:center;">${contentHtml}</span></li>`; 
+              });
+              
+              if(sortableInstance) sortableInstance.destroy();
+              sortableInstance = new Sortable(list, { 
+                  animation: 150, 
+                  ghostClass: 'sortable-ghost',
+                  delay: 150,
+                  delayOnTouchOnly: true
+              });
+            }
+            else {
+              document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; btnGrid.style.display = 'grid';
+              
+              if (data.qType === 'order' || data.qType === 'match_click') {
+                document.getElementById('orderDisplay').style.display = 'block'; document.getElementById('orderDisplay').innerText = '序列：';
+                document.getElementById('resetOrderBtn').style.display = 'inline-block';
+              }
+              
+              let shuffled = (data.qType === 'match_click') ? Array.from({length: data.options.length}, (_, i) => i).sort(() => Math.random() - 0.5) : Array.from({length: data.options.length}, (_, i) => i);
+              
+              let optCount = data.options.length;
+              if (optCount <= 4) { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; }
+              else { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; } 
 
-            document.getElementById('orderDisplay').style.display = 'none'; document.getElementById('resetOrderBtn').style.display = 'none';
-            document.getElementById('coopText').style.display = 'none';
-            
-            const btnGrid = document.getElementById('btnGrid');
-            btnGrid.innerHTML = '';
-            
-            if (data.isAuctionWinner !== undefined && !data.isAuctionWinner) {
-               document.getElementById('gameStatus').innerText = `⚖️ 本題由 ${data.aucWinnerName} 得標！`;
-               document.getElementById('gameStatus').style.background = "#333"; document.getElementById('gameStatus').style.color = "#f1c40f";
-               submitBtn.style.display = 'none';
-            }
-            
-            if (data.qType === 'slider') {
-              btnGrid.style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; document.getElementById('sliderBox').style.display = 'flex';
-              const sld = document.getElementById('ansSlider');
-              sld.disabled = false;
-              sld.min = data.min || 0; sld.max = data.max || 100; sld.value = Math.floor((parseInt(sld.min)+parseInt(sld.max))/2);
-              document.getElementById('sliderValue').innerText = sld.value;
-            } 
-            else if (data.qType === 'match_drag') {
-              btnGrid.style.display = 'none'; document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'flex';
-              const list = document.getElementById('dragList'); list.innerHTML = '';
-              let initialOrder = Array.from({length: data.options.length}, (_, i) => i).sort(() => Math.random() - 0.5); 
-              
-              initialOrder.forEach(idx => { 
-                  let isImg = data.options[idx].trim().startsWith('http');
-                  let contentHtml = isImg 
-                      ? `<img src="${data.options[idx].trim()}" style="max-height: 6dvh; object-fit: contain; border-radius: 1dvh; pointer-events: none;">` 
-                      : data.options[idx];
-                  list.innerHTML += `<li data-id="${idx}"><span class="drag-handle">☰</span> <span style="flex:1; text-align:left; display:flex; align-items:center;">${contentHtml}</span></li>`; 
-              });
-              
-              if(sortableInstance) sortableInstance.destroy();
-              sortableInstance = new Sortable(list, { 
-                  animation: 150, 
-                  ghostClass: 'sortable-ghost',
-                  delay: 150,
-                  delayOnTouchOnly: true
-              });
-            }
-            else {
-              document.getElementById('sliderBox').style.display = 'none'; document.getElementById('dragBox').style.display = 'none'; btnGrid.style.display = 'grid';
-              
-              if (data.qType === 'order' || data.qType === 'match_click') {
-                document.getElementById('orderDisplay').style.display = 'block'; document.getElementById('orderDisplay').innerText = '序列：';
-                document.getElementById('resetOrderBtn').style.display = 'inline-block';
-              }
-              
-              let shuffled = (data.qType === 'match_click') ? Array.from({length: data.options.length}, (_, i) => i).sort(() => Math.random() - 0.5) : Array.from({length: data.options.length}, (_, i) => i);
-              
-              let optCount = data.options.length;
-              if (optCount <= 4) { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; }
-              else { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; } 
+              data.options.forEach((optText, i) => {
+                  let textContent;
+                  let isImg = false;
+                  if (data.qType === 'match_click' || data.qType === 'order') {
+                      isImg = data.options[i].trim().startsWith('http');
+                      textContent = isImg 
+                          ? `<img src="${data.options[i].trim()}" style="max-width:90%; max-height:8dvh; object-fit:contain; border-radius:1.5dvh; pointer-events:none;">` 
+                          : data.options[i];
+                  } else {
+                      textContent = shapeList[i % shapeList.length];
+                  }
 
-              data.options.forEach((optText, i) => {
-                  let textContent;
-                  let isImg = false;
-                  if (data.qType === 'match_click' || data.qType === 'order') {
-                      isImg = data.options[i].trim().startsWith('http');
-                      textContent = isImg 
-                          ? `<img src="${data.options[i].trim()}" style="max-width:90%; max-height:8dvh; object-fit:contain; border-radius:1.5dvh; pointer-events:none;">` 
-                          : data.options[i];
-                  } else {
-                      textContent = shapeList[i % shapeList.length];
-                  }
+                  let btnHTML = `<button class="ans-btn color-${i % 8} active" onclick="toggleSelection(${i}, event)" style="animation-delay: ${i * 0.05}s; order: ${shuffled[i]};">
+                                    <span class="opt-text" style="${isImg ? 'display:flex; justify-content:center; align-items:center; width:100%; height:100%; padding:0;' : ''} pointer-events:none;">${textContent}</span>
+                                 </button>`;
+                  btnGrid.innerHTML += btnHTML;
+              });
 
-                  let btnHTML = `<button class="ans-btn color-${i % 8} active" onclick="toggleSelection(${i}, event)" style="animation-delay: ${i * 0.05}s; order: ${shuffled[i]};">
-                                    <span class="opt-text" style="${isImg ? 'display:flex; justify-content:center; align-items:center; width:100%; height:100%; padding:0;' : ''} pointer-events:none;">${textContent}</span>
-                                 </button>`;
-                  btnGrid.innerHTML += btnHTML;
-              });
+              document.querySelectorAll('.ans-btn').forEach((b, i) => { 
+                if (data.qMode === 'chameleon' && gameCfg.useExtreme) b.classList.add('chameleon-fx');
+                if (data.qMode === 'auction' && gameCfg.useExtreme && !data.isAuctionWinner) b.classList.add('locked'); 
+                
+                setTimeout(() => { if(!b.classList.contains('locked')) b.classList.add('floating-opt'); }, 600 + i*100);
+              });
 
-              document.querySelectorAll('.ans-btn').forEach((b, i) => { 
-                // ✅ 修正後代碼 (index.html)：
-                if (data.qMode === 'chameleon') b.classList.add('chameleon-fx');
-                if (data.qMode === 'auction' && !data.isAuctionWinner) b.classList.add('locked');
-                
-                setTimeout(() => { if(!b.classList.contains('locked')) b.classList.add('floating-opt'); }, 600 + i*100);
-              });
+              if (data.qMode === 'memory' && gameCfg.useExtreme) {
+                  memoryTimeout = setTimeout(() => {
+                      document.querySelectorAll('.opt-text').forEach(t => t.classList.add('memory-hide'));
+                  }, 3000);
+              }
 
-              if (data.qMode === 'memory' && gameCfg.useExtreme) {
-                  memoryTimeout = setTimeout(() => {
-                      document.querySelectorAll('.opt-text').forEach(t => t.classList.add('memory-hide'));
-                  }, 3000);
-              }
+              if (data.coopRole === 'text_only') {
+                btnGrid.style.display = 'none'; document.getElementById('submitBtn').style.display = 'none';
+                document.getElementById('coopText').style.display = 'block'; document.getElementById('coopText').innerText = data.questionText;
+                document.getElementById('gameStatus').innerText = "🗣️ 快唸出題目給隊友聽！";
+              } else if (data.coopRole === 'btns_part1') {
+                let half = Math.ceil(data.options.length / 2);
+                document.querySelectorAll('.ans-btn').forEach((b, i) => { if(i >= half) b.style.display = 'none'; });
+                document.getElementById('gameStatus').innerText = "🧩 聽隊友指示作答！";
+              } else if (data.coopRole === 'btns_part2') {
+                let half = Math.ceil(data.options.length / 2);
+                document.querySelectorAll('.ans-btn').forEach((b, i) => { if(i < half) b.style.display = 'none'; });
+                document.getElementById('gameStatus').innerText = "🧩 聽隊友指示作答！";
+              }
+            }
 
-              if (data.coopRole === 'text_only') {
-                btnGrid.style.display = 'none'; document.getElementById('submitBtn').style.display = 'none';
-                document.getElementById('coopText').style.display = 'block'; document.getElementById('coopText').innerText = data.questionText;
-                document.getElementById('gameStatus').innerText = "🗣️ 快唸出題目給隊友聽！";
-              } else if (data.coopRole === 'btns_part1') {
-                let half = Math.ceil(data.options.length / 2);
-                document.querySelectorAll('.ans-btn').forEach((b, i) => { if(i >= half) b.style.display = 'none'; });
-                document.getElementById('gameStatus').innerText = "🧩 聽隊友指示作答！";
-              } else if (data.coopRole === 'btns_part2') {
-                let half = Math.ceil(data.options.length / 2);
-                document.querySelectorAll('.ans-btn').forEach((b, i) => { if(i < half) b.style.display = 'none'; });
-                document.getElementById('gameStatus').innerText = "🧩 聽隊友指示作答！";
-              }
-            }
+            startMobileTimer(data.time || (data.isFast ? 10 : 15), data.isFast, data.timerStyle || 0);
+          } 
+          else if (data.type === 'DISABLE_BUTTONS') {
+            clearInterval(mobileTimerInterval); 
+            document.getElementById('mobileTimerContainer').style.display = 'none';
+            document.body.className = ''; document.body.style.background = myTeamGrad; clearTimeout(memoryTimeout);
+            document.getElementById('gameStatus').innerText = "⏳ 停火！請抬頭看大螢幕";
+            document.getElementById('gameStatus').style.background = "#89609e"; document.getElementById('gameStatus').style.color = "white";
+            document.getElementById('submitBtn').style.display = 'none'; document.getElementById('skillBar').style.display = 'none';
+            document.querySelectorAll('.ans-btn').forEach(b => { b.classList.remove('active', 'selected', 'chameleon-fx', 'floating-opt'); b.classList.add('locked'); b.querySelector('.opt-text')?.classList.remove('memory-hide'); });
+            document.getElementById('ansSlider').disabled = true;
+            document.getElementById('giantTimerOverlay').style.display = 'none';
+            document.body.classList.remove('panic-lighting');
+            document.getElementById('gameScreen').classList.remove('panel-shake');
+            document.getElementById('gameScreen').style.border = 'none';
+            document.getElementById('gameScreen').style.boxShadow = 'none';
+          }
+        });
+      });
+    }
 
-            startMobileTimer(data.time || (data.isFast ? 10 : 15), data.isFast, data.timerStyle || 0);
-          } 
-          else if (data.type === 'DISABLE_BUTTONS') {
-            clearInterval(mobileTimerInterval); 
-            document.getElementById('mobileTimerContainer').style.display = 'none';
-            document.body.className = ''; document.body.style.background = myTeamGrad; clearTimeout(memoryTimeout);
-            document.getElementById('gameStatus').innerText = "⏳ 停火！請抬頭看大螢幕";
-            document.getElementById('gameStatus').style.background = "#89609e"; document.getElementById('gameStatus').style.color = "white";
-            document.getElementById('submitBtn').style.display = 'none'; document.getElementById('skillBar').style.display = 'none';
-            document.querySelectorAll('.ans-btn').forEach(b => { b.classList.remove('active', 'selected', 'chameleon-fx', 'floating-opt'); b.classList.add('locked'); b.querySelector('.opt-text')?.classList.remove('memory-hide'); });
-            document.getElementById('ansSlider').disabled = true;
-            document.getElementById('giantTimerOverlay').style.display = 'none';
-            document.body.classList.remove('panic-lighting');
-            document.getElementById('gameScreen').classList.remove('panel-shake');
-            document.getElementById('gameScreen').style.border = 'none';
-            document.getElementById('gameScreen').style.boxShadow = 'none';
-          }
-        });
-      });
-    }
+    function renderTeams(teams, max) { 
+      const list = document.getElementById('teamList'); list.innerHTML = ''; 
+      teams.forEach(t => { 
+        const isFull = t.players.length >= max; 
+        list.innerHTML += `<button class="team-btn" style="background: ${t.gradient};" onclick="selectTeam(${t.id})" ${isFull ? 'disabled' : ''}>${t.name} (${t.players.length}/${max}) ${isFull ? '🔒' : ''}</button>`; 
+      }); 
+    }
 
-    function renderTeams(teams, max) { 
-      const list = document.getElementById('teamList'); list.innerHTML = ''; 
-      teams.forEach(t => { 
-        const isFull = t.players.length >= max; 
-        list.innerHTML += `<button class="team-btn" style="background: ${t.gradient};" onclick="selectTeam(${t.id})" ${isFull ? 'disabled' : ''}>${t.name} (${t.players.length}/${max}) ${isFull ? '🔒' : ''}</button>`; 
-      }); 
-    }
+    function startMobileTimer(maxTime, isFast, timerStyle) {
+      clearInterval(mobileTimerInterval); 
+      const timerContainer = document.getElementById('mobileTimerContainer'); 
+      const timeBar = document.getElementById('mobileTimerBar'); 
+      const timerText = document.getElementById('mobileTimerText');
+      const giantTimerEl = document.getElementById('giantTimerOverlay'); 
+      
+      timerContainer.style.display = 'flex'; 
+      let timeLeft = maxTime;
+      timerText.innerText = timeLeft;
+      
+      if (timerStyle === 0) {
+          timeBar.className = 'striped-bar bar-normal';
+          timeBar.style.width = '100%';
+          timeBar.style.background = '';
+      } else if (timerStyle === 1) {
+          timeBar.className = 'striped-bar';
+          timeBar.style.width = '0%';
+          timeBar.style.background = `linear-gradient(90deg, hsl(120, 100%, 50%), hsl(100, 100%, 50%))`;
+      } else {
+          timeBar.className = 'striped-bar bar-normal';
+          timeBar.style.width = '100%';
+          timeBar.style.background = '';
+          document.getElementById('gameScreen').style.border = `0.8dvh solid hsl(120, 100%, 50%)`;
+      }
 
-    function startMobileTimer(maxTime, isFast, timerStyle) {
-      clearInterval(mobileTimerInterval); 
-      const timerContainer = document.getElementById('mobileTimerContainer'); 
-      const timeBar = document.getElementById('mobileTimerBar'); 
-      const timerText = document.getElementById('mobileTimerText');
-      const giantTimerEl = document.getElementById('giantTimerOverlay'); 
-      
-      timerContainer.style.display = 'flex'; 
-      let timeLeft = maxTime;
-      timerText.innerText = timeLeft;
-      
-      if (timerStyle === 0) {
-          timeBar.className = 'striped-bar bar-normal';
-          timeBar.style.width = '100%';
-          timeBar.style.background = '';
-      } else if (timerStyle === 1) {
-          timeBar.className = 'striped-bar';
-          timeBar.style.width = '0%';
-          timeBar.style.background = `linear-gradient(90deg, hsl(120, 100%, 50%), hsl(100, 100%, 50%))`;
-      } else {
-          timeBar.className = 'striped-bar bar-normal';
-          timeBar.style.width = '100%';
-          timeBar.style.background = '';
-          document.getElementById('gameScreen').style.border = `0.8dvh solid hsl(120, 100%, 50%)`;
-      }
+      document.getElementById('gameScreen').classList.remove('panel-shake'); 
+      document.body.classList.remove('panic-lighting'); 
+      giantTimerEl.style.display = 'none';
+      
+      mobileTimerInterval = setInterval(() => { 
+        if (isGlobalPaused) return;
+        timeLeft--; 
+        timerText.innerText = timeLeft;
+        let progress = ((maxTime - timeLeft) / maxTime) * 100; 
 
-      document.getElementById('gameScreen').classList.remove('panel-shake'); 
-      document.body.classList.remove('panic-lighting'); 
-      giantTimerEl.style.display = 'none';
-      
-      mobileTimerInterval = setInterval(() => { 
-        if (isGlobalPaused) return;
-        timeLeft--; 
-        timerText.innerText = timeLeft;
-        let progress = ((maxTime - timeLeft) / maxTime) * 100; 
+        if (timerStyle === 0) {
+            timeBar.style.width = `${100 - progress}%`;
+        } else if (timerStyle === 1) {
+            timeBar.style.width = `${progress}%`;
+            let hue = (timeLeft/maxTime) * 120;
+            timeBar.style.background = `linear-gradient(90deg, hsl(${hue}, 100%, 50%), hsl(${Math.max(0, hue - 20)}, 100%, 50%))`;
+        } else {
+            timeBar.style.width = `${100 - progress}%`;
+            let hue = (timeLeft/maxTime) * 120;
+            let spread = progress / 100 * 4 + 1; 
+            document.getElementById('gameScreen').style.border = `0.8dvh solid hsl(${hue}, 100%, 50%)`;
+            document.getElementById('gameScreen').style.boxShadow = `inset 0 0 ${spread}dvh 1dvh hsl(${hue}, 100%, 50%), 0 2dvh 5dvh rgba(0,0,0,0.15)`;
+        }
 
-        if (timerStyle === 0) {
-            timeBar.style.width = `${100 - progress}%`;
-        } else if (timerStyle === 1) {
-            timeBar.style.width = `${progress}%`;
-            let hue = (timeLeft/maxTime) * 120;
-            timeBar.style.background = `linear-gradient(90deg, hsl(${hue}, 100%, 50%), hsl(${Math.max(0, hue - 20)}, 100%, 50%))`;
-        } else {
-            timeBar.style.width = `${100 - progress}%`;
-            let hue = (timeLeft/maxTime) * 120;
-            let spread = progress / 100 * 4 + 1; 
-            document.getElementById('gameScreen').style.border = `0.8dvh solid hsl(${hue}, 100%, 50%)`;
-            document.getElementById('gameScreen').style.boxShadow = `inset 0 0 ${spread}dvh 1dvh hsl(${hue}, 100%, 50%), 0 2dvh 5dvh rgba(0,0,0,0.15)`;
-        }
+        timerText.classList.remove('tick-anim'); void timerText.offsetWidth; timerText.classList.add('tick-anim');
 
-        timerText.classList.remove('tick-anim'); void timerText.offsetWidth; timerText.classList.add('tick-anim');
+        if(timeLeft <= 5 && timeLeft > 0) { 
+          document.getElementById('gameScreen').classList.add('panel-shake'); 
+          document.body.classList.add('panic-lighting'); 
+          if (timerStyle === 0 || timerStyle === 2) timeBar.className = 'striped-bar bar-panic'; 
+          
+          giantTimerEl.style.display = 'flex'; 
+          giantTimerEl.innerText = timeLeft; 
+          if (!isEliminated) { playTickFast(); } 
+        } else { 
+          document.getElementById('gameScreen').classList.remove('panel-shake'); 
+          document.body.classList.remove('panic-lighting'); 
+          giantTimerEl.style.display = 'none'; 
+          if ((timerStyle === 0 || timerStyle === 2) && progress > 50 && timeLeft > 5) { timeBar.className = 'striped-bar bar-warning'; } 
+        } 
+        
+        if(timeLeft <= 0) { 
+          clearInterval(mobileTimerInterval); 
+          timerContainer.style.display = 'none'; 
+          document.getElementById('gameScreen').classList.remove('panel-shake'); 
+          giantTimerEl.style.display = 'none'; 
+          document.body.classList.remove('panic-lighting'); 
+          document.getElementById('gameScreen').style.border = 'none';
+          document.getElementById('gameScreen').style.boxShadow = 'none';
+        } 
+      }, 1000); 
+    }
 
-        if(timeLeft <= 5 && timeLeft > 0) { 
-          document.getElementById('gameScreen').classList.add('panel-shake'); 
-          document.body.classList.add('panic-lighting'); 
-          if (timerStyle === 0 || timerStyle === 2) timeBar.className = 'striped-bar bar-panic'; 
-          
-          giantTimerEl.style.display = 'flex'; 
-          giantTimerEl.innerText = timeLeft; 
-          if (!isEliminated) { playTickFast(); } 
-        } else { 
-          document.getElementById('gameScreen').classList.remove('panel-shake'); 
-          document.body.classList.remove('panic-lighting'); 
-          giantTimerEl.style.display = 'none'; 
-          if ((timerStyle === 0 || timerStyle === 2) && progress > 50 && timeLeft > 5) { timeBar.className = 'striped-bar bar-warning'; } 
-        } 
-        
-        if(timeLeft <= 0) { 
-          clearInterval(mobileTimerInterval); 
-          timerContainer.style.display = 'none'; 
-          document.getElementById('gameScreen').classList.remove('panel-shake'); 
-          giantTimerEl.style.display = 'none'; 
-          document.body.classList.remove('panic-lighting'); 
-          document.getElementById('gameScreen').style.border = 'none';
-          document.getElementById('gameScreen').style.boxShadow = 'none';
-        } 
-      }, 1000); 
-    }
+    function selectTeam(id) { playClickSound(); vibrate(50); hostConnection.send({ type: 'SELECT_TEAM', teamId: id }); }
 
-    function selectTeam(id) { playClickSound(); vibrate(50); hostConnection.send({ type: 'SELECT_TEAM', teamId: id }); }
+    function useSkill(type) { 
+      if(type === '5050' && currentQuestionType !== 'single' && currentQuestionType !== 'multiple') return alert("此題型無法使用 50/50 救援！");
+      if(confirm(`確定要消耗積分使用技能嗎？`)) hostConnection.send({ type: 'USE_SKILL', skill: type }); 
+    }
 
-    function useSkill(type) { 
-      if(type === '5050' && currentQuestionType !== 'single' && currentQuestionType !== 'multiple') return alert("此題型無法使用 50/50 救援！");
-      if(confirm(`確定要消耗積分使用技能嗎？`)) hostConnection.send({ type: 'USE_SKILL', skill: type }); 
-    }
+    function breakIce() {
+      iceHp--; vibrate(30); document.getElementById('freezeOverlay').style.opacity = iceHp / 5;
+      if (iceHp <= 0) { document.getElementById('freezeOverlay').style.display = 'none'; document.getElementById('freezeOverlay').style.opacity = '1'; }
+    }
 
-    function breakIce() {
-      iceHp--; vibrate(30); document.getElementById('freezeOverlay').style.opacity = iceHp / 5;
-      if (iceHp <= 0) { document.getElementById('freezeOverlay').style.display = 'none'; document.getElementById('freezeOverlay').style.opacity = '1'; }
-    }
+    function confirmWager() {
+      const amt = parseInt(document.getElementById('wagerSlider').value);
+      const target = isBountyMode ? document.getElementById('bountyTarget').value : null;
+      hostConnection.send({ type: isAuctionMode ? 'SUBMIT_BID' : 'SUBMIT_WAGER', amount: amt, target: target });
+      document.getElementById('gameStatus').innerText = isAuctionMode ? `⚖️ 已出價 ${amt} 分！等待結算...` : (isBountyMode ? `🎯 詛咒完成！已押注 ${amt} 分` : `💰 已押注 ${amt} 分！準備作答...`);
+      document.getElementById('wagerBox').style.display = 'none';
+    }
 
-    function confirmWager() {
-      const amt = parseInt(document.getElementById('wagerSlider').value);
-      const target = isBountyMode ? document.getElementById('bountyTarget').value : null;
-      hostConnection.send({ type: isAuctionMode ? 'SUBMIT_BID' : 'SUBMIT_WAGER', amount: amt, target: target });
-      document.getElementById('gameStatus').innerText = isAuctionMode ? `⚖️ 已出價 ${amt} 分！等待結算...` : (isBountyMode ? `🎯 詛咒完成！已押注 ${amt} 分` : `💰 已押注 ${amt} 分！準備作答...`);
-      document.getElementById('wagerBox').style.display = 'none';
-    }
+    function resetOrder() {
+      vibrate(30); selectedOrder = []; document.getElementById('orderDisplay').innerText = '序列：';
+      document.querySelectorAll('.ans-btn').forEach(b => { b.classList.remove('selected', 'locked'); });
+    }
 
-    function resetOrder() {
-      vibrate(30); selectedOrder = []; document.getElementById('orderDisplay').innerText = '序列：';
-      document.querySelectorAll('.ans-btn').forEach(b => { b.classList.remove('selected', 'locked'); });
-    }
+    function toggleSelection(index, event) {
+      if(document.querySelectorAll('.ans-btn')[index].classList.contains('locked') || isGlobalPaused) return;
+      vibrate(30); playClickSound(); 
+      const buttons = document.querySelectorAll('.ans-btn'); const btn = buttons[index];
+      
+      const circle = document.createElement('span'); circle.classList.add('ripple');
+      const diameter = Math.max(btn.clientWidth, btn.clientHeight);
+      circle.style.width = circle.style.height = `${diameter}px`;
+      circle.style.left = `${event.clientX - btn.getBoundingClientRect().left - diameter/2}px`;
+      circle.style.top = `${event.clientY - btn.getBoundingClientRect().top - diameter/2}px`;
+      btn.appendChild(circle); setTimeout(() => circle.remove(), 600);
 
-    function toggleSelection(index, event) {
-      if(document.querySelectorAll('.ans-btn')[index].classList.contains('locked') || isGlobalPaused) return;
-      vibrate(30); playClickSound(); 
-      const buttons = document.querySelectorAll('.ans-btn'); const btn = buttons[index];
-      
-      const circle = document.createElement('span'); circle.classList.add('ripple');
-      const diameter = Math.max(btn.clientWidth, btn.clientHeight);
-      circle.style.width = circle.style.height = `${diameter}px`;
-      circle.style.left = `${event.clientX - btn.getBoundingClientRect().left - diameter/2}px`;
-      circle.style.top = `${event.clientY - btn.getBoundingClientRect().top - diameter/2}px`;
-      btn.appendChild(circle); setTimeout(() => circle.remove(), 600);
+      if (currentQuestionType === 'order' || currentQuestionType === 'match_click') {
+        if(!selectedOrder.includes(index)) {
+          selectedOrder.push(index); 
+          let textArray = selectedOrder.map(i => {
+              let val = currentOptions[i] || document.querySelectorAll('.ans-btn')[i].innerText.trim() || "選項";
+              return val.startsWith('http') ? `<img src="${val}" style="height:3dvh; vertical-align:middle; border-radius:0.5dvh;">` : val;
+          });
+          document.getElementById('orderDisplay').innerHTML = '序列：' + textArray.join(' ➡️ ');
+          btn.classList.add('locked'); btn.classList.remove('floating-opt');
+        }
+      } 
+      else if (currentQuestionType === 'single') {
+        selectedAnswers.clear(); buttons.forEach(b => b.classList.remove('selected'));
+        selectedAnswers.add(index); btn.classList.add('selected');
+        if (document.body.classList.contains('fast-mode')) submitAnswers();
+      } else {
+        if (selectedAnswers.has(index)) { selectedAnswers.delete(index); btn.classList.remove('selected'); } 
+        else { selectedAnswers.add(index); btn.classList.add('selected'); }
+      }
+    }
 
-      if (currentQuestionType === 'order' || currentQuestionType === 'match_click') {
-        if(!selectedOrder.includes(index)) {
-          selectedOrder.push(index); 
-          let textArray = selectedOrder.map(i => {
-              let val = currentOptions[i] || document.querySelectorAll('.ans-btn')[i].innerText.trim() || "選項";
-              return val.startsWith('http') ? `<img src="${val}" style="height:3dvh; vertical-align:middle; border-radius:0.5dvh;">` : val;
-          });
-          document.getElementById('orderDisplay').innerHTML = '序列：' + textArray.join(' ➡️ ');
-          btn.classList.add('locked'); btn.classList.remove('floating-opt');
-        }
-      } 
-      else if (currentQuestionType === 'single') {
-        selectedAnswers.clear(); buttons.forEach(b => b.classList.remove('selected'));
-        selectedAnswers.add(index); btn.classList.add('selected');
-        if (document.body.classList.contains('fast-mode')) submitAnswers();
-      } else {
-        if (selectedAnswers.has(index)) { selectedAnswers.delete(index); btn.classList.remove('selected'); } 
-        else { selectedAnswers.add(index); btn.classList.add('selected'); }
-      }
-    }
+    function submitAnswers() {
+      if (isGlobalPaused || isEliminated) return; 
 
-    function submitAnswers() {
-      if (isGlobalPaused || isEliminated) return; 
+      let ansArray = [];
+      if (currentQuestionType === 'slider') { ansArray = [parseInt(document.getElementById('ansSlider').value)]; }
+      else if (currentQuestionType === 'match_drag') {
+        const items = document.querySelectorAll('#dragList li');
+        ansArray = Array.from(items).map(li => parseInt(li.getAttribute('data-id')));
+      }
+      else if (currentQuestionType === 'order' || currentQuestionType === 'match_click') {
+        if(selectedOrder.length !== currentOptionsLength) { vibrate([50,50,50]); return alert(`請依序點選所有 ${currentOptionsLength} 個選項！`); }
+        ansArray = selectedOrder;
+      }
+      else {
+        if (selectedAnswers.size === 0) { vibrate([50, 50, 50]); return alert("請至少選擇一個答案喔！"); }
+        ansArray = Array.from(selectedAnswers);
+      }
+      
+      vibrate(80); playCoinSound(); document.body.className = ''; document.body.style.background = myTeamGrad; 
+      document.getElementById('skillBar').style.display = 'none'; document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting');
+      document.getElementById('gameScreen').style.border = 'none';
+      document.getElementById('gameScreen').style.boxShadow = 'none';
 
-      let ansArray = [];
-      if (currentQuestionType === 'slider') { ansArray = [parseInt(document.getElementById('ansSlider').value)]; }
-      else if (currentQuestionType === 'match_drag') {
-        const items = document.querySelectorAll('#dragList li');
-        ansArray = Array.from(items).map(li => parseInt(li.getAttribute('data-id')));
-      }
-      else if (currentQuestionType === 'order' || currentQuestionType === 'match_click') {
-        if(selectedOrder.length !== currentOptionsLength) { vibrate([50,50,50]); return alert(`請依序點選所有 ${currentOptionsLength} 個選項！`); }
-        ansArray = selectedOrder;
-      }
-      else {
-        if (selectedAnswers.size === 0) { vibrate([50, 50, 50]); return alert("請至少選擇一個答案喔！"); }
-        ansArray = Array.from(selectedAnswers);
-      }
-      
-      vibrate(80); playCoinSound(); document.body.className = ''; document.body.style.background = myTeamGrad; 
-      document.getElementById('skillBar').style.display = 'none'; document.getElementById('mobileTimerContainer').style.display = 'none'; document.getElementById('gameScreen').classList.remove('panel-shake'); document.getElementById('giantTimerOverlay').style.display = 'none'; document.body.classList.remove('panic-lighting');
-      document.getElementById('gameScreen').style.border = 'none';
-      document.getElementById('gameScreen').style.boxShadow = 'none';
+      if (currentQuestionType !== 'slider' && currentQuestionType !== 'match_drag') {
+        document.querySelectorAll('.ans-btn').forEach((b, i) => { 
+          b.classList.remove('active', 'floating-opt'); b.classList.add('locked');
+          if(!ansArray.includes(i)) { b.style.opacity = '0.15'; b.style.transform = 'scale(0.85)'; }
+        });
+      } else if (currentQuestionType === 'slider') { 
+        document.getElementById('ansSlider').disabled = true; 
+      }
+      
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.innerText = "🚀 答案已在路上！"; submitBtn.style.opacity = '0.5'; submitBtn.style.pointerEvents = 'none';
 
-      if (currentQuestionType !== 'slider' && currentQuestionType !== 'match_drag') {
-        document.querySelectorAll('.ans-btn').forEach((b, i) => { 
-          b.classList.remove('active', 'floating-opt'); b.classList.add('locked');
-          if(!ansArray.includes(i)) { b.style.opacity = '0.15'; b.style.transform = 'scale(0.85)'; }
-        });
-      } else if (currentQuestionType === 'slider') { 
-        document.getElementById('ansSlider').disabled = true; 
-      }
-      
-      const submitBtn = document.getElementById('submitBtn');
-      submitBtn.innerText = "🚀 答案已在路上！"; submitBtn.style.opacity = '0.5'; submitBtn.style.pointerEvents = 'none';
+      document.getElementById('gameStatus').innerText = "🤞 屏息以待...";
+      document.getElementById('gameStatus').style.background = "#FFD700"; document.getElementById('gameStatus').style.color = "#333";
 
-      document.getElementById('gameStatus').innerText = "🤞 屏息以待...";
-      document.getElementById('gameStatus').style.background = "#FFD700"; document.getElementById('gameStatus').style.color = "#333";
-
-      if (hostConnection && hostConnection.open) { hostConnection.send({ type: 'ANSWER', answers: ansArray }); }
-    }
-  </script>
+      if (hostConnection && hostConnection.open) { hostConnection.send({ type: 'ANSWER', answers: ansArray }); }
+    }
+  </script>
 </body>
 </html>
