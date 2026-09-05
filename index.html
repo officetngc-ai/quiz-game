@@ -576,8 +576,7 @@
                 setTimeout(() => { if(!b.classList.contains('locked')) b.classList.add('floating-opt'); }, 600 + i*100);
               });
 
-              // 🌟 修正：移除未定義的 gameCfg.useExtreme，避免觸發 ReferenceError 導致手機端當機
-              if (data.qMode === 'memory') {
+              if (data.qMode === 'memory' && gameCfg.useExtreme) {
                   memoryTimeout = setTimeout(() => {
                       document.querySelectorAll('.opt-text').forEach(t => t.classList.add('memory-hide'));
                   }, 3000);
