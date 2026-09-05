@@ -98,7 +98,7 @@
     #questionBox h2 { font-size: clamp(30px, 6vh, 60px); margin: 0 0 1vh 0; line-height: 1.3; flex-shrink: 0; color: #2c3e50; font-weight: 900; }
     .mode-badge { background: linear-gradient(45deg, #f093fb, #f5576c); color: white; padding: 1vh 2vw; border-radius: 3vh; font-size: clamp(16px, 3vh, 32px); vertical-align: middle; margin-left: 1vw; box-shadow: 0 0.5vh 0 #c0392b;}
     
-    #qMedia { max-height: 25vh; max-width: 100%; object-fit: contain; border-radius: 2vh; display: none; margin: 1vh auto; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); border: 0.5vh solid white; flex-shrink: 0;}
+    #qMedia { max-height: 18vh; max-width: 100%; object-fit: contain; border-radius: 2vh; display: none; margin: 1vh auto; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); border: 0.5vh solid white; flex-shrink: 0;}
     .fog-anim { animation: fogClear var(--fog-time) linear forwards; }
     @keyframes fogClear { 0% { filter: blur(3vh); } 100% { filter: blur(0); } }
 
@@ -107,10 +107,11 @@
     .match-prompt-item img { max-width: 100%; max-height: 12vh; border-radius: 1vh; object-fit: contain;}
     .match-badge { position: absolute; top: -1.5vh; left: -1.5vh; background: #e74c3c; color: white; width: 6vh; height: 6vh; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3.5vh; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.3); z-index: 5;}
 
-    #optionsContainer { display: grid; gap: 2vh 2vw; margin-top: 2vh; flex: 1; min-height: 0; width: 100%; box-sizing: border-box; }
-    .option { width: 100%; height: 100%; padding: 1.5vh 2vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.98); }
-    .opt-text { font-size: clamp(20px, 4vw, 70px); font-weight: 900; line-height: 1.2; word-break: break-word; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); }
+    #optionsContainer { display: grid; gap: 1.5vh 1.5vw; margin-top: 1.5vh; flex: 1; min-height: 0; width: 100%; box-sizing: border-box; grid-auto-rows: 1fr;}
+    .option { width: 100%; height: 100%; padding: 1vh 1vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.98); flex-wrap: nowrap; container-type: inline-size; }
 
+    .opt-text {font-size: clamp(14px, 10cqw, 45px); font-weight: 900; line-height: 1.15; word-break: keep-all; text-align: center; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); }
+    
     .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1vh 0 #b32a18;} 
     .color-1 { background: linear-gradient(135deg, #0072ff, #00c6ff); box-shadow: 0 1vh 0 #0056b3;} 
     .color-2 { background: linear-gradient(135deg, #f9d423, #ff4e50); box-shadow: 0 1vh 0 #b33200;} 
@@ -620,7 +621,12 @@
           }
       });
       peer.on('open', (id) => {
-        new QRCode(document.getElementById("qrcode"), { text: window.location.href.replace('host.html', '') + "?pin=" + roomCode, width: 200, height: 200, colorDark : "#ff4b2b", colorLight : "#fff", correctLevel : QRCode.CorrectLevel.H });
+        // 🌟 修正：確保網址絕對乾淨，避免舊參數污染 PIN 碼解析
+        const baseUrl = window.location.href.split('?')[0].split('#')[0].replace('host.html', '');
+        new QRCode(document.getElementById("qrcode"), { 
+            text: baseUrl + "?pin=" + roomCode, 
+            width: 200, height: 200, colorDark : "#ff4b2b", colorLight : "#fff", correctLevel : QRCode.CorrectLevel.H 
+        });
         loadQuestions(); 
       });
 
@@ -641,10 +647,21 @@
             }
 
             if (gameConfig.isTeamMode) {
+              // 🌟 修正：判斷玩家是否為「斷線重連」，若已有隊伍則直接派發進入等待畫面
+              if (playerStats[data.name].teamId !== -1) {
+                  const existingTeam = teamsData.find(t => t.id === playerStats[data.name].teamId);
+                  if (existingTeam) {
+                      conn.send({ type: 'TEAM_ASSIGNED', teamName: existingTeam.name, teamClass: existingTeam.class, teamGrad: existingTeam.gradient, cfg: gameConfig });
+                      return;
+                  }
+              }
               conn.send({ type: 'TEAM_SELECTION_START', teams: teamsData, max: gameConfig.maxPerTeam, css: document.getElementById('dynamicTeamStyles').innerHTML, cfg: gameConfig });
             } else {
-              const tag = createPlayerTagElement(data.name, '👤', `ptag-${data.name}`);
-              bucketsContainer.appendChild(tag);
+              // 🌟 修正：防止重新連線時產生重複的名牌
+              if (!document.getElementById(`ptag-${data.name}`)) {
+                  const tag = createPlayerTagElement(data.name, '👤', `ptag-${data.name}`);
+                  bucketsContainer.appendChild(tag);
+              }
               conn.send({ type: 'INDIVIDUAL_MODE_WAIT', cfg: gameConfig });
             }
           }
@@ -682,7 +699,18 @@
     }
 
     function handleTeamSelection(conn, teamId) {
-      const pName = conn.playerName; const team = teamsData.find(t => t.id === teamId);
+      const pName = conn.playerName; 
+      const team = teamsData.find(t => t.id === teamId);
+      
+      // ✅ 處理斷線重連：如果玩家已經有隊伍了，直接發送成功訊號讓他進入遊戲
+      if (playerStats[pName].teamId !== -1) {
+        const exTeam = teamsData.find(t => t.id === playerStats[pName].teamId);
+        if(exTeam) {
+          conn.send({ type: 'TEAM_ASSIGNED', teamName: exTeam.name, teamClass: exTeam.class, teamGrad: exTeam.gradient, cfg: gameConfig });
+        }
+        return;
+      }
+
       if (team && team.players.length < gameConfig.maxPerTeam && playerStats[pName].teamId === -1) {
         team.players.push(pName); playerStats[pName].teamId = teamId;
         document.getElementById(`bucket-${teamId}`).querySelector('.team-title').innerText = `${team.name} (${team.players.length}/${gameConfig.maxPerTeam})`;
