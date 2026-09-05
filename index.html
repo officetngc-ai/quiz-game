@@ -4,9 +4,32 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>玩家控制器 - 實境淘汰賽版</title>
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap" rel="stylesheet">
+  
+  <!-- 🚨 替換 Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+    // 🔴 請在此貼上您的 Firebase Config 🔴
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    window.db = getDatabase(app);
+    window.ref = ref; window.set = set; window.push = push; window.onValue = onValue;
+    window.firebaseReady = true;
+  </script>
+
   <style id="dynamicTeamStyles"></style>
   <style>
     /* ========== 全域無卷軸絕對壓縮配置 (防破版核心) ========== */
@@ -48,6 +71,7 @@
     .input-field { padding: 2.5dvh; font-size: clamp(18px, 3.5dvh, 26px); width: 90%; margin: 2dvh 0; border-radius: 3dvh; border: none; text-align: center; font-weight: 900; color: #333; box-shadow: 0 1dvh 2dvh rgba(0,0,0,0.15); font-family: inherit; outline: none; z-index: 10; box-sizing: border-box;}
     .action-btn { padding: 2.5dvh; font-size: clamp(20px, 4dvh, 32px); width: 90%; margin-top: 2dvh; border-radius: 3dvh; border: none; font-weight: 900; cursor: pointer; transition: 0.1s; background: #FFD700; color: #d35400; box-shadow: 0 1dvh 0 #e67e22, 0 1.5dvh 2dvh rgba(0,0,0,0.2); font-family: inherit; z-index: 10; box-sizing: border-box; flex-shrink: 0;}
     .action-btn:active { transform: translateY(1dvh); box-shadow: 0 0 0 #e67e22; } 
+    .action-btn:disabled { background: #bdc3c7; color: #fff; box-shadow: 0 1dvh 0 #7f8c8d; cursor: not-allowed; }
 
     /* ========== 玩家頂部身分牌 ========== */
     #playerTopBar { display: none; background: rgba(255,255,255,0.95); padding: 1.5dvh 4vw; border-radius: 4dvh; margin: 1dvh auto 0.5dvh auto; font-weight: 900; font-size: clamp(18px, 3dvh, 24px); color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.15); align-items: center; justify-content: center; gap: 2vw; max-width: 90%; flex-shrink: 0; animation: superPop 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-sizing: border-box;}
@@ -182,6 +206,7 @@
     <div class="floating-emoji" style="top: 20%; right: 10%; font-size: 6dvh;">✨</div>
     <div id="loginForm">
       <h2>🎉 準備加入榮耀之戰！</h2>
+      <input type="text" id="pinInput" class="input-field" placeholder="輸入大螢幕 PIN 碼" style="text-transform: uppercase;">
       <input type="text" id="playerName" class="input-field" placeholder="輸入你的大名">
       <button class="action-btn" onclick="joinGame()">即刻登入 🚀</button>
       <div id="statusText" style="margin-top: 2dvh; font-size: 2.5dvh; font-weight:bold; opacity: 0.9;"></div>
@@ -280,10 +305,10 @@
     function playTickFast() { initAudio(); playTone(800, 'square', 0.1, 0.08); } 
     function vibrate(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
 
-    const avatarsList = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','🦟','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿','🦔','🐉','🐲'];
+    const avatarsList = ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐨','🐯','🦁','🐮','🐷','🐸','🐵','🐔','🐧','🐦','🐤','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🐛','🦋','🐌','🐞','🐜','蚊','🦗','🕷','🦂','🐢','🐍','🦎','🦖','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐕‍🦺','🐈','🐓','🦃','🦚','🦜','🦢','🦩','🕊','🐇','🦝','🦨','🦡','🦦','🦥','🐁','🐀','🐿','🦔','🐉','🐲'];
     const shapeList = ['▲','◆','●','■','★','✚','✦','✖','▼','⬣'];
     
-    let peer; let hostConnection; let currentQuestionType = 'single'; 
+    let currentQuestionType = 'single'; 
     let selectedAnswers = new Set(); let selectedOrder = []; 
     let autoPin = ""; let myTeamGrad = "linear-gradient(135deg, #1cb5e0, #000046)"; 
     let myScore = 0; let iceHp = 0; let hasShield = false;
@@ -297,54 +322,72 @@
     let isEliminated = false; 
     let mobileTimerInterval = null; 
 
+    // 🚨 設定全域變數，供送出函數使用
+    window.currentPin = "";
+    window.myName = "";
+
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
-      autoPin = urlParams.get('pin');
-      if (!autoPin) {
-        document.getElementById('loginForm').innerHTML = `<h2 style="color: #ffeaa7;">⚠️ 迷路了嗎？</h2><p style="font-size: 3dvh; line-height: 1.5;">請直接掃描大螢幕上的<br>QR Code 來加入派對！</p>`;
-      } else { document.getElementById('playerName').focus(); }
+      autoPin = urlParams.get('pin')?.toUpperCase();
+      if (autoPin) {
+        document.getElementById('pinInput').value = autoPin; 
+        document.getElementById('pinInput').style.display = 'none'; 
+        document.getElementById('playerName').focus(); 
+      }
     };
 
-    function joinGame() {
-      if (!autoPin) return alert("請掃描大螢幕的 QR Code！");
+    // 🚨 透過 Firebase 發送指令給主機
+    function sendToHost(msgObj) {
+      if(!window.firebaseReady || !window.currentPin || !window.myName) return;
+      window.push(window.ref(window.db, `rooms/${window.currentPin}/playerMsgs`), { name: window.myName, ...msgObj });
+    }
+
+    window.joinGame = function() {
+      const pin = document.getElementById('pinInput').value.trim().toUpperCase();
+      const name = document.getElementById('playerName').value.trim();
       
-      if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-      if(audioCtx.state === 'suspended') audioCtx.resume();
+      if (!pin || !name) return alert('請填寫完整資訊！');
+      if (!window.firebaseReady) return alert("Firebase 尚未載入完成，請確認金鑰設定。");
+
+      const btn = document.querySelector('.action-btn');
+      btn.disabled = true;
+      btn.innerText = "連線中... 📡";
       
       initAudio(); vibrate(50); playClickSound(); 
-      const myName = document.getElementById('playerName').value.trim();
-      if (!myName) return alert('忘記輸入名字囉！');
+      window.currentPin = pin; window.myName = name;
 
       myAvatar = avatarsList[Math.floor(Math.random() * avatarsList.length)];
       document.getElementById('myAvatarBadge').innerText = myAvatar;
-      document.getElementById('myNameDisplay').innerText = myName;
+      document.getElementById('myNameDisplay').innerText = name;
 
       document.getElementById('statusText').innerText = "📡 正在連線中...";
-      peer = new Peer({
-          config: {
-              'iceServers': [
-                  { urls: 'stun:stun.l.google.com:19302' },
-                  { urls: 'stun:stun1.l.google.com:19302' }
-              ]
+
+      // 發送加入訊息給主機
+      sendToHost({ type: 'JOIN', avatar: myAvatar });
+      
+      // 監聽主機廣播
+      window.onValue(window.ref(window.db, `rooms/${pin}/hostBroadcast`), (snapshot) => {
+          const val = snapshot.val();
+          if(val && val.msg) processHostMessage(val.msg);
+      });
+
+      // 監聽主機私訊
+      window.onValue(window.ref(window.db, `rooms/${pin}/privateMsgs/${name}`), (snapshot) => {
+          const val = snapshot.val();
+          if(val && val.msg) processHostMessage(val.msg);
+      });
+      
+      // 設定超時判斷 (如果 Firebase 沒有回應)
+      setTimeout(() => {
+          if (document.getElementById('loginScreen').style.display !== 'none') {
+              document.getElementById('statusText').innerText = "❌ 無法連線至主機，請確認 PIN 碼";
+              btn.disabled = false;
+              btn.innerText = "即刻登入 🚀";
           }
-      });
+      }, 5000);
+    }
 
-      peer.on('open', (id) => {
-        hostConnection = peer.connect('minikahoot-' + autoPin);
-        
-        hostConnection.on('open', () => {
-          vibrate([50, 100, 50]); 
-          hostConnection.send({ type: 'JOIN', name: myName });
-          hostConnection.send({ type: 'SYNC_AVATAR', avatar: myAvatar });
-        });
-
-      peer.on('error', (err) => {
-          document.getElementById('statusText').innerText = "❌ 連線失敗，請重試";
-          alert("連線發生錯誤：" + err.type + "\n如果您使用的是行動網路，請嘗試連接 Wi-Fi 或重新掃描條碼。");
-      });
-
-        hostConnection.on('data', (data) => {
-          
+    function processHostMessage(data) {
           if (data.type === 'ELIMINATED') {
             isEliminated = true;
             document.getElementById('eliminatedOverlay').style.display = 'flex';
@@ -440,7 +483,7 @@
             if (isBountyMode && data.teams) {
               tgtSelect.style.display = 'block'; tgtSelect.innerHTML = '';
               data.teams.forEach(t => {
-                 if(t.name !== document.getElementById('playerName').value) tgtSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
+                 if(t.name !== window.myName) tgtSelect.innerHTML += `<option value="${t.id}">${t.name}</option>`;
               });
             } else { tgtSelect.style.display = 'none'; }
 
@@ -552,9 +595,8 @@
 
               data.options.forEach((optText, i) => {
                   let textContent;
-                  let isImg = false;
                   if (data.qType === 'match_click' || data.qType === 'order') {
-                      isImg = data.options[i].trim().startsWith('http');
+                      let isImg = data.options[i].trim().startsWith('http');
                       textContent = isImg 
                           ? `<img src="${data.options[i].trim()}" style="max-width:90%; max-height:8dvh; object-fit:contain; border-radius:1.5dvh; pointer-events:none;">` 
                           : data.options[i];
@@ -563,20 +605,18 @@
                   }
 
                   let btnHTML = `<button class="ans-btn color-${i % 8} active" onclick="toggleSelection(${i}, event)" style="animation-delay: ${i * 0.05}s; order: ${shuffled[i]};">
-                                    <span class="opt-text" style="${isImg ? 'display:flex; justify-content:center; align-items:center; width:100%; height:100%; padding:0;' : ''} pointer-events:none;">${textContent}</span>
+                                    <span class="opt-text" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%; pointer-events:none;">${textContent}</span>
                                  </button>`;
                   btnGrid.innerHTML += btnHTML;
               });
 
               document.querySelectorAll('.ans-btn').forEach((b, i) => { 
-                // ✅ 修正後代碼 (index.html)：
                 if (data.qMode === 'chameleon') b.classList.add('chameleon-fx');
                 if (data.qMode === 'auction' && !data.isAuctionWinner) b.classList.add('locked');
                 
                 setTimeout(() => { if(!b.classList.contains('locked')) b.classList.add('floating-opt'); }, 600 + i*100);
               });
 
-              // 🌟 修正：移除未定義的 gameCfg.useExtreme，避免觸發 ReferenceError 導致手機端當機
               if (data.qMode === 'memory') {
                   memoryTimeout = setTimeout(() => {
                       document.querySelectorAll('.opt-text').forEach(t => t.classList.add('memory-hide'));
@@ -615,8 +655,6 @@
             document.getElementById('gameScreen').style.border = 'none';
             document.getElementById('gameScreen').style.boxShadow = 'none';
           }
-        });
-      });
     }
 
     function renderTeams(teams, max) { 
@@ -706,32 +744,32 @@
       }, 1000); 
     }
 
-    function selectTeam(id) { playClickSound(); vibrate(50); hostConnection.send({ type: 'SELECT_TEAM', teamId: id }); }
+    window.selectTeam = function(id) { playClickSound(); vibrate(50); sendToHost({ type: 'SELECT_TEAM', teamId: id }); }
 
-    function useSkill(type) { 
+    window.useSkill = function(type) { 
       if(type === '5050' && currentQuestionType !== 'single' && currentQuestionType !== 'multiple') return alert("此題型無法使用 50/50 救援！");
-      if(confirm(`確定要消耗積分使用技能嗎？`)) hostConnection.send({ type: 'USE_SKILL', skill: type }); 
+      if(confirm(`確定要消耗積分使用技能嗎？`)) sendToHost({ type: 'USE_SKILL', skill: type }); 
     }
 
-    function breakIce() {
+    window.breakIce = function() {
       iceHp--; vibrate(30); document.getElementById('freezeOverlay').style.opacity = iceHp / 5;
       if (iceHp <= 0) { document.getElementById('freezeOverlay').style.display = 'none'; document.getElementById('freezeOverlay').style.opacity = '1'; }
     }
 
-    function confirmWager() {
+    window.confirmWager = function() {
       const amt = parseInt(document.getElementById('wagerSlider').value);
       const target = isBountyMode ? document.getElementById('bountyTarget').value : null;
-      hostConnection.send({ type: isAuctionMode ? 'SUBMIT_BID' : 'SUBMIT_WAGER', amount: amt, target: target });
+      sendToHost({ type: isAuctionMode ? 'SUBMIT_BID' : 'SUBMIT_WAGER', amount: amt, target: target });
       document.getElementById('gameStatus').innerText = isAuctionMode ? `⚖️ 已出價 ${amt} 分！等待結算...` : (isBountyMode ? `🎯 詛咒完成！已押注 ${amt} 分` : `💰 已押注 ${amt} 分！準備作答...`);
       document.getElementById('wagerBox').style.display = 'none';
     }
 
-    function resetOrder() {
+    window.resetOrder = function() {
       vibrate(30); selectedOrder = []; document.getElementById('orderDisplay').innerText = '序列：';
       document.querySelectorAll('.ans-btn').forEach(b => { b.classList.remove('selected', 'locked'); });
     }
 
-    function toggleSelection(index, event) {
+    window.toggleSelection = function(index, event) {
       if(document.querySelectorAll('.ans-btn')[index].classList.contains('locked') || isGlobalPaused) return;
       vibrate(30); playClickSound(); 
       const buttons = document.querySelectorAll('.ans-btn'); const btn = buttons[index];
@@ -764,7 +802,7 @@
       }
     }
 
-    function submitAnswers() {
+    window.submitAnswers = function() {
       if (isGlobalPaused || isEliminated) return; 
 
       let ansArray = [];
@@ -789,12 +827,12 @@
 
       if (currentQuestionType !== 'slider' && currentQuestionType !== 'match_drag') {
         document.querySelectorAll('.ans-btn').forEach((b, i) => { 
-          b.classList.remove('active', 'floating-opt'); b.classList.add('locked');
+            b.classList.remove('active', 'floating-opt'); b.classList.add('locked');
           if(!ansArray.includes(i)) { b.style.opacity = '0.15'; b.style.transform = 'scale(0.85)'; }
         });
       } else if (currentQuestionType === 'slider') { 
-        document.getElementById('ansSlider').disabled = true; 
-      }
+          document.getElementById('ansSlider').disabled = true; 
+      } 
       
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.innerText = "🚀 答案已在路上！"; submitBtn.style.opacity = '0.5'; submitBtn.style.pointerEvents = 'none';
@@ -802,7 +840,8 @@
       document.getElementById('gameStatus').innerText = "🤞 屏息以待...";
       document.getElementById('gameStatus').style.background = "#FFD700"; document.getElementById('gameStatus').style.color = "#333";
 
-      if (hostConnection && hostConnection.open) { hostConnection.send({ type: 'ANSWER', answers: ansArray }); }
+      // 🚨 透過 Firebase 發送答案
+      sendToHost({ type: 'ANSWER', answers: ansArray });
     }
   </script>
 </body>
