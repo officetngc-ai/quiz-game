@@ -256,7 +256,6 @@
   <script>
     let audioCtx;
 
-    // 手機端僅保留絕對必要的音效產生器，徹底移除 BGM 避免錯亂！
     function initAudio() { 
       if(!audioCtx) { 
           audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
@@ -539,12 +538,17 @@
               if (optCount <= 4) { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; }
               else { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; } 
 
-              // 🌟 選項無條件全面支援文字與圖片渲染
               data.options.forEach((optText, i) => {
-                  let isImg = data.options[i].trim().startsWith('http');
-                  let textContent = isImg 
-                      ? `<img src="${data.options[i].trim()}" style="max-width:90%; max-height:8dvh; object-fit:contain; border-radius:1.5dvh; pointer-events:none;">` 
-                      : data.options[i];
+                  let textContent;
+                  let isImg = false;
+                  if (data.qType === 'match_click' || data.qType === 'order') {
+                      isImg = data.options[i].trim().startsWith('http');
+                      textContent = isImg 
+                          ? `<img src="${data.options[i].trim()}" style="max-width:90%; max-height:8dvh; object-fit:contain; border-radius:1.5dvh; pointer-events:none;">` 
+                          : data.options[i];
+                  } else {
+                      textContent = shapeList[i % shapeList.length];
+                  }
 
                   let btnHTML = `<button class="ans-btn color-${i % 8} active" onclick="toggleSelection(${i}, event)" style="animation-delay: ${i * 0.05}s; order: ${shuffled[i]};">
                                     <span class="opt-text" style="${isImg ? 'display:flex; justify-content:center; align-items:center; width:100%; height:100%; padding:0;' : ''} pointer-events:none;">${textContent}</span>
