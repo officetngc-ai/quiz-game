@@ -419,6 +419,7 @@
     }
 
     window.joinGame = function() {
+      // 移除讀取 pinInput 的邏輯，直接讀取名字
       const name = document.getElementById('playerName').value.trim();
       
       if (!window.currentPin) return alert("請掃描大螢幕的 QR Code 來加入遊戲！");
