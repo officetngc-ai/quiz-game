@@ -338,6 +338,11 @@
           hostConnection.send({ type: 'SYNC_AVATAR', avatar: myAvatar });
         });
 
+      peer.on('error', (err) => {
+          document.getElementById('statusText').innerText = "❌ 連線失敗，請重試";
+          alert("連線發生錯誤：" + err.type + "\n如果您使用的是行動網路，請嘗試連接 Wi-Fi 或重新掃描條碼。");
+      });
+
         hostConnection.on('data', (data) => {
           
           if (data.type === 'ELIMINATED') {
