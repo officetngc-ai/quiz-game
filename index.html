@@ -299,27 +299,38 @@
 
     window.onload = () => {
       const urlParams = new URLSearchParams(window.location.search);
-      autoPin = urlParams.get('pin');
+      // ✅ 強制將抓取的 PIN 碼轉大寫，避免大小寫連錯房間[cite: 4]
+      autoPin = urlParams.get('pin')?.toUpperCase();
       if (!autoPin) {
         document.getElementById('loginForm').innerHTML = `<h2 style="color: #ffeaa7;">⚠️ 迷路了嗎？</h2><p style="font-size: 3dvh; line-height: 1.5;">請直接掃描大螢幕上的<br>QR Code 來加入派對！</p>`;
       } else { document.getElementById('playerName').focus(); }
     };
 
-function joinGame() {
+    function joinGame() {
       if (!autoPin) return alert("請掃描大螢幕的 QR Code！");
+      
+      const btn = document.querySelector('.action-btn');
+      btn.disabled = true;
+      btn.innerText = "連線中... 📡";
       
       if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
       if(audioCtx.state === 'suspended') audioCtx.resume();
       
       initAudio(); vibrate(50); playClickSound(); 
       const myName = document.getElementById('playerName').value.trim();
-      if (!myName) return alert('忘記輸入名字囉！');
+      if (!myName) {
+        btn.disabled = false;
+        btn.innerText = "即刻登入 🚀";
+        return alert('忘記輸入名字囉！');
+      }
 
       myAvatar = avatarsList[Math.floor(Math.random() * avatarsList.length)];
       document.getElementById('myAvatarBadge').innerText = myAvatar;
       document.getElementById('myNameDisplay').innerText = myName;
 
       document.getElementById('statusText').innerText = "📡 正在連線中...";
+
+      // ✅ 修正 STUN Server: 解決 4G/5G 行動網路無法順利穿透防火牆連線的問題[cite: 4]
       peer = new Peer({
           config: {
               'iceServers': [
@@ -329,15 +340,16 @@ function joinGame() {
           }
       });
 
-      // ✅ 修正 1：將 peer 的錯誤監聽移到 peer.on('open') 外面，確保連線失敗時能正確觸發
+      // ✅ 將錯誤監聽移至 peer.on('open') 外，確保連線被擋時會正確報錯[cite: 4]
       peer.on('error', (err) => {
           document.getElementById('statusText').innerText = "❌ 連線失敗，請重試";
+          btn.disabled = false;
+          btn.innerText = "即刻登入 🚀";
           alert("連線發生錯誤：" + err.type + "\n如果您使用的是行動網路，請嘗試連接 Wi-Fi 或重新掃描條碼。");
       });
 
       peer.on('open', (id) => {
-        // ✅ 修正 2：加入 .toUpperCase() 強制大寫，避免因大小寫問題進錯房間
-        hostConnection = peer.connect('minikahoot-' + autoPin.toUpperCase());
+        hostConnection = peer.connect('minikahoot-' + autoPin);
         
         hostConnection.on('open', () => {
           vibrate([50, 100, 50]); 
@@ -345,7 +357,7 @@ function joinGame() {
           hostConnection.send({ type: 'SYNC_AVATAR', avatar: myAvatar });
         });
 
-        // ✅ 修正 3：加入主機斷線監聽，讓玩家意外掉線時能知道發生什麼事
+        // ✅ 加入斷線監聽：當主控端意外關閉時提醒玩家[cite: 4]
         hostConnection.on('close', () => {
             document.getElementById('statusText').innerText = "❌ 與主機斷線，請重新整理";
         });
@@ -553,15 +565,16 @@ function joinGame() {
               
               let shuffled = (data.qType === 'match_click') ? Array.from({length: data.options.length}, (_, i) => i).sort(() => Math.random() - 0.5) : Array.from({length: data.options.length}, (_, i) => i);
               
+              // ✅ 核心修改：優化圖文自適應選項面板[cite: 5]
               let optCount = data.options.length;
               if (optCount <= 4) { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; }
               else { btnGrid.style.gridTemplateColumns = "repeat(2, 1fr)"; } 
 
               data.options.forEach((optText, i) => {
                   let textContent;
-                  let isImg = false;
+                  // 判斷是否為需要顯示文字/圖片的題型 (解決單純網址過長破版問題)
                   if (data.qType === 'match_click' || data.qType === 'order') {
-                      isImg = data.options[i].trim().startsWith('http');
+                      let isImg = data.options[i].trim().startsWith('http');
                       textContent = isImg 
                           ? `<img src="${data.options[i].trim()}" style="max-width:90%; max-height:8dvh; object-fit:contain; border-radius:1.5dvh; pointer-events:none;">` 
                           : data.options[i];
@@ -570,7 +583,7 @@ function joinGame() {
                   }
 
                   let btnHTML = `<button class="ans-btn color-${i % 8} active" onclick="toggleSelection(${i}, event)" style="animation-delay: ${i * 0.05}s; order: ${shuffled[i]};">
-                                    <span class="opt-text" style="${isImg ? 'display:flex; justify-content:center; align-items:center; width:100%; height:100%; padding:0;' : ''} pointer-events:none;">${textContent}</span>
+                                    <span class="opt-text" style="display:flex; justify-content:center; align-items:center; width:100%; height:100%; pointer-events:none;">${textContent}</span>
                                  </button>`;
                   btnGrid.innerHTML += btnHTML;
               });
@@ -582,7 +595,7 @@ function joinGame() {
                 setTimeout(() => { if(!b.classList.contains('locked')) b.classList.add('floating-opt'); }, 600 + i*100);
               });
 
-              // ✅ 修正 4：移除未定義的 gameCfg 變數，直接判定模式，避免 ReferenceError 閃退
+              // ✅ 修復：移除可能引發崩潰的未定義 gameCfg，直接驗證模式字串[cite: 4]
               if (data.qMode === 'memory') {
                   memoryTimeout = setTimeout(() => {
                       document.querySelectorAll('.opt-text').forEach(t => t.classList.add('memory-hide'));
@@ -793,14 +806,15 @@ function joinGame() {
       document.getElementById('gameScreen').style.border = 'none';
       document.getElementById('gameScreen').style.boxShadow = 'none';
 
+      // ✅ 修正部分防呆邏輯
       if (currentQuestionType !== 'slider' && currentQuestionType !== 'match_drag') {
         document.querySelectorAll('.ans-btn').forEach((b, i) => { 
-          b.classList.remove('active', 'floating-opt'); b.classList.add('locked');
+            b.classList.remove('active', 'floating-opt'); b.classList.add('locked');
           if(!ansArray.includes(i)) { b.style.opacity = '0.15'; b.style.transform = 'scale(0.85)'; }
         });
       } else if (currentQuestionType === 'slider') { 
-        document.getElementById('ansSlider').disabled = true; 
-      }
+          document.getElementById('ansSlider').disabled = true; 
+      } 
       
       const submitBtn = document.getElementById('submitBtn');
       submitBtn.innerText = "🚀 答案已在路上！"; submitBtn.style.opacity = '0.5'; submitBtn.style.pointerEvents = 'none';
