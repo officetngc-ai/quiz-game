@@ -102,13 +102,11 @@
     .fog-anim { animation: fogClear var(--fog-time) linear forwards; }
     @keyframes fogClear { 0% { filter: blur(3vh); } 100% { filter: blur(0); } }
 
-    /* 連連看題型排版優化 */
     #matchPromptsContainer { display: none; flex-wrap: wrap; justify-content: center; gap: 1.5vw; margin-top: 1vh; flex: 1; min-height: 0; align-content: center; overflow: hidden;}
     .match-prompt-item { flex: 1 1 auto; max-width: 48%; min-width: 150px; background: white; border-radius: 2vh; padding: 2vh 2vw; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: clamp(24px, 4vh, 48px); font-weight: 900; position: relative; color: #333;}
     .match-prompt-item img { max-width: 100%; max-height: 12vh; border-radius: 1vh; object-fit: contain;}
     .match-badge { position: absolute; top: -1.5vh; left: -1.5vh; background: #e74c3c; color: white; width: 6vh; height: 6vh; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3.5vh; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.3); z-index: 5;}
 
-    /* 網格選項自適應排版 */
     #optionsContainer { display: grid; gap: 2vh 2vw; margin-top: 2vh; flex: 1; min-height: 0; width: 100%; box-sizing: border-box; }
     .option { width: 100%; height: 100%; padding: 1.5vh 2vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.98); }
     .opt-text { font-size: clamp(20px, 4vw, 70px); font-weight: 900; line-height: 1.2; word-break: break-word; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); }
@@ -125,30 +123,31 @@
     @keyframes superBounce {
       0% { transform: scale(0); opacity: 0; }
       60% { transform: scale(1.02); opacity: 1; }
-      100% { transform: scale(0.98); opacity: 1; }
+      100% { transform: scale(0.98); opacity: 1; } 
     }
 
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
     @keyframes floatOpt { 0%, 100% { transform: scale(0.98) translateY(0px) rotate(0deg); } 33% { transform: scale(0.98) translateY(-0.8vh) rotate(1deg); } 66% { transform: scale(0.98) translateY(0.5vh) rotate(-1deg); } }
 
-    /* 解決放大重疊問題：縮小錯誤項，完美光暈正確項 */
     .option.dimmed { opacity: 0.15; transform: scale(0.85); filter: grayscale(100%); animation: none !important; box-shadow: none !important; z-index: 1;}
     .option.highlight { transform: scale(1.02) !important; box-shadow: 0 0 5vh rgba(255, 215, 0, 1), inset 0 0 2vh rgba(255,255,255,0.8) !important; border: 0.8vh solid #FFD700; z-index: 20; animation: none !important; background: linear-gradient(135deg, #f1c40f, #f39c12) !important; color: #000; text-shadow: 0 0.2vh 0.5vh rgba(255,255,255,0.8); }
 
     #sliderResult { display: none; margin-top: 2vh; background: rgba(255,255,255,0.9); padding: 2vh 3vw; border-radius: 2vh; flex-shrink: 0;}
 
-    /* ========== 答題即時進場區 (防溢出設計) ========== */
     #answeredContainer { margin-top: 1.5vh; padding-top: 1.5vh; border-top: 0.3vh dashed rgba(0,0,0,0.1); flex-shrink: 0; display: flex; flex-direction: column; overflow: hidden; width: 100%;}
     #answeredCountTitle { font-size: clamp(16px, 2.5vh, 26px); font-weight: 900; color: #555; margin: 0 0 1vh 0; flex-shrink: 0;}
     #answeredGrid { display: flex; flex-wrap: wrap; justify-content: center; align-content: flex-start; gap: 1vh; overflow: hidden; max-height: 12vh; }
-    
-    /* 底部時間條 隨機三模式 */
+    .answered-tag { font-size: clamp(12px, 2vh, 22px); padding: 0.5vh 1vw; border-radius: 3vh; background: rgba(255,255,255,0.9); color: #333; font-weight: 900; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.15); display: inline-flex; align-items: center; gap: 0.6vw; animation: popInAnswer 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform: scale(0); }
+    .answered-tag.top-1 { border: 0.3vh solid #f1c40f; background: #fffdf0; transform: scale(1.15) !important; z-index: 3; }
+    .answered-tag.top-2 { border: 0.3vh solid #bdc3c7; transform: scale(1.05) !important; z-index: 2; }
+    .answered-tag.top-3 { border: 0.3vh solid #cd7f32; transform: scale(1.0) !important; z-index: 1; }
+    @keyframes popInAnswer { 0% { transform: scale(0) translateY(3vh); opacity: 0; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1) translateY(0); opacity: 1; } }
+
     .bottom-timer-row { display: flex; align-items: center; gap: 2vw; margin-top: 1vh; flex-shrink: 0; width: 100%; }
     #timeBarContainer { flex: 1; height: 3vh; background: #eee; border-radius: 2vh; overflow: hidden; box-shadow: inset 0 0.5vh 1vh rgba(0,0,0,0.1);}
     #timeBar { height: 100%; width: 100%; transition: width 1s linear, background 1s linear; }
     
     .bar-stripe { background: repeating-linear-gradient(45deg, #00c6ff, #00c6ff 2vw, #0072ff 2vw, #0072ff 4vw) !important; animation: moveStripes 1s linear infinite; }
-    .bar-party { background: repeating-linear-gradient(45deg, #ff9a9e, #ff9a9e 2vw, #fecfef 2vw, #fecfef 4vw) !important; animation: moveStripes 0.5s linear infinite; }
     @keyframes moveStripes { 0% {background-position: 0 0;} 100% {background-position: 5.65vw 0;} }
     
     #timerText { font-size: clamp(30px, 6vh, 60px); font-weight: 900; color: #333; width: 8vw; text-align: right;}
@@ -172,14 +171,23 @@
     .r-name { font-size: clamp(20px, 4vh, 40px); font-weight: 900; margin-bottom: 1vh; text-shadow: 0.2vh 0.2vh 0.4vh rgba(0,0,0,0.3);}
     .r-time { font-size: clamp(24px, 5vh, 50px); font-family: monospace; font-weight: 900; background: rgba(0,0,0,0.4); padding: 0.5vh 1.5vw; border-radius: 1.5vh;}
     
-    #scoreList { list-style: none; padding: 0; overflow-y: hidden; display: flex; flex-direction: column; gap: 1vh; flex: 1; justify-content: center;}
-    .rank-item { background: linear-gradient(90deg, #fff, #f8f9fa); padding: 1.5vh 2.5vw; border-radius: 2vh; box-shadow: 0 0.8vh 1.5vh rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; font-size: clamp(20px, 3.5vh, 40px); border-left: 0.8vh solid #ff4b2b; animation: slideInLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
-    
+    .rank-item { background: linear-gradient(90deg, #fff, #f8f9fa); padding: 1.5vh 2.5vw; border-radius: 2vh; box-shadow: 0 0.8vh 1.5vh rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; font-size: clamp(20px, 3.5vh, 40px); border-left: 0.8vh solid #ff4b2b; animation: slideInLeft 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; position: relative; z-index: 5;}
     .eliminated-item { background: linear-gradient(90deg, #555, #333) !important; color: #fff; text-decoration: line-through; opacity: 0.8; border-left: 0.8vh solid #000; filter: grayscale(80%); }
     .eliminated-item .rank-score { color: #aaa !important; }
-
     @keyframes slideInLeft { from { transform: translateX(-10vw); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
     .rank-score { color: #ff4b2b; font-family: monospace; font-size: clamp(24px, 4.5vh, 50px); font-weight: 900;}
+
+    /* 🌟 前三名專屬亮光特效 */
+    .glow-1 { box-shadow: 0 0 3vh rgba(255, 215, 0, 0.8), inset 0 0 1vh rgba(255, 215, 0, 0.5) !important; border: 0.3vh solid #FFD700 !important; z-index: 10;}
+    .glow-2 { box-shadow: 0 0 2vh rgba(192, 192, 192, 0.8), inset 0 0 1vh rgba(192, 192, 192, 0.5) !important; border: 0.3vh solid #C0C0C0 !important; z-index: 9;}
+    .glow-3 { box-shadow: 0 0 2vh rgba(205, 127, 50, 0.8), inset 0 0 1vh rgba(205, 127, 50, 0.5) !important; border: 0.3vh solid #CD7F32 !important; z-index: 8;}
+
+    /* 🌟 名次升降標籤 */
+    .rank-change { font-size: 2vh; margin-left: 1vw; font-weight: 900; padding: 0.2vh 0.8vw; border-radius: 1.5vh; animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); white-space: nowrap;}
+    .change-up { color: #2ecc71; background: rgba(46, 204, 113, 0.2); }
+    .change-down { color: #e74c3c; background: rgba(231, 76, 60, 0.2); }
+    .change-same { color: #95a5a6; background: rgba(149, 165, 166, 0.2); }
+    .change-new { color: #3498db; background: rgba(52, 152, 219, 0.2); }
 
     #podiumContainer { flex-direction: row; justify-content: center; align-items: flex-end; height: 100%; width: 100%; gap: 3vw;}
     .podium-place { display: flex; flex-direction: column; align-items: center; width: 25%; animation: riseUp 1.2s forwards;}
@@ -211,7 +219,6 @@
     <h2 style="color: #4a3472; font-size: 7vh; margin-bottom: 2vh; flex-shrink: 0;">⚙️ 建立終極派對聯賽</h2>
     
     <div style="display:flex; gap:2vw; text-align:left; flex: 1; min-height: 0; overflow: hidden;">
-      <!-- 第一欄：基礎賽制 -->
       <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
         <h3 style="margin:0 0 1vh 0; color:#e67e22; font-size: 3vh;">👥 基礎賽制設定</h3>
         <div class="setup-row"><span>模式：</span><select id="cfgMode" class="setup-select" onchange="toggleTeamInputs()"><option value="individual">👑 個人戰 (不分組)</option><option value="teams" selected>🛡️ 聯盟對抗</option></select></div>
@@ -232,7 +239,6 @@
         </div>
       </div>
       
-      <!-- 第二欄：七大擴充模組 -->
       <div style="flex:1; background: rgba(46, 204, 113, 0.2); border-left: 0.5vw solid #2ecc71; padding: 1.5vh; border-radius: 2vh; display:flex; flex-direction:column; justify-content:center;">
         <h3 style="margin:0 0 1vh 0; color:#27ae60; font-size: 3vh;">🔥 七大遊玩擴充模組</h3>
         <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgMedia" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 👁️ 迷霧解析 & 多媒體圖片</label>
@@ -241,11 +247,9 @@
         <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgSabotage" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚔️ 戰術干擾 (冰凍/洗牌/50-50/護盾)</label>
         <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgGhost" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ☠️ 靈魂急救 (生存依賴模式)</label>
         <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;"><input type="checkbox" id="cfgExtreme" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> ⚖️ 極限心理戰 (背叛者/拍賣/地雷/閃憶)</label>
-        <!-- 🚨 預設開啟果凍頭像進場，保留震撼體驗 -->
         <label style="display:flex; align-items:center; margin: 0.8vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer; background:rgba(255,255,255,0.5); padding:0.5vh; border-radius:1vh;"><input type="checkbox" id="cfgAvatarAnim" checked style="width:2.5vh; height:2.5vh; margin-right:1vw;"> 🎭 動態頭像進場 (百人以上建議關閉)</label>
       </div>
 
-      <!-- 第三欄：🏆 錦標賽/大逃殺設定 -->
       <div style="flex:1; background: rgba(241, 196, 15, 0.2); border-left: 0.5vw solid #f1c40f; padding: 1.5vh; border-radius: 2vh; display:flex; flex-direction:column; justify-content:center;">
         <h3 style="margin:0 0 1vh 0; color:#f39c12; font-size: 3vh;">🏆 殘酷淘汰模式</h3>
         <label style="display:flex; align-items:center; margin: 1vh 0; font-size: clamp(14px, 2.2vh, 22px); cursor:pointer;">
@@ -289,7 +293,6 @@
     
     <div id="sliderResult"></div>
 
-    <!-- ⚡ 即時作答進場區 -->
     <div id="answeredContainer">
       <div id="answeredCountTitle">⚡ 已完成作答 <span id="answeredCount">0</span> / <span id="totalActivePlayers">0</span> 人 ⚡</div>
       <div id="answeredGrid"></div>
@@ -308,10 +311,11 @@
     <button class="ctrl-btn" onclick="showTotalLeaderboard()" style="flex-shrink:0;">查看總積分 ➡️</button>
   </div>
 
-  <div id="leaderboard" class="glass-panel" style="display:none;">
-    <h3 style="font-size: 7vh; margin-top:0; color:#4a3472; flex-shrink:0;">🏆 總積分戰況 🏆</h3>
-    <ul id="scoreList"></ul>
-    <button id="nextBtnLeader" class="ctrl-btn" onclick="nextQuestion()" style="flex-shrink:0;">下一題 ➡️</button>
+  <!-- 🌟 分組排名與單人排名共用的排行榜容器 -->
+  <div id="leaderboard" class="glass-panel" style="display:none; padding: 2vh 3vw;">
+    <h3 style="font-size: 6vh; margin-top:0; margin-bottom:1vh; color:#4a3472; flex-shrink:0;">🏆 總積分戰況 🏆</h3>
+    <div id="boardContainer" style="flex: 1; display: flex; flex-direction: column; width: 100%; min-height: 0; gap: 1vh;"></div>
+    <button id="nextBtnLeader" class="ctrl-btn" onclick="nextQuestion()" style="flex-shrink:0; margin-top:1vh;">下一題 ➡️</button>
   </div>
 
   <div id="podiumContainer">
@@ -321,7 +325,7 @@
     <div class="podium-place place-3" style="order: 3;"><div class="podium-score" id="score-3"></div><div class="podium-name" id="name-3"></div><div class="podium-block">3</div></div>
   </div>
 
-  <!-- ✅ 雙軌 BGM 引擎 + 頒獎典禮專屬音樂 -->
+  <!-- BGM -->
   <audio id="bgmLobbyObj" loop src="music/lobby.mp3"></audio>
   <audio id="bgmNormalObj" loop src="music/normal.mp3"></audio>
   <audio id="bgmFastObj" loop src="music/fast.mp3"></audio>
@@ -340,6 +344,10 @@
     let bgmPodium;
 
     let currentBGM = null;
+
+    // 🌟 全域計分紀錄體系 (供跑馬表與名次升降計算使用)
+    let previousTeamRanks = {};
+    let previousPlayerRanks = {};
 
     function initAudio() { 
       if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); } 
@@ -516,6 +524,23 @@
         teamsData.push({ id: i, name: `${e} ${n}`, class: `t-${i}`, gradient: `linear-gradient(135deg, ${color1}, ${color2})`, players: [], isEliminated: false });
       }
       document.getElementById('dynamicTeamStyles').innerHTML = cssString;
+    }
+
+    // 🌟 跑馬表數字跳動共用引擎
+    function animateValue(obj, start, end, duration) {
+      if (start === end) { obj.innerHTML = end; return; }
+      let startTimestamp = null;
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start);
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        } else {
+            obj.innerHTML = end; 
+        }
+      };
+      window.requestAnimationFrame(step);
     }
 
     function initLobby() {
@@ -744,7 +769,7 @@
             questions = results.data.slice(1).map(row => {
               if(!row || row.length < 3 || !row[0] || row[0].trim() === '') return null;
               const type = row[0].trim().toLowerCase();
-              const q = row[1] ? row[1].trim() : "請看圖片作答";
+              const q = row[1] ? row[1].trim() : "請看圖片作答"; // 🚨 防呆
               const correctArray = row[2].toString().split(',').map(n => parseInt(n.trim()));
               const modeRaw = row[3] ? row[3].trim().toLowerCase() : 'normal';
               const mediaUrl = row[4] ? row[4].trim() : '';
@@ -795,7 +820,6 @@
       let countEl = document.getElementById('answeredCount');
       if (countEl) countEl.innerText = currentRank;
 
-      // 🌟 果凍頭像進場：由管理員面板控制
       if (gameConfig.useAvatarAnim) {
           let playerAvatar = playerStats[conn.playerName] ? playerStats[conn.playerName].avatar : '👤';
           let tagNode = createPlayerTagElement(conn.playerName, playerAvatar);
@@ -937,8 +961,6 @@
         document.getElementById('warningSub').innerText = `出價最高的隊伍獲得唯一作答權！\n答對雙倍標金，答錯沒收標金！`;
         playWarning(); startPartyBGM(); overlayFastBGM(true); 
         
-        broadcast({ type: 'AUCTION_PHASE', time: 10 });
-
         let auctionTime = 10;
         let aInt = setInterval(() => {
           if (isGlobalPaused) return; 
@@ -1069,7 +1091,6 @@
       } 
       else {
         optBox.innerHTML = '';
-        
         let optCount = qData.options.length;
         if (optCount === 1) { optBox.style.gridTemplateColumns = "1fr"; }
         else if (optCount === 2 || optCount === 4) { optBox.style.gridTemplateColumns = "repeat(2, 1fr)"; }
@@ -1466,42 +1487,192 @@
       }
     }
 
+    // 🌟 全新重構：支援分組排版與動畫升降的排行榜渲染
     function renderLeaderboard() {
-      const list = document.getElementById('scoreList'); list.innerHTML = '';
-      let rankedData = [];
+      const container = document.getElementById('boardContainer'); 
+      container.innerHTML = ''; 
+
       if (gameConfig.isTeamMode) {
-        rankedData = teamsData.map(t => {
-          let score = getTeamScore(t.id);
-          return { name: `<span style="background:${t.gradient}; padding:0.5vh 1.5vw; border-radius:1vh; color:white; opacity:${t.isEliminated ? '0.5' : '1'};">${t.name}</span>`, score: score, isEliminated: t.isEliminated };
-        });
-      } else { 
-        rankedData = Object.keys(playerStats).map(pName => { return { name: pName, score: playerStats[pName].score, avatar: playerStats[pName].avatar, isEliminated: playerStats[pName].isEliminated }; }); 
+          // --- 上半部：分組總分排名 ---
+          let teamRanks = teamsData.map(t => ({ ...t, score: getTeamScore(t.id) }));
+          teamRanks.sort((a, b) => {
+              if (a.isEliminated === b.isEliminated) return b.score - a.score;
+              return a.isEliminated ? 1 : -1;
+          });
+
+          let upperDiv = document.createElement('div');
+          upperDiv.style.cssText = "flex: 1; display:flex; flex-direction:column; overflow-y:auto; gap:1vh; border-bottom: 0.4vh dashed rgba(0,0,0,0.1); padding-bottom: 1.5vh;";
+          
+          teamRanks.forEach((t, index) => {
+              let row = document.createElement('div');
+              row.className = 'rank-item';
+              if (t.isEliminated) row.classList.add('eliminated-item');
+
+              let medal = index === 0 && !t.isEliminated ? "👑" : index === 1 && !t.isEliminated ? "💎" : index === 2 && !t.isEliminated ? "🌟" : (t.isEliminated ? "💀" : "🔥");
+              
+              let glowClass = '';
+              let rankChangeHtml = '';
+              let oldScore = t.score;
+
+              if (gameConfig.useAvatarAnim && !t.isEliminated) {
+                  if (index === 0) glowClass = 'glow-1';
+                  else if (index === 1) glowClass = 'glow-2';
+                  else if (index === 2) glowClass = 'glow-3';
+
+                  if (previousTeamRanks[t.name]) {
+                      let oldRank = previousTeamRanks[t.name].rank;
+                      oldScore = previousTeamRanks[t.name].score;
+                      if (oldRank > index) rankChangeHtml = `<span class="rank-change change-up">⬆️ 升 ${oldRank - index}</span>`;
+                      else if (oldRank < index) rankChangeHtml = `<span class="rank-change change-down">⬇️ 降 ${index - oldRank}</span>`;
+                      else rankChangeHtml = `<span class="rank-change change-same">➖ 持平</span>`;
+                  } else {
+                      rankChangeHtml = `<span class="rank-change change-new">🆕 新進榜</span>`;
+                  }
+              }
+
+              if (glowClass) row.classList.add(glowClass);
+              row.style.animationDelay = `${index * 0.1}s`;
+
+              let scoreSpanId = `team-score-${t.id}`;
+              row.innerHTML = `
+                  <span style="display:flex; align-items:center;">
+                      ${medal} &nbsp;
+                      <span style="background:${t.gradient}; padding:0.5vh 1.5vw; border-radius:1vh; color:white; opacity:${t.isEliminated ? '0.5' : '1'};">${t.name}</span>
+                      ${rankChangeHtml}
+                  </span> 
+                  <span class="rank-score" id="${scoreSpanId}">${oldScore}</span>`;
+              upperDiv.appendChild(row);
+
+              if (gameConfig.useAvatarAnim && !t.isEliminated && oldScore !== t.score) {
+                  setTimeout(() => animateValue(document.getElementById(scoreSpanId), oldScore, t.score, 1500), 100);
+              } else {
+                  setTimeout(() => { if(document.getElementById(scoreSpanId)) document.getElementById(scoreSpanId).innerText = t.score; }, 0);
+              }
+          });
+
+          // --- 下半部：各分組組員名次 ---
+          let lowerDiv = document.createElement('div');
+          lowerDiv.style.cssText = "flex: 1.5; display:flex; justify-content:center; gap:1.5vw; overflow-x:auto; padding-top: 1vh;";
+
+          teamsData.forEach(t => {
+              let teamCol = document.createElement('div');
+              let borderColor = t.gradient.split(',')[1] ? t.gradient.split(',')[1].trim().replace(')','') : '#ccc';
+              teamCol.style.cssText = `flex: 1; min-width: 18vw; background: rgba(255,255,255,0.9); border: 0.4vh solid ${borderColor}; border-radius: 2vh; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 1vh 2vh rgba(0,0,0,0.1); opacity:${t.isEliminated ? '0.5' : '1'};`;
+              
+              let title = document.createElement('div');
+              title.style.cssText = `background: ${t.gradient}; color: white; padding: 1vh; font-size: 2.5vh; font-weight: 900; text-shadow: 0 0.2vh 0.4vh rgba(0,0,0,0.3);`;
+              title.innerText = t.name;
+              teamCol.appendChild(title);
+
+              let memList = document.createElement('div');
+              memList.style.cssText = "flex: 1; overflow-y: auto; padding: 1vh; display:flex; flex-direction:column; gap:0.5vh;";
+
+              let members = t.players.map(pName => {
+                  return { name: pName, score: playerStats[pName].score, avatar: playerStats[pName].avatar, isEliminated: playerStats[pName].isEliminated, streak: playerStats[pName].streak };
+              });
+              members.sort((a,b) => b.score - a.score);
+
+              members.forEach((m, mIdx) => {
+                  let memRow = document.createElement('div');
+                  memRow.style.cssText = `display:flex; justify-content:space-between; align-items:center; padding: 0.8vh 1vw; background: ${mIdx%2===0 ? 'rgba(0,0,0,0.03)' : '#fff'}; border-radius: 1vh; font-size: clamp(14px, 2.2vh, 24px); font-weight: bold; ${m.isEliminated ? 'text-decoration:line-through; color:#aaa;' : 'color:#333;'}`;
+                  
+                  let oldPScore = m.score;
+                  if (gameConfig.useAvatarAnim && previousPlayerRanks[m.name]) {
+                      oldPScore = previousPlayerRanks[m.name].score;
+                  }
+
+                  let pScoreId = `mem-score-${m.name.replace(/[^a-zA-Z0-9]/g, '')}-${mIdx}`;
+                  let streakIcon = m.streak >= 2 && !m.isEliminated ? `<span style="font-size:1.8vh; color:#e74c3c;">🔥</span>` : '';
+
+                  memRow.innerHTML = `<span style="display:flex; align-items:center; gap:0.5vw;"><span style="font-size:3vh; filter:drop-shadow(0 0.1vh 0.1vh rgba(0,0,0,0.2));">${m.avatar}</span> <span style="max-width: 8vw; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.name}</span> ${streakIcon}</span> <span style="color:#ff4b2b; font-family:monospace; font-size: clamp(16px, 2.5vh, 28px);" id="${pScoreId}">${oldPScore}</span>`;
+                  memList.appendChild(memRow);
+
+                  if (gameConfig.useAvatarAnim && !m.isEliminated && oldPScore !== m.score) {
+                      setTimeout(() => animateValue(document.getElementById(pScoreId), oldPScore, m.score, 1500), 100);
+                  } else {
+                      setTimeout(() => { if(document.getElementById(pScoreId)) document.getElementById(pScoreId).innerText = m.score; }, 0);
+                  }
+              });
+              
+              teamCol.appendChild(memList);
+              lowerDiv.appendChild(teamCol);
+          });
+
+          container.appendChild(upperDiv);
+          container.appendChild(lowerDiv);
+
+          // 更新記憶體名次資料供下回合對比
+          previousTeamRanks = {};
+          teamRanks.forEach((t, idx) => previousTeamRanks[t.name] = { rank: idx, score: t.score });
+          previousPlayerRanks = {};
+          Object.keys(playerStats).forEach(pName => previousPlayerRanks[pName] = { score: playerStats[pName].score });
+
+      } else {
+          // --- 個人戰模式維持單一列表 ---
+          let rankedData = Object.keys(playerStats).map(pName => { return { name: pName, score: playerStats[pName].score, avatar: playerStats[pName].avatar, isEliminated: playerStats[pName].isEliminated, streak: playerStats[pName].streak, isGhost: playerStats[pName].isGhost }; }); 
+          
+          rankedData.sort((a, b) => {
+              if (a.isEliminated === b.isEliminated) return b.score - a.score;
+              return a.isEliminated ? 1 : -1;
+          });
+
+          let ul = document.createElement('ul');
+          ul.id = 'scoreList'; 
+          container.appendChild(ul);
+
+          rankedData.slice(0, 10).forEach((item, index) => {
+              let li = document.createElement('li'); 
+              li.className = 'rank-item'; 
+              li.style.animationDelay = `${index * 0.1}s`;
+              
+              if (item.isEliminated) li.classList.add('eliminated-item');
+
+              let medal = index === 0 && !item.isEliminated ? "👑" : index === 1 && !item.isEliminated ? "💎" : index === 2 && !item.isEliminated ? "🌟" : (item.isEliminated ? "💀" : "🔥");
+              
+              let glowClass = '';
+              let rankChangeHtml = '';
+              let oldScore = item.score;
+
+              if (gameConfig.useAvatarAnim && !item.isEliminated) {
+                  if (index === 0) glowClass = 'glow-1';
+                  else if (index === 1) glowClass = 'glow-2';
+                  else if (index === 2) glowClass = 'glow-3';
+
+                  if (previousPlayerRanks[item.name]) {
+                      let oldRank = previousPlayerRanks[item.name].rank;
+                      oldScore = previousPlayerRanks[item.name].score;
+                      if (oldRank > index) rankChangeHtml = `<span class="rank-change change-up">⬆️ 升 ${oldRank - index}</span>`;
+                      else if (oldRank < index) rankChangeHtml = `<span class="rank-change change-down">⬇️ 降 ${index - oldRank}</span>`;
+                      else rankChangeHtml = `<span class="rank-change change-same">➖ 持平</span>`;
+                  } else {
+                      rankChangeHtml = `<span class="rank-change change-new">🆕 新進榜</span>`;
+                  }
+              }
+
+              if (glowClass) li.classList.add(glowClass);
+
+              let streakHtml = ''; let ghostHtml = '';
+              if(item.streak >= 2 && !item.isEliminated) streakHtml = `<span class="player-tag fire-streak" style="font-size:2vh; padding: 0.5vh 1vw;">🔥 x${item.streak}</span>`;
+              if(item.isGhost) ghostHtml = ` <span style="font-size:3vh;">👻</span>`;
+              
+              let avatarHtml = `<span style="font-size:4vh; margin-right:1vw; filter: drop-shadow(0 0.2vh 0.2vh rgba(0,0,0,0.2));">${item.avatar}</span>`;
+              
+              let scoreSpanId = `indiv-score-${index}`;
+              li.innerHTML = `<span style="display:flex; align-items:center;">${medal} &nbsp;${avatarHtml}${item.name} ${streakHtml} ${ghostHtml} ${rankChangeHtml}</span> <span class="rank-score" id="${scoreSpanId}">${oldScore}</span>`;
+              ul.appendChild(li);
+
+              if (gameConfig.useAvatarAnim && !item.isEliminated && oldScore !== item.score) {
+                  setTimeout(() => animateValue(document.getElementById(scoreSpanId), oldScore, item.score, 1500), 100);
+              } else {
+                  setTimeout(() => { if(document.getElementById(scoreSpanId)) document.getElementById(scoreSpanId).innerText = item.score; }, 0);
+              }
+          });
+
+          previousPlayerRanks = {};
+          rankedData.forEach((item, index) => {
+              previousPlayerRanks[item.name] = { rank: index, score: item.score };
+          });
       }
-      
-      rankedData.sort((a, b) => {
-          if (a.isEliminated === b.isEliminated) return b.score - a.score;
-          return a.isEliminated ? 1 : -1;
-      });
-
-      rankedData.slice(0, 10).forEach((item, index) => {
-        let li = document.createElement('li'); li.className = 'rank-item'; li.style.animationDelay = `${index * 0.1}s`;
-        
-        if (item.isEliminated) {
-            li.classList.add('eliminated-item');
-        }
-
-        let medal = index === 0 && !item.isEliminated ? "👑" : index === 1 && !item.isEliminated ? "💎" : index === 2 && !item.isEliminated ? "🌟" : (item.isEliminated ? "💀" : "🔥");
-        let streakHtml = ''; let ghostHtml = '';
-        if(!gameConfig.isTeamMode && playerStats[item.name]) {
-          if(playerStats[item.name].streak >= 2 && !item.isEliminated) streakHtml = `<span class="player-tag fire-streak" style="font-size:2vh; padding: 0.5vh 1vw;">🔥 x${playerStats[item.name].streak}</span>`;
-          if(playerStats[item.name].isGhost) ghostHtml = ` <span style="font-size:3vh;">👻</span>`;
-        }
-        
-        let avatarHtml = gameConfig.isTeamMode ? "" : `<span style="font-size:4vh; margin-right:1vw; filter: drop-shadow(0 0.2vh 0.2vh rgba(0,0,0,0.2));">${item.avatar}</span>`;
-        
-        li.innerHTML = `<span style="display:flex; align-items:center;">${medal} &nbsp;${avatarHtml}${item.name} ${streakHtml} ${ghostHtml}</span> <span class="rank-score">${item.score}</span>`;
-        list.appendChild(li);
-      });
     }
 
     function showTeamPodium() {
