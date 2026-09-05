@@ -132,10 +132,10 @@
 
     /* 🚨 修正：限制選項網格自動斷行，列高均分 */
     #optionsContainer { display: grid; gap: 1.5vh 1.5vw; margin-top: 1.5vh; flex: 1 1 auto; min-height: 25vh; width: 100%; box-sizing: border-box; grid-auto-rows: minmax(0, 1fr); overflow: hidden;}
-    .option { width: 100%; height: 100%; padding: 1vh 1vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.98); container-type: inline-size; overflow: hidden; }
+    .option { width: 100%; height: 100%; padding: 1vh 1vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.98); container-type: inline-size; flex-wrap: nowrap; }
     
     /* 🌟 允許文字自然換行，最多顯示 4 行 */
-    .opt-text {font-size: clamp(14px, 8cqw, 45px); font-weight: 900; line-height: 1.2; word-break: break-word; white-space: normal; text-align: center; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; width: 100%; }
+    .opt-text {font-size: clamp(14px, 8cqw, 45px); font-weight: 900; line-height: 1.15; word-break: break-word; white-space: normal; text-align: center; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; width: 100%; }
     
     .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1vh 0 #b32a18;} 
     .color-1 { background: linear-gradient(135deg, #0072ff, #00c6ff); box-shadow: 0 1vh 0 #0056b3;} 
@@ -301,7 +301,7 @@
     <div style="display: flex; justify-content: center; align-items: center; gap: 3vw; flex-shrink: 0; margin-top: 2vh;">
       <div id="qrcode"></div>
       <div style="text-align: left;">
-        <h2 style="color:#ff4b2b; margin:0; text-shadow: 0 0.4vh 1vh rgba(0,0,0,0.1);" id="lobbyWaitText">✨ 掃描 QR Code 選擇陣營！</h2>
+        <h2 style="color:#ff4b2b; margin:0; text-shadow: 0 0.4vh 1vh rgba(0,0,0,0.1);" id="lobbyWaitText">✨ 相機掃描 QR Code 選擇陣營！</h2>
         <div class="lobby-timer-box" id="lobbyTimerBox">
           倒數開始遊戲：<span id="groupTimerText">60</span> 秒
         </div>
@@ -635,7 +635,7 @@
       const bucketsContainer = document.getElementById('teamBuckets'); bucketsContainer.innerHTML = '';
 
       if (gameConfig.isTeamMode) {
-        document.getElementById('lobbyWaitText').innerText = "✨ 掃描 QR Code 選擇陣營！";
+        document.getElementById('lobbyWaitText').innerText = "✨ 相機掃描 QR Code 選擇陣營！";
         document.getElementById('lobbyTimerBox').innerHTML = `倒數自動分組：<span id="groupTimerText">${gameConfig.groupTime}</span> 秒`;
         document.getElementById('forceStartBtn').innerText = "跳過等待，隨機分組並開始 ➡️";
         
@@ -643,7 +643,7 @@
           bucketsContainer.innerHTML += `<div class="team-bucket ${t.class}" id="bucket-${t.id}"><div class="team-title">${t.name} (0/${gameConfig.maxPerTeam})</div><div id="players-${t.id}" class="players-list"></div></div>`;
         });
       } else {
-        document.getElementById('lobbyWaitText').innerText = "✨ 掃描 QR Code 加入英雄榜！";
+        document.getElementById('lobbyWaitText').innerText = "✨ 相機掃描 QR Code 加入英雄榜！";
         document.getElementById('lobbyTimerBox').style.display = 'inline-block'; 
         document.getElementById('lobbyTimerBox').innerHTML = `倒數開始遊戲：<span id="groupTimerText">${gameConfig.groupTime}</span> 秒`;
         document.getElementById('forceStartBtn').innerText = "跳過等待，立刻開始 ➡️";
