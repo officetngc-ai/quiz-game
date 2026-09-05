@@ -305,7 +305,7 @@
       } else { document.getElementById('playerName').focus(); }
     };
 
-    function joinGame() {
+function joinGame() {
       if (!autoPin) return alert("請掃描大螢幕的 QR Code！");
       
       if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
@@ -329,8 +329,15 @@
           }
       });
 
+      // ✅ 修正 1：將 peer 的錯誤監聽移到 peer.on('open') 外面，確保連線失敗時能正確觸發
+      peer.on('error', (err) => {
+          document.getElementById('statusText').innerText = "❌ 連線失敗，請重試";
+          alert("連線發生錯誤：" + err.type + "\n如果您使用的是行動網路，請嘗試連接 Wi-Fi 或重新掃描條碼。");
+      });
+
       peer.on('open', (id) => {
-        hostConnection = peer.connect('minikahoot-' + autoPin);
+        // ✅ 修正 2：加入 .toUpperCase() 強制大寫，避免因大小寫問題進錯房間
+        hostConnection = peer.connect('minikahoot-' + autoPin.toUpperCase());
         
         hostConnection.on('open', () => {
           vibrate([50, 100, 50]); 
@@ -338,10 +345,10 @@
           hostConnection.send({ type: 'SYNC_AVATAR', avatar: myAvatar });
         });
 
-      peer.on('error', (err) => {
-          document.getElementById('statusText').innerText = "❌ 連線失敗，請重試";
-          alert("連線發生錯誤：" + err.type + "\n如果您使用的是行動網路，請嘗試連接 Wi-Fi 或重新掃描條碼。");
-      });
+        // ✅ 修正 3：加入主機斷線監聽，讓玩家意外掉線時能知道發生什麼事
+        hostConnection.on('close', () => {
+            document.getElementById('statusText').innerText = "❌ 與主機斷線，請重新整理";
+        });
 
         hostConnection.on('data', (data) => {
           
@@ -569,14 +576,14 @@
               });
 
               document.querySelectorAll('.ans-btn').forEach((b, i) => { 
-                // ✅ 修正後代碼 (index.html)：
                 if (data.qMode === 'chameleon') b.classList.add('chameleon-fx');
                 if (data.qMode === 'auction' && !data.isAuctionWinner) b.classList.add('locked');
                 
                 setTimeout(() => { if(!b.classList.contains('locked')) b.classList.add('floating-opt'); }, 600 + i*100);
               });
 
-              if (data.qMode === 'memory' && gameCfg.useExtreme) {
+              // ✅ 修正 4：移除未定義的 gameCfg 變數，直接判定模式，避免 ReferenceError 閃退
+              if (data.qMode === 'memory') {
                   memoryTimeout = setTimeout(() => {
                       document.querySelectorAll('.opt-text').forEach(t => t.classList.add('memory-hide'));
                   }, 3000);
