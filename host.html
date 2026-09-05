@@ -312,7 +312,6 @@
     <button class="ctrl-btn" onclick="showTotalLeaderboard()" style="flex-shrink:0;">查看總積分 ➡️</button>
   </div>
 
-  <!-- 🌟 分組排名與單人排名共用的排行榜容器 -->
   <div id="leaderboard" class="glass-panel" style="display:none; padding: 2vh 3vw;">
     <h3 style="font-size: 6vh; margin-top:0; margin-bottom:1vh; color:#4a3472; flex-shrink:0;">🏆 總積分戰況 🏆</h3>
     <div id="boardContainer" style="flex: 1; display: flex; flex-direction: column; width: 100%; min-height: 0; gap: 1vh;"></div>
@@ -621,10 +620,10 @@
           }
       });
       peer.on('open', (id) => {
-        // 🌟 修正：確保網址絕對乾淨，避免舊參數污染 PIN 碼解析
+        // ✅ 修正：確保生成的 QR Code 網址 100% 乾淨，避免髒參數干擾手機連線
         const baseUrl = window.location.href.split('?')[0].split('#')[0].replace('host.html', '');
         new QRCode(document.getElementById("qrcode"), { 
-            text: baseUrl + "?pin=" + roomCode, 
+            text: baseUrl + "index.html?pin=" + roomCode, 
             width: 180, height: 180, colorDark : "#ff4b2b", colorLight : "#fff", correctLevel : QRCode.CorrectLevel.H 
         });
         loadQuestions(); 
@@ -647,7 +646,7 @@
             }
 
             if (gameConfig.isTeamMode) {
-              // 🌟 修正：判斷玩家是否為「斷線重連」，若已有隊伍則直接派發進入等待畫面
+              // ✅ 處理斷線重連：如果玩家已經有隊伍了，直接發送成功訊號讓他進入遊戲
               if (playerStats[data.name].teamId !== -1) {
                   const existingTeam = teamsData.find(t => t.id === playerStats[data.name].teamId);
                   if (existingTeam) {
@@ -657,7 +656,6 @@
               }
               conn.send({ type: 'TEAM_SELECTION_START', teams: teamsData, max: gameConfig.maxPerTeam, css: document.getElementById('dynamicTeamStyles').innerHTML, cfg: gameConfig });
             } else {
-              // 🌟 修正：防止重新連線時產生重複的名牌
               if (!document.getElementById(`ptag-${data.name}`)) {
                   const tag = createPlayerTagElement(data.name, '👤', `ptag-${data.name}`);
                   bucketsContainer.appendChild(tag);
@@ -1526,13 +1524,11 @@
       }
     }
 
-    // 🌟 全新重構：支援分組排版與動畫升降的排行榜渲染
     function renderLeaderboard() {
       const container = document.getElementById('boardContainer'); 
       container.innerHTML = ''; 
 
       if (gameConfig.isTeamMode) {
-          // --- 上半部：分組總分排名 ---
           let teamRanks = teamsData.map(t => ({ ...t, score: getTeamScore(t.id) }));
           teamRanks.sort((a, b) => {
               if (a.isEliminated === b.isEliminated) return b.score - a.score;
@@ -1589,7 +1585,6 @@
               }
           });
 
-          // --- 下半部：各分組組員名次 ---
           let lowerDiv = document.createElement('div');
           lowerDiv.style.cssText = "flex: 1.5; display:flex; justify-content:center; gap:1.5vw; overflow-x:auto; padding-top: 1vh;";
 
@@ -1640,14 +1635,12 @@
           container.appendChild(upperDiv);
           container.appendChild(lowerDiv);
 
-          // 更新記憶體名次資料供下回合對比
           previousTeamRanks = {};
           teamRanks.forEach((t, idx) => previousTeamRanks[t.name] = { rank: idx, score: t.score });
           previousPlayerRanks = {};
           Object.keys(playerStats).forEach(pName => previousPlayerRanks[pName] = { score: playerStats[pName].score });
 
       } else {
-          // --- 個人戰模式維持單一列表 ---
           let rankedData = Object.keys(playerStats).map(pName => { return { name: pName, score: playerStats[pName].score, avatar: playerStats[pName].avatar, isEliminated: playerStats[pName].isEliminated, streak: playerStats[pName].streak, isGhost: playerStats[pName].isGhost }; }); 
           
           rankedData.sort((a, b) => {
