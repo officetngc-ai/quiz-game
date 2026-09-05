@@ -620,7 +620,7 @@
           }
       });
       peer.on('open', (id) => {
-        new QRCode(document.getElementById("qrcode"), { text: window.location.href.replace('host.html', '') + "?pin=" + roomCode, width: 140, height: 140, colorDark : "#ff4b2b", colorLight : "#fff", correctLevel : QRCode.CorrectLevel.H });
+        new QRCode(document.getElementById("qrcode"), { text: window.location.href.replace('host.html', '') + "?pin=" + roomCode, width: 200, height: 200, colorDark : "#ff4b2b", colorLight : "#fff", correctLevel : QRCode.CorrectLevel.H });
         loadQuestions(); 
       });
 
