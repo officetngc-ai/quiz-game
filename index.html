@@ -116,12 +116,35 @@
 
     /* 🌟 改為可滾動網格，避免 10 個選項時擠壓到按鈕變形 */
     #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5dvh 2vw; flex: 1 1 auto; min-height: 0; width: 100%; margin-bottom: 1dvh; padding: 1vw; overflow-y: auto; align-content: start; box-sizing: border-box;}
+
+    .ans-btn { 
+        flex: 1 1 0; min-height: 0; height: auto; width: 100%; cursor: pointer; 
+        border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; 
+        color: rgba(255,255,255,0.9); box-shadow: 0 1dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); 
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        opacity: 0.3; pointer-events: none; transform: scale(0.96); 
+        position: relative; overflow: hidden; margin:0; padding: 1.5dvh 2vw; box-sizing: border-box;
+        
+        /* 🌟 核心修正 1：加上這行啟用容器查詢，讓手機按鈕成為縮放基準 */
+        container-type: inline-size; 
+    }
     
-    /* 🌟 設置按鈕最小高度 (min-height)，保證不會縮成一條線 */
-    .ans-btn { min-height: 9dvh; height: auto; width: 100%; cursor: pointer; border: none; border-radius: 2.5dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 0.8dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.96); position: relative; overflow: hidden; margin:0; padding: 1dvh 2vw; box-sizing: border-box;}
-    
-    /* 🌟 開放自然換行，最多顯示 3 行，超過隱藏 */
-    .opt-text { font-size: clamp(14px, 4.5vmin, 32px); font-weight: 900; line-height: 1.2; word-break: break-word; white-space: normal; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; padding: 0 5px; width: 100%;}
+    .opt-text { 
+        /* 🌟 核心修正 2：使用 cqw 取代 vmin，讓字體隨按鈕寬度自動縮放 */
+        font-size: clamp(12px, 12cqw, 32px); 
+        font-weight: 900; 
+        line-height: 1.15; 
+        
+        /* 🌟 核心修正 3：移除截斷限制，改用 keep-all 確保中文詞彙完整呈現 */
+        word-break: keep-all; 
+        white-space: normal; 
+        text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); 
+        padding: 0 5px; 
+        width: 100%;
+        text-align: center;
+        /* 已徹底移除 display: -webkit-box 與 -webkit-line-clamp: 3 */
+    }
+        
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
     @keyframes floatOpt { 0%, 100% { transform: scale(0.96) translateY(0px) rotate(0deg); } 33% { transform: scale(0.96) translateY(-0.5dvh) rotate(1deg); } 66% { transform: scale(0.96) translateY(0.3dvh) rotate(-1deg); } }
 
