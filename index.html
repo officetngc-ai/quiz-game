@@ -114,14 +114,14 @@
     #ghostOverlay { display: none; position: absolute; top:30%; left:0; width:100%; z-index: 50; flex-direction: column; align-items:center;}
     #traitorWarning { display: none; background: #000; color: #e74c3c; border: 0.5dvh solid #c0392b; padding: 1.5dvh; border-radius: 3dvh; font-size: clamp(16px, 2.5dvh, 22px); font-weight: 900; margin-bottom: 1dvh; box-shadow: 0 0 2dvh rgba(231, 76, 60, 0.8); animation: pulseWin 1s infinite; flex-shrink: 0;}
 
-    /* ========== 網格彈性極限壓縮佈局 (絕對防溢出核心) ========== */
-    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2dvh 3vw; flex: 1 1 0; min-height: 0; width: 100%; margin-bottom: 2dvh; padding: 1vw; overflow: hidden;}
+    /* 🌟 改為可滾動網格，避免 10 個選項時擠壓到按鈕變形 */
+    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5dvh 2vw; flex: 1 1 auto; min-height: 0; width: 100%; margin-bottom: 1dvh; padding: 1vw; overflow-y: auto; align-content: start; box-sizing: border-box;}
     
-    .ans-btn { flex: 1 1 0; min-height: 0; height: auto; width: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 1dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.96); position: relative; overflow: hidden; margin:0; padding: 1.5dvh 2vw; box-sizing: border-box;}
+    /* 🌟 設置按鈕最小高度 (min-height)，保證不會縮成一條線 */
+    .ans-btn { min-height: 9dvh; height: auto; width: 100%; cursor: pointer; border: none; border-radius: 2.5dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 0.8dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.96); position: relative; overflow: hidden; margin:0; padding: 1dvh 2vw; box-sizing: border-box;}
     
-    /* ✅ 字體極限自適應縮放，利用 vmin 加上極限彈性，保證不破版 */
-    .opt-text { font-size: clamp(14px, 4.5vmin, 45px); line-height: 1.15; word-break: break-word; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; padding: 0 5px;}
-
+    /* 🌟 開放自然換行，最多顯示 3 行，超過隱藏 */
+    .opt-text { font-size: clamp(14px, 4.5vmin, 32px); font-weight: 900; line-height: 1.2; word-break: break-word; white-space: normal; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; padding: 0 5px; width: 100%;}
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
     @keyframes floatOpt { 0%, 100% { transform: scale(0.96) translateY(0px) rotate(0deg); } 33% { transform: scale(0.96) translateY(-0.5dvh) rotate(1deg); } 66% { transform: scale(0.96) translateY(0.3dvh) rotate(-1deg); } }
 
@@ -144,9 +144,10 @@
 
     /* 拉桿、連連看區塊彈性適配 */
     #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1 1 0; min-height: 0; background: rgba(255,255,255,0.9); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; box-sizing: border-box;}
-    input[type=range] { -webkit-appearance: none; appearance: none; width: 90%; margin: 3dvh 0; height: 2dvh; border-radius: 1dvh; background: #d3d3d3; outline: none; touch-action: none; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 6dvh; height: 6dvh; border-radius: 50%; background: #3498db; cursor: pointer; box-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.3);}
-    #sliderValue { font-size: clamp(40px, 8dvh, 80px); font-weight: 900; color: #e74c3c; }
+    /* 🌟 放大拉桿 UI 與數值 */
+    input[type=range] { -webkit-appearance: none; appearance: none; width: 90%; margin: 4dvh 0; height: 3dvh; border-radius: 1.5dvh; background: #d3d3d3; outline: none; touch-action: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 8dvh; height: 8dvh; border-radius: 50%; background: #3498db; cursor: pointer; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.3);}
+    #sliderValue { font-size: clamp(60px, 12dvh, 120px); font-weight: 900; color: #e74c3c; text-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.2); }
 
     #wagerBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1 1 0; min-height: 0; background: rgba(0,0,0,0.7); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; color: white; box-sizing: border-box;}
     #wagerAmount { font-size: clamp(40px, 8dvh, 80px); font-weight: 900; color: #f1c40f; margin: 2dvh 0;}
@@ -157,7 +158,9 @@
     /* ✅ 讓 DragList 保有原始高度並且可滾動，防止極限擠壓 */
     #dragBox { display:none; flex-direction:column; align-items:center; flex:1 1 0; min-height: 0; width:100%; margin-bottom: 1dvh; overflow: hidden; box-sizing: border-box;}
     #dragList { list-style:none; padding:0; width:95%; margin:0; display:flex; flex-direction:column; gap:1dvh; flex: 1 1 0; min-height: 0; overflow-y: auto; touch-action: pan-y;}
-    #dragList li { flex: 0 0 auto; min-height: fit-content; background: white; padding: 1.5dvh 4vw; border-radius: 2dvh; font-size: clamp(16px, 4.5vmin, 28px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: flex-start; gap: 3vw; border-left: 1.5dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box; overflow: hidden; word-break: break-word;}
+
+    /* 🌟 放大拖曳連連看清單字體 */
+    #dragList li { flex: 0 0 auto; min-height: fit-content; background: white; padding: 2dvh 4vw; border-radius: 2dvh; font-size: clamp(18px, 5.5vmin, 36px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: flex-start; gap: 3vw; border-left: 1.5dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box; overflow: hidden; word-break: break-word;}
     .drag-handle { color: #bdc3c7; font-size: 4dvh; cursor: grab;}
     .sortable-ghost { opacity: 0.4; background: #f1c40f !important; }
 
@@ -256,7 +259,7 @@
     </div>
 
     <div id="sliderBox">
-      <span style="font-size: 3dvh; color:#666; font-weight:bold;">滑動拉桿選擇精準數值</span>
+      <span style="font-size: clamp(20px, 4dvh, 40px); font-weight:bold; color: #333; text-shadow: 0 2px 4px rgba(255,255,255,0.8);">滑動拉桿選擇精準數值</span>
       <div id="sliderValue">50</div>
       <input type="range" id="ansSlider" min="0" max="100" value="50" oninput="document.getElementById('sliderValue').innerText = this.value">
     </div>
