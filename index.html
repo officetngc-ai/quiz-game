@@ -3,17 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>玩家控制器 - 實境淘汰賽版</title>
+  <title>玩家端 - 終極 Firebase 版</title>
   
   <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap" rel="stylesheet">
   
-  <!-- 🚨 替換 Firebase SDK -->
+  <!-- 🚨 Firebase SDK 引入 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
     import { getDatabase, ref, set, push, onValue } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
-    // 🔴 請在此貼上您的 Firebase Config 🔴
     const firebaseConfig = {
       apiKey: "AIzaSyDSo4UrteWJKxZrVUA8B3MG1ewgyvhL6gw",
       authDomain: "qagame-50bb6.firebaseapp.com",
@@ -33,7 +32,7 @@
 
   <style id="dynamicTeamStyles"></style>
   <style>
-    /* ========== 全域無卷軸絕對壓縮配置 (防破版核心) ========== */
+    /* ========== 全域無卷軸絕對壓縮配置 ========== */
     body { font-family: 'Nunito', sans-serif; text-align: center; background: #e0e5ec; margin:0; padding:0; height: 100dvh; overflow: hidden; display: flex; flex-direction: column; transition: all 0.5s ease; box-sizing: border-box;}
     
     .fast-mode { background: repeating-linear-gradient(45deg, #f1c40f, #f1c40f 5dvh, #e67e22 5dvh, #e67e22 10dvh); background-size: 200% 200%; animation: feverRush 0.8s linear infinite; box-shadow: inset 0 0 5dvh rgba(211,84,0,0.8); }
@@ -45,7 +44,7 @@
     @keyframes chameleonBlur { 0% { filter: blur(0); opacity: 1; } 100% { filter: blur(1dvh); opacity: 0.2; } }
     .memory-hide { color: transparent !important; text-shadow: 0 0 2dvh rgba(255,255,255,0.8); pointer-events: none;}
 
-    /* ========== 🚨 全域派對狂歡光影 (手機端最後5秒) ========== */
+    /* ========== 🚨 全域派對狂歡光影 ========== */
     body.panic-lighting::after {
         content: ''; position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
         box-shadow: inset 0 0 10dvh 3dvh rgba(255, 105, 180, 0.5); 
@@ -87,7 +86,7 @@
     @keyframes stripemove { 0% { background-position: 0 0; } 100% { background-position: 10dvh 0; } }
     #mobileTimerText { font-size: clamp(20px, 4dvh, 40px); font-weight: 900; color: #333; width: 8vw; text-align: right; text-shadow: 0.2dvh 0.2dvh 0 rgba(255,255,255,0.8);}
 
-    /* ========== 巨大化中央倒數特效 (最後5秒) ========== */
+    /* ========== 中央倒數特效 (最後5秒) ========== */
     #giantTimerOverlay { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9000; pointer-events: none; font-size: 60dvh; font-weight: 900; background: linear-gradient(135deg, #ff0844, #ffb199, #fbc2eb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; color: transparent; filter: drop-shadow(0 0 5dvh rgba(255, 105, 180, 0.6)); animation: giantPartyPop 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) infinite; line-height: 1; margin:0; padding:0;}
     @keyframes giantPartyPop { 0% { transform: translate(-50%, -50%) scale(0.5) rotate(-10deg); opacity: 0; } 30% { transform: translate(-50%, -50%) scale(1.2) rotate(10deg); opacity: 1; } 100% { transform: translate(-50%, -50%) scale(0.8) rotate(0deg); opacity: 0; } }
     
@@ -114,13 +113,11 @@
     #ghostOverlay { display: none; position: absolute; top:30%; left:0; width:100%; z-index: 50; flex-direction: column; align-items:center;}
     #traitorWarning { display: none; background: #000; color: #e74c3c; border: 0.5dvh solid #c0392b; padding: 1.5dvh; border-radius: 3dvh; font-size: clamp(16px, 2.5dvh, 22px); font-weight: 900; margin-bottom: 1dvh; box-shadow: 0 0 2dvh rgba(231, 76, 60, 0.8); animation: pulseWin 1s infinite; flex-shrink: 0;}
 
-    /* ========== 網格彈性極限壓縮佈局 (絕對防溢出核心) ========== */
-    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2dvh 3vw; flex: 1 1 0; min-height: 0; width: 100%; margin-bottom: 2dvh; padding: 1vw; overflow: hidden;}
+    /* ========== 網格彈性極限壓縮佈局 ========== */
+    #btnGrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5dvh 2vw; flex: 1 1 auto; min-height: 0; width: 100%; margin-bottom: 1.5dvh; padding: 1vw; overflow-y: auto; align-content: start;}
+    .ans-btn { flex: 1 1 auto; min-height: 8dvh; height: auto; width: 100%; cursor: pointer; border: none; border-radius: 2.5dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 0.8dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.96); position: relative; overflow: hidden; margin:0; padding: 1.5dvh 2vw; box-sizing: border-box;}
     
-    .ans-btn { flex: 1 1 0; min-height: 0; height: auto; width: 100%; cursor: pointer; border: none; border-radius: 3dvh; display: flex; justify-content: center; align-items: center; color: rgba(255,255,255,0.9); box-shadow: 0 1dvh 0 rgba(0,0,0,0.2), inset 0 0.5dvh 1dvh rgba(255,255,255,0.3); transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0.3; pointer-events: none; transform: scale(0.96); position: relative; overflow: hidden; margin:0; padding: 1.5dvh 2vw; box-sizing: border-box;}
-    
-    /* ✅ 字體極限自適應縮放，利用 vmin 加上極限彈性，保證不破版 */
-    .opt-text { font-size: clamp(14px, 4.5vmin, 45px); line-height: 1.15; word-break: break-word; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; padding: 0 5px;}
+    .opt-text { font-size: clamp(14px, 5vmin, 32px); line-height: 1.2; word-break: break-word; white-space: normal; text-shadow: 0 0.2dvh 0.5dvh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; padding: 0 5px; width: 100%;}
 
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
     @keyframes floatOpt { 0%, 100% { transform: scale(0.96) translateY(0px) rotate(0deg); } 33% { transform: scale(0.96) translateY(-0.5dvh) rotate(1deg); } 66% { transform: scale(0.96) translateY(0.3dvh) rotate(-1deg); } }
@@ -129,13 +126,11 @@
     .color-4 { background: linear-gradient(135deg, #8e44ad, #9b59b6); box-shadow: 0 1.5dvh 0 #732d91;} .color-5 { background: linear-gradient(135deg, #e67e22, #f39c12); box-shadow: 0 1.5dvh 0 #d35400;} .color-6 { background: linear-gradient(135deg, #2c3e50, #34495e); box-shadow: 0 1.5dvh 0 #1a252f;} .color-7 { background: linear-gradient(135deg, #e84393, #fd79a8); box-shadow: 0 1.5dvh 0 #b33971;}
 
     .ans-btn.active { opacity: 1; pointer-events: auto; animation: superPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-    /* 🚨 降低基準縮放，絕對防止邊緣重疊 */
     @keyframes superPop { 0% {transform: scale(0) rotate(-10deg);} 80% {transform: scale(1.02) rotate(5deg);} 100% {transform: scale(0.96) rotate(0deg);} }
 
     body.fast-mode .ans-btn.active:not(.selected) { animation: feverPulse 0.4s infinite alternate; }
     @keyframes feverPulse { from {transform: scale(0.96);} to {transform: scale(1.02); filter: brightness(1.2);} }
     
-    /* 修正重疊問題：選中時內縮並發光 */
     .ans-btn.selected { transform: scale(0.9) translateY(1.5dvh) !important; box-shadow: 0 0 0 rgba(0,0,0,0), 0 0 3dvh rgba(255,255,255,0.8), inset 0 0 2dvh rgba(0,0,0,0.5); color: rgba(255,255,255,1); border: 0.6dvh solid #fff; animation: none;}
     
     .ripple { position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.7); transform: scale(0); animation: rippleAnim 0.6s linear; pointer-events: none;}
@@ -143,25 +138,26 @@
     .ans-btn.locked { opacity: 0.4; filter: grayscale(80%); transform: scale(0.85); pointer-events: none; animation: none; box-shadow: 0 0.5dvh 0 rgba(0,0,0,0.2); }
 
     /* 拉桿、連連看區塊彈性適配 */
-    #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1 1 0; min-height: 0; background: rgba(255,255,255,0.9); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; box-sizing: border-box;}
-    input[type=range] { -webkit-appearance: none; appearance: none; width: 90%; margin: 3dvh 0; height: 2dvh; border-radius: 1dvh; background: #d3d3d3; outline: none; touch-action: none; }
-    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 6dvh; height: 6dvh; border-radius: 50%; background: #3498db; cursor: pointer; box-shadow: 0 0.5dvh 1dvh rgba(0,0,0,0.3);}
-    #sliderValue { font-size: clamp(40px, 8dvh, 80px); font-weight: 900; color: #e74c3c; }
+    #sliderBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1 1 0; min-height: 0; background: rgba(255,255,255,0.9); border-radius: 3dvh; padding: 3dvh; margin-bottom: 1.5dvh; box-sizing: border-box;}
+    #sliderBox span { font-size: clamp(20px, 4dvh, 30px); color:#666; font-weight:bold; margin-bottom: 2dvh; text-align: center; line-height: 1.3;}
+    input[type=range] { -webkit-appearance: none; appearance: none; width: 95%; margin: 4dvh 0; height: 3dvh; border-radius: 1.5dvh; background: #d3d3d3; outline: none; touch-action: none; }
+    input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 8dvh; height: 8dvh; border-radius: 50%; background: #3498db; cursor: pointer; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.4); border: 4px solid #fff;}
+    #sliderValue { font-size: clamp(60px, 12dvh, 120px); font-weight: 900; color: #e74c3c; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
-    #wagerBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1 1 0; min-height: 0; background: rgba(0,0,0,0.7); border-radius: 3dvh; padding: 2dvh; margin-bottom: 1.5dvh; color: white; box-sizing: border-box;}
-    #wagerAmount { font-size: clamp(40px, 8dvh, 80px); font-weight: 900; color: #f1c40f; margin: 2dvh 0;}
+    #wagerBox { display: none; flex-direction: column; justify-content: center; align-items: center; flex: 1 1 0; min-height: 0; background: rgba(0,0,0,0.8); border-radius: 3dvh; padding: 3dvh; margin-bottom: 1.5dvh; color: white; box-sizing: border-box;}
+    #wagerTitle { font-size: clamp(20px, 4dvh, 30px); font-weight:bold; text-align: center; line-height: 1.3; }
+    #wagerAmount { font-size: clamp(60px, 12dvh, 120px); font-weight: 900; color: #f1c40f; margin: 2dvh 0; text-shadow: 0 4px 10px rgba(0,0,0,0.5);}
 
     #orderDisplay { display: none; background: rgba(255,255,255,0.8); padding: 1dvh; border-radius: 2dvh; margin-bottom: 1dvh; font-size: clamp(16px, 3dvh, 24px); font-weight: 900; min-height: 5dvh; color: #333; flex-shrink: 0;}
     #resetOrderBtn { display: none; background: #e74c3c; color: white; border: none; border-radius: 1dvh; padding: 0.5dvh 3vw; font-weight: bold; margin-bottom: 1dvh; cursor:pointer; flex-shrink: 0;}
 
-    /* ✅ 讓 DragList 保有原始高度並且可滾動，防止極限擠壓 */
-    #dragBox { display:none; flex-direction:column; align-items:center; flex:1 1 0; min-height: 0; width:100%; margin-bottom: 1dvh; overflow: hidden; box-sizing: border-box;}
-    #dragList { list-style:none; padding:0; width:95%; margin:0; display:flex; flex-direction:column; gap:1dvh; flex: 1 1 0; min-height: 0; overflow-y: auto; touch-action: pan-y;}
-    #dragList li { flex: 0 0 auto; min-height: fit-content; background: white; padding: 1.5dvh 4vw; border-radius: 2dvh; font-size: clamp(16px, 4.5vmin, 28px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: flex-start; gap: 3vw; border-left: 1.5dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box; overflow: hidden; word-break: break-word;}
+    #dragBox { display:none; flex-direction:column; align-items:center; flex:1 1 auto; min-height: 0; width:100%; margin-bottom: 1.5dvh; overflow-y: auto; box-sizing: border-box;}
+    #dragList { list-style:none; padding:0; width:95%; margin:0; display:flex; flex-direction:column; gap:1dvh; flex: 1 1 auto; min-height: 0; touch-action: pan-y;}
+    #dragList li { flex: 0 0 auto; min-height: 8dvh; background: white; padding: 1.5dvh 4vw; border-radius: 2dvh; font-size: clamp(16px, 5vmin, 28px); font-weight: 900; color: #333; box-shadow: 0 0.5dvh 1.5dvh rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: flex-start; gap: 3vw; border-left: 1.5dvh solid #3498db; transition: transform 0.1s; box-sizing: border-box; overflow: hidden; word-break: break-word; white-space: normal; line-height: 1.2;}
     .drag-handle { color: #bdc3c7; font-size: 4dvh; cursor: grab;}
     .sortable-ghost { opacity: 0.4; background: #f1c40f !important; }
 
-    #submitBtn { display: none; width: 100%; background: linear-gradient(135deg, #a18cd1, #fbc2eb); box-shadow: 0 1dvh 0 #89609e; color: #fff; margin: 0 0 1dvh 0; flex-shrink: 0;}
+    #submitBtn { display: none; width: 100%; background: linear-gradient(135deg, #a18cd1, #fbc2eb); box-shadow: 0 1dvh 0 #89609e; color: #fff; margin: 0 0 2dvh 0; flex-shrink: 0; z-index: 10;}
     #submitBtn:active { transform: translateY(1dvh); box-shadow: 0 0 0 #89609e; }
 
     #skillBar { display: none; flex-shrink: 0; justify-content: space-around; background: rgba(0,0,0,0.6); padding: 1dvh; border-radius: 3dvh; backdrop-filter: blur(5px); margin-bottom: 1dvh;}
@@ -189,7 +185,7 @@
   <!-- 💀 淘汰死亡畫面 -->
   <div id="eliminatedOverlay">
     <div style="font-size: 15dvh; margin-bottom: 2dvh;">💀</div>
-    <h2 style="font-size: 5dvh; font-weight:900; color: #ff4b2b; text-shadow: 0 0 2dvh rgba(255,0,0,0.8);">你已被淘汰</h2>
+    <h2 style="font-size: 5dvh; font-weight:900; color: #ff4b2b;">你已被淘汰</h2>
     <p style="font-size: 3dvh; font-weight:bold; color: #fff;">勝敗乃兵家常事，請繼續觀戰！</p>
   </div>
 
@@ -656,6 +652,8 @@
             document.getElementById('gameScreen').style.border = 'none';
             document.getElementById('gameScreen').style.boxShadow = 'none';
           }
+        });
+      });
     }
 
     function renderTeams(teams, max) { 
