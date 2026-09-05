@@ -876,12 +876,14 @@
         }
       }
 
-      if (qData.mode === 'fog' && gameConfig.useMedia && isCorrect) {
+      // 迷霧模式：越晚答分數越低
+      if (qData.mode.includes('fog') && gameConfig.useMedia && isCorrect) {
         earnedScore = Math.floor(earnedScore * ((maxTimeMs - timeTaken) / maxTimeMs));
         if(earnedScore < 100) earnedScore = 100;
       }
 
-      if ((qData.mode === 'fast_single' || qData.mode === 'fast_rank') && gameConfig.useExtreme && !isCorrect && timeTaken < 3000) {
+      // 搶答模式：前 3 秒盲猜答錯的極限懲罰
+      if ((qData.mode.includes('fast_single') || qData.mode.includes('fast_rank')) && gameConfig.useExtreme && !isCorrect && timeTaken < 3000) {
         earnedScore = -300;
       }
 
@@ -1007,11 +1009,13 @@
           if(wagerTime <= 0) { clearInterval(wInt); warning.style.display = 'none'; showQuestionUI(qData, false); }
         }, 1000);
       } 
-      else if (qData.mode === 'fast_single' || qData.mode === 'fast_rank') {
+      else if (qData.mode.includes('fast_single') || qData.mode.includes('fast_rank')) {
         document.body.className = "bg-fast";
         const warning = document.getElementById('eventWarning'); warning.style.display = 'flex';
-        document.getElementById('warningTitle').innerText = qData.mode === 'fast_single' ? "⚡ 閃電唯一 ⚡" : "🌟 極速排名 🌟";
-        document.getElementById('warningSub').innerText = qData.mode === 'fast_single' ? "只要一人答對，瞬間秒殺結算！\n(3秒內亂按扣300分)" : "爭奪手速前三名，挑戰極限！";
+        document.getElementById('warningTitle').innerText = qData.mode.includes('fast_single') ? "⚡ 閃電唯一 ⚡" : "🌟 極速排名 🌟";
+        let subText = qData.mode.includes('fast_single') ? "只要一人答對，瞬間秒殺結算！\n(3秒內亂按扣300分)" : "爭奪手速前三名，挑戰極限！";
+        if (qData.mode.includes('fog')) subText += "\n👁️ 迷霧啟動：請小心觀察！";
+        document.getElementById('warningSub').innerText = subText;
         playWarning(); startPartyBGM();
         setTimeout(() => { warning.style.display = 'none'; showQuestionUI(qData, true); }, 3000); 
       } else {
@@ -1061,7 +1065,7 @@
       const mediaEl = document.getElementById('qMedia');
       if (gameConfig.useMedia && qData.media) { 
         mediaEl.src = qData.media; mediaEl.style.display = 'block'; 
-        if(qData.mode === 'fog') { mediaEl.style.setProperty('--fog-time', `${qData.time || 15}s`); mediaEl.className = "fog-anim"; } 
+        if(qData.mode.includes('fog')) { mediaEl.style.setProperty('--fog-time', `${qData.time || (isFastMode ? 10 : 15)}s`); mediaEl.className = "fog-anim"; } 
         else { mediaEl.className = ""; }
       } else { mediaEl.style.display = 'none'; mediaEl.className = ""; }
 
@@ -1425,10 +1429,10 @@
         
         let delay = (gameConfig.useTournament && ((currentQIndex + 1) % gameConfig.tournInterval === 0)) ? 4500 : 0;
 
-        setTimeout(() => {
-            if (currentMode === 'fast_single' || currentMode === 'fast_rank') {
+      setTimeout(() => {
+            if (currentMode.includes('fast_single') || currentMode.includes('fast_rank')) {
                 showRoundRanking(currentMode);
-            } else { 
+            } else {
                 document.getElementById('leaderboard').style.display = 'flex'; 
                 renderLeaderboard(); 
                 document.getElementById('nextBtnLeader').style.display = 'inline-block'; 
