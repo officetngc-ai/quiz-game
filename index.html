@@ -557,8 +557,9 @@
               });
 
               document.querySelectorAll('.ans-btn').forEach((b, i) => { 
-                if (data.qMode === 'chameleon' && gameCfg.useExtreme) b.classList.add('chameleon-fx');
-                if (data.qMode === 'auction' && gameCfg.useExtreme && !data.isAuctionWinner) b.classList.add('locked'); 
+                // ✅ 修正後代碼 (index.html)：
+                if (data.qMode === 'chameleon') b.classList.add('chameleon-fx');
+                if (data.qMode === 'auction' && !data.isAuctionWinner) b.classList.add('locked');
                 
                 setTimeout(() => { if(!b.classList.contains('locked')) b.classList.add('floating-opt'); }, 600 + i*100);
               });
