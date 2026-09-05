@@ -320,7 +320,14 @@
       document.getElementById('myNameDisplay').innerText = myName;
 
       document.getElementById('statusText').innerText = "📡 正在連線中...";
-      peer = new Peer();
+      peer = new Peer({
+          config: {
+              'iceServers': [
+                  { urls: 'stun:stun.l.google.com:19302' },
+                  { urls: 'stun:stun1.l.google.com:19302' }
+              ]
+          }
+      });
 
       peer.on('open', (id) => {
         hostConnection = peer.connect('minikahoot-' + autoPin);
@@ -330,6 +337,11 @@
           hostConnection.send({ type: 'JOIN', name: myName });
           hostConnection.send({ type: 'SYNC_AVATAR', avatar: myAvatar });
         });
+
+      peer.on('error', (err) => {
+          document.getElementById('statusText').innerText = "❌ 連線失敗，請重試";
+          alert("連線發生錯誤：" + err.type + "\n如果您使用的是行動網路，請嘗試連接 Wi-Fi 或重新掃描條碼。");
+      });
 
         hostConnection.on('data', (data) => {
           
@@ -557,8 +569,9 @@
               });
 
               document.querySelectorAll('.ans-btn').forEach((b, i) => { 
-                if (data.qMode === 'chameleon' && gameCfg.useExtreme) b.classList.add('chameleon-fx');
-                if (data.qMode === 'auction' && gameCfg.useExtreme && !data.isAuctionWinner) b.classList.add('locked'); 
+                // ✅ 修正後代碼 (index.html)：
+                if (data.qMode === 'chameleon') b.classList.add('chameleon-fx');
+                if (data.qMode === 'auction' && !data.isAuctionWinner) b.classList.add('locked');
                 
                 setTimeout(() => { if(!b.classList.contains('locked')) b.classList.add('floating-opt'); }, 600 + i*100);
               });
