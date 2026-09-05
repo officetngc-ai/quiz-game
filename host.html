@@ -4,12 +4,34 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>P2P 主畫面 - 實境秀錦標賽版</title>
-  <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap" rel="stylesheet">
   
+  <!-- 🚨 替換 Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
+    import { getDatabase, ref, set, push, onChildAdded, onValue, remove } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
+
+    // 🔴 請在此貼上您的 Firebase Config 🔴
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    window.db = getDatabase(app);
+    window.ref = ref; window.set = set; window.push = push; window.onChildAdded = onChildAdded; window.onValue = onValue; window.remove = remove;
+    window.firebaseReady = true;
+  </script>
+
   <style id="dynamicTeamStyles"></style>
 
   <style>
@@ -98,7 +120,7 @@
     #questionBox h2 { font-size: clamp(30px, 6vh, 60px); margin: 0 0 1vh 0; line-height: 1.3; flex-shrink: 0; color: #2c3e50; font-weight: 900; }
     .mode-badge { background: linear-gradient(45deg, #f093fb, #f5576c); color: white; padding: 1vh 2vw; border-radius: 3vh; font-size: clamp(16px, 3vh, 32px); vertical-align: middle; margin-left: 1vw; box-shadow: 0 0.5vh 0 #c0392b;}
     
-    #qMedia { max-height: 25vh; max-width: 100%; object-fit: contain; border-radius: 2vh; display: none; margin: 1vh auto; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); border: 0.5vh solid white; flex-shrink: 0;}
+    #qMedia { max-height: 18vh; max-width: 100%; object-fit: contain; border-radius: 2vh; display: none; margin: 1vh auto; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); border: 0.5vh solid white; flex-shrink: 0;}
     .fog-anim { animation: fogClear var(--fog-time) linear forwards; }
     @keyframes fogClear { 0% { filter: blur(3vh); } 100% { filter: blur(0); } }
 
@@ -107,10 +129,11 @@
     .match-prompt-item img { max-width: 100%; max-height: 12vh; border-radius: 1vh; object-fit: contain;}
     .match-badge { position: absolute; top: -1.5vh; left: -1.5vh; background: #e74c3c; color: white; width: 6vh; height: 6vh; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3.5vh; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.3); z-index: 5;}
 
-    #optionsContainer { display: grid; gap: 2vh 2vw; margin-top: 2vh; flex: 1; min-height: 0; width: 100%; box-sizing: border-box; }
-    .option { width: 100%; height: 100%; padding: 1.5vh 2vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.98); }
-    .opt-text { font-size: clamp(20px, 4vw, 70px); font-weight: 900; line-height: 1.2; word-break: break-word; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); }
+    #optionsContainer { display: grid; gap: 1.5vh 1.5vw; margin-top: 1.5vh; flex: 1; min-height: 0; width: 100%; box-sizing: border-box; grid-auto-rows: 1fr;}
+    .option { width: 100%; height: 100%; padding: 1vh 1vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.98); flex-wrap: nowrap; container-type: inline-size; }
 
+    .opt-text {font-size: clamp(14px, 10cqw, 45px); font-weight: 900; line-height: 1.15; word-break: keep-all; text-align: center; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); }
+    
     .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1vh 0 #b32a18;} 
     .color-1 { background: linear-gradient(135deg, #0072ff, #00c6ff); box-shadow: 0 1vh 0 #0056b3;} 
     .color-2 { background: linear-gradient(135deg, #f9d423, #ff4e50); box-shadow: 0 1vh 0 #b33200;} 
@@ -282,7 +305,7 @@
       </div>
     </div>
     <div id="teamBuckets"></div>
-    <button class="ctrl-btn" onclick="autoAssignAndStart()" id="forceStartBtn">跳過等待，立刻開始 ➡️</button>
+    <button class="ctrl-btn" onclick="autoAssignAndStart()" id="forceStartBtn">跳過等待，隨機分組並開始 ➡️</button>
   </div>
   
   <div id="questionBox" class="glass-panel" style="display:none;">
@@ -469,7 +492,7 @@
     }
 
     let questions = []; let currentQIndex = -1; let countdownInterval; let isAcceptingAnswers = false;
-    let connections = []; let answeredPlayers = new Set(); let questionStartTime = 0;
+    let connectionsMap = {}; let answeredPlayers = new Set(); let questionStartTime = 0;
     
     let gameConfig = {}; let teamsData = []; let playerStats = {}; 
     let currentRoundData = []; let groupTimerInterval;
@@ -480,7 +503,6 @@
     const shapeList = ['▲','◆','●','■','★','✚','✦','✖','▼','⬣'];
 
     const roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
-    let peer;
 
     function createPlayerTagElement(name, avatar, idStr = "") {
       const tag = document.createElement('div'); 
@@ -543,7 +565,29 @@
       window.requestAnimationFrame(step);
     }
 
+    // 🚨 Firebase 廣播指令給所有玩家
+    function broadcast(messageObj, targetName = null) { 
+      if(!window.firebaseReady) return;
+      
+      // 如果有指定對象，發送私訊
+      if (targetName) {
+         sendToPlayer(targetName, messageObj);
+         return;
+      }
+      
+      // 否則廣播給所有人
+      window.set(window.ref(window.db, `rooms/${roomCode}/hostBroadcast`), { ts: Date.now(), msg: messageObj });
+    }
+
+    // 發送私訊給單一玩家
+    function sendToPlayer(playerName, messageObj) {
+      if(!window.firebaseReady) return;
+      window.set(window.ref(window.db, `rooms/${roomCode}/privateMsgs/${playerName}`), { ts: Date.now(), msg: messageObj });
+    }
+
     function initLobby() {
+      if (!window.firebaseReady) return alert("Firebase 尚未載入完成，請確認金鑰設定是否正確。");
+
       if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
       if(audioCtx.state === 'suspended') audioCtx.resume();
       
@@ -611,60 +655,79 @@
       document.getElementById('setupScreen').style.display = 'none'; document.body.className = 'bg-lobby';
       document.getElementById('lobbyScreen').style.display = 'flex';
 
-      peer = new Peer('minikahoot-' + roomCode, {
-          config: {
-              'iceServers': [
-                  { urls: 'stun:stun.l.google.com:19302' },
-                  { urls: 'stun:stun1.l.google.com:19302' }
-              ]
-          }
-      });
-      peer.on('open', (id) => {
-        new QRCode(document.getElementById("qrcode"), { text: window.location.href.replace('host.html', '') + "?pin=" + roomCode, width: 200, height: 200, colorDark : "#ff4b2b", colorLight : "#fff", correctLevel : QRCode.CorrectLevel.H });
-        loadQuestions(); 
+      // 🚨 產出絕對乾淨的 QR Code 網址
+      const baseUrl = window.location.href.split('?')[0].split('#')[0].replace(/host\.html$/, '').replace(/\/$/, '') + '/';
+      new QRCode(document.getElementById("qrcode"), { 
+          text: baseUrl + "index.html?pin=" + roomCode, 
+          width: 180, height: 180, colorDark : "#ff4b2b", colorLight : "#fff", correctLevel : QRCode.CorrectLevel.H 
       });
 
-      peer.on('connection', (conn) => {
-        connections.push(conn);
-        conn.on('data', (data) => {
-          if (data.type === 'JOIN') {
-            playJoin(); conn.playerName = data.name;
-            if(!playerStats[data.name]) {
-                playerStats[data.name] = { teamId: -1, score: 0, correctCount: 0, fastWins: 0, fastScore: 0, streak: 0, hasShield: false, isGhost: false, isTraitor: false, avatar: '👤', isEliminated: false };
-                let pCountEl = document.getElementById('lobbyPlayerCount');
-                if (pCountEl) pCountEl.innerText = Object.keys(playerStats).length;
-            }
-            
-            if (playerStats[data.name].isEliminated) {
-                 conn.send({ type: 'ELIMINATED' });
-                 return;
-            }
+      // 清理 Firebase 舊房間資料
+      window.remove(window.ref(window.db, `rooms/${roomCode}`));
+      
+      // 🚨 監聽 Firebase 傳來的玩家訊息
+      window.onChildAdded(window.ref(window.db, `rooms/${roomCode}/playerMsgs`), (snapshot) => {
+        const data = snapshot.val();
+        if(!data) return;
 
-            if (gameConfig.isTeamMode) {
-              conn.send({ type: 'TEAM_SELECTION_START', teams: teamsData, max: gameConfig.maxPerTeam, css: document.getElementById('dynamicTeamStyles').innerHTML, cfg: gameConfig });
-            } else {
-              const tag = createPlayerTagElement(data.name, '👤', `ptag-${data.name}`);
-              bucketsContainer.appendChild(tag);
-              conn.send({ type: 'INDIVIDUAL_MODE_WAIT', cfg: gameConfig });
+        let conn = connectionsMap[data.name];
+        if (!conn) {
+            conn = {
+                playerName: data.name,
+                open: true,
+                send: (msgObj) => sendToPlayer(data.name, msgObj)
+            };
+            connectionsMap[data.name] = conn;
+        }
+
+        if (data.type === 'JOIN') {
+          playJoin();
+          if(!playerStats[data.name]) {
+              playerStats[data.name] = { teamId: -1, score: 0, correctCount: 0, fastWins: 0, fastScore: 0, streak: 0, hasShield: false, isGhost: false, isTraitor: false, avatar: data.avatar || '👤', isEliminated: false };
+              let pCountEl = document.getElementById('lobbyPlayerCount');
+              if (pCountEl) pCountEl.innerText = Object.keys(playerStats).length;
+          }
+          
+          if (playerStats[data.name].isEliminated) {
+               conn.send({ type: 'ELIMINATED' });
+               return;
+          }
+
+          if (gameConfig.isTeamMode) {
+            if (playerStats[data.name].teamId !== -1) {
+                const existingTeam = teamsData.find(t => t.id === playerStats[data.name].teamId);
+                if (existingTeam) {
+                    conn.send({ type: 'TEAM_ASSIGNED', teamName: existingTeam.name, teamClass: existingTeam.class, teamGrad: existingTeam.gradient, cfg: gameConfig });
+                    return;
+                }
             }
+            conn.send({ type: 'TEAM_SELECTION_START', teams: teamsData, max: gameConfig.maxPerTeam, css: document.getElementById('dynamicTeamStyles').innerHTML, cfg: gameConfig });
+          } else {
+            if (!document.getElementById(`ptag-${data.name}`)) {
+                const tag = createPlayerTagElement(data.name, data.avatar || '👤', `ptag-${data.name}`);
+                bucketsContainer.appendChild(tag);
+            }
+            conn.send({ type: 'INDIVIDUAL_MODE_WAIT', cfg: gameConfig });
           }
-          else if (data.type === 'SYNC_AVATAR') {
-             if(playerStats[conn.playerName]) {
-                 playerStats[conn.playerName].avatar = data.avatar;
-                 let ptag = document.getElementById(`ptag-${conn.playerName}`);
-                 if(ptag) ptag.innerHTML = `<span style="font-size:3.5vh; filter: drop-shadow(0 0.2vh 0.2vh rgba(0,0,0,0.2));">${data.avatar}</span> <span style="text-shadow: 0 0.1vh 0.2vh rgba(255,255,255,0.8);">${conn.playerName}</span>`;
-             }
-          }
-          else if (data.type === 'SELECT_TEAM' && gameConfig.isTeamMode) { handleTeamSelection(conn, data.teamId); }
-          else if (data.type === 'ANSWER') { handleAnswer(conn, data); }
-          else if (data.type === 'USE_SKILL' && gameConfig.useSabotage) { handleSkill(conn, data.skill); }
-          else if (data.type === 'SUBMIT_WAGER' && gameConfig.useEconomy) { 
-            conn.wager = data.amount; 
-            if(data.target) conn.bountyTarget = data.target; else conn.bountyTarget = null;
-          }
-          else if (data.type === 'SUBMIT_BID' && gameConfig.useExtreme) { conn.bidAmount = data.amount; }
-        });
+        }
+        else if (data.type === 'SYNC_AVATAR') {
+           if(playerStats[conn.playerName]) {
+               playerStats[conn.playerName].avatar = data.avatar;
+               let ptag = document.getElementById(`ptag-${conn.playerName}`);
+               if(ptag) ptag.innerHTML = `<span style="font-size:3.5vh; filter: drop-shadow(0 0.2vh 0.2vh rgba(0,0,0,0.2));">${data.avatar}</span> <span style="text-shadow: 0 0.1vh 0.2vh rgba(255,255,255,0.8);">${conn.playerName}</span>`;
+           }
+        }
+        else if (data.type === 'SELECT_TEAM' && gameConfig.isTeamMode) { handleTeamSelection(conn, data.teamId); }
+        else if (data.type === 'ANSWER') { handleAnswer(conn, data); }
+        else if (data.type === 'USE_SKILL' && gameConfig.useSabotage) { handleSkill(conn, data.skill); }
+        else if (data.type === 'SUBMIT_WAGER' && gameConfig.useEconomy) { 
+          conn.wager = data.amount; 
+          if(data.target) conn.bountyTarget = data.target; else conn.bountyTarget = null;
+        }
+        else if (data.type === 'SUBMIT_BID' && gameConfig.useExtreme) { conn.bidAmount = data.amount; }
       });
+
+      loadQuestions();
 
       let timeLeft = gameConfig.groupTime; 
       const timerTextEl = document.getElementById('groupTimerText');
@@ -682,7 +745,17 @@
     }
 
     function handleTeamSelection(conn, teamId) {
-      const pName = conn.playerName; const team = teamsData.find(t => t.id === teamId);
+      const pName = conn.playerName; 
+      const team = teamsData.find(t => t.id === teamId);
+      
+      if (playerStats[pName].teamId !== -1) {
+        const exTeam = teamsData.find(t => t.id === playerStats[pName].teamId);
+        if(exTeam) {
+          conn.send({ type: 'TEAM_ASSIGNED', teamName: exTeam.name, teamClass: exTeam.class, teamGrad: exTeam.gradient, cfg: gameConfig });
+        }
+        return;
+      }
+
       if (team && team.players.length < gameConfig.maxPerTeam && playerStats[pName].teamId === -1) {
         team.players.push(pName); playerStats[pName].teamId = teamId;
         document.getElementById(`bucket-${teamId}`).querySelector('.team-title').innerText = `${team.name} (${team.players.length}/${gameConfig.maxPerTeam})`;
@@ -713,9 +786,9 @@
       } else if ((skillType === 'freeze' || skillType === 'scramble') && stats.score >= 500) {
         let enemies = [];
         if (gameConfig.isTeamMode) {
-           enemies = connections.filter(c => c.playerName && c.playerName !== pName && playerStats[c.playerName].teamId !== stats.teamId && !playerStats[c.playerName].isGhost && !playerStats[c.playerName].isEliminated);
+           enemies = Object.values(connectionsMap).filter(c => c.playerName && c.playerName !== pName && playerStats[c.playerName].teamId !== stats.teamId && !playerStats[c.playerName].isGhost && !playerStats[c.playerName].isEliminated);
         } else {
-           enemies = connections.filter(c => c.playerName && c.playerName !== pName && !playerStats[c.playerName].isGhost && !playerStats[c.playerName].isEliminated);
+           enemies = Object.values(connectionsMap).filter(c => c.playerName && c.playerName !== pName && !playerStats[c.playerName].isGhost && !playerStats[c.playerName].isEliminated);
         }
 
         if(enemies.length > 0) {
@@ -748,7 +821,7 @@
     function autoAssignAndStart() {
       clearInterval(groupTimerInterval);
       if (gameConfig.isTeamMode) {
-        let unassignedConns = connections.filter(c => c.playerName && playerStats[c.playerName].teamId === -1 && !playerStats[c.playerName].isEliminated);
+        let unassignedConns = Object.values(connectionsMap).filter(c => c.playerName && playerStats[c.playerName].teamId === -1 && !playerStats[c.playerName].isEliminated);
         unassignedConns.sort(() => Math.random() - 0.5);
         unassignedConns.forEach(conn => {
           let availableTeams = teamsData.filter(t => t.players.length < gameConfig.maxPerTeam);
@@ -776,7 +849,7 @@
             questions = results.data.slice(1).map(row => {
               if(!row || row.length < 3 || !row[0] || row[0].trim() === '') return null;
               const type = row[0].trim().toLowerCase();
-              const q = row[1] ? row[1].trim() : "請看圖片作答"; // 🚨 防呆
+              const q = row[1] ? row[1].trim() : "請看圖片作答"; 
               const correctArray = row[2].toString().split(',').map(n => parseInt(n.trim()));
               const modeRaw = row[3] ? row[3].trim().toLowerCase() : 'normal';
               const mediaUrl = row[4] ? row[4].trim() : '';
@@ -809,8 +882,6 @@
         { type: "slider", mode: "normal", q: "【精準拉桿】水在常溫常壓的沸點是幾度？", options: ["0", "200"], correct: [100], media: "", time: 15 }
       ];
     }
-
-    function broadcast(messageObj, targetName = null) { connections.forEach(conn => { if (conn.open) { if (!targetName || conn.playerName === targetName) conn.send(messageObj); } }); }
 
     function handleAnswer(conn, data) {
       if (!isAcceptingAnswers || answeredPlayers.has(conn.playerName) || isGlobalPaused) return;
@@ -943,7 +1014,7 @@
       let tIdx = 0;
       allPlayers.forEach(pName => {
         teamsData[tIdx].players.push(pName); playerStats[pName].teamId = teamsData[tIdx].id;
-        const conn = connections.find(c => c.playerName === pName);
+        const conn = connectionsMap[pName];
         if(conn && conn.open) conn.send({ type: 'TEAM_SHUFFLE', teamName: teamsData[tIdx].name, teamGrad: teamsData[tIdx].gradient });
         tIdx = (tIdx + 1) % gameConfig.teamCount;
       });
@@ -961,7 +1032,7 @@
 
       document.getElementById('questionBox').style.display = 'none'; document.getElementById('leaderboard').style.display = 'none'; document.getElementById('roundRanking').style.display = 'none'; document.getElementById('nextBtn').style.display = 'none'; document.getElementById('nextBtnLeader').style.display = 'none';
 
-      connections.forEach(c => { c.wager = 0; c.bountyTarget = null; c.bidAmount = 0; }); 
+      Object.values(connectionsMap).forEach(c => { c.wager = 0; c.bountyTarget = null; c.bidAmount = 0; }); 
 
       if (qData.mode === 'auction' && gameConfig.useExtreme) {
         document.body.className = "bg-wager";
@@ -981,7 +1052,7 @@
             highestBid = 0; highestBidder = null;
             if(gameConfig.isTeamMode) {
               let teamBids = {};
-              connections.forEach(c => {
+              Object.values(connectionsMap).forEach(c => {
                  if(c.playerName) {
                    let tid = playerStats[c.playerName].teamId;
                    if(!teamBids[tid]) teamBids[tid] = 0;
@@ -990,7 +1061,7 @@
               });
               for(let tid in teamBids) { if(teamBids[tid] > highestBid) { highestBid = teamBids[tid]; highestBidder = parseInt(tid); }}
             } else {
-              connections.forEach(c => { if((c.bidAmount || 0) > highestBid) { highestBid = c.bidAmount; highestBidder = c.playerName; }});
+              Object.values(connectionsMap).forEach(c => { if((c.bidAmount || 0) > highestBid) { highestBid = c.bidAmount; highestBidder = c.playerName; }});
             }
             
             showQuestionUI(qData, false); 
@@ -1148,9 +1219,9 @@
       document.querySelector('.glass-panel').style.border = 'none';
       document.querySelector('.glass-panel').style.boxShadow = '0 2vh 5vh rgba(0,0,0,0.15), inset 0 0 0 0.5vh rgba(255,255,255,0.5)';
       
-      currentRoundData = []; isAcceptingAnswers = true; answeredPlayers.clear(); connections.forEach(c => c.tempResult = null);
+      currentRoundData = []; isAcceptingAnswers = true; answeredPlayers.clear(); Object.values(connectionsMap).forEach(c => c.tempResult = null);
       
-      connections.forEach(c => {
+      Object.values(connectionsMap).forEach(c => {
         if(c.open && c.playerName && !playerStats[c.playerName].isEliminated) {
           let role = 'all';
           if(qData.mode === 'coop' && gameConfig.useAdvType && gameConfig.isTeamMode) {
@@ -1269,7 +1340,7 @@
                 for (let i = 0; i < elimCount; i++) {
                     let loser = activePlayers[activePlayers.length - 1 - i];
                     playerStats[loser].isEliminated = true;
-                    let conn = connections.find(c => c.playerName === loser);
+                    let conn = connectionsMap[loser];
                     if (conn && conn.open) conn.send({ type: 'ELIMINATED' });
                 }
             }
@@ -1286,7 +1357,7 @@
                     
                     teamsData.find(t => t.id === loserId).players.forEach(p => {
                         playerStats[p].isEliminated = true;
-                        let conn = connections.find(c => c.playerName === p);
+                        let conn = connectionsMap[p];
                         if (conn && conn.open) conn.send({ type: 'ELIMINATED' });
                     });
                 } else {
@@ -1323,12 +1394,12 @@
       if (currentMode === 'majority' && gameConfig.useAdvType) {
         let counts = {};
         for(let i=0; i<questions[currentQIndex].options.length; i++) counts[i] = 0;
-        connections.forEach(c => { if(c.tempResult && c.tempResult.pVal !== undefined) counts[c.tempResult.pVal]++; });
+        Object.values(connectionsMap).forEach(c => { if(c.tempResult && c.tempResult.pVal !== undefined) counts[c.tempResult.pVal]++; });
         let maxVote = -1; let maxOpt = 0;
         for(let i=0; i<questions[currentQIndex].options.length; i++) { if(counts[i] > maxVote) { maxVote = counts[i]; maxOpt = i; } }
         correctAns = [maxOpt];
         
-        connections.forEach(c => {
+        Object.values(connectionsMap).forEach(c => {
           if(c.tempResult && c.tempResult.pVal !== undefined) {
             if(c.tempResult.pVal === maxOpt) { c.tempResult.isCorrect = true; c.tempResult.earnedScore = 1000; }
             const rData = currentRoundData.find(d => d.name === c.playerName);
@@ -1374,7 +1445,7 @@
         });
       }
 
-      connections.forEach(conn => {
+      Object.values(connectionsMap).forEach(conn => {
         if(conn.playerName) {
           const stats = playerStats[conn.playerName];
           if(conn.tempResult) {
@@ -1392,8 +1463,8 @@
             if(currentMode === 'bounty' && conn.bountyTarget != null) {
               let wagerAmt = parseInt(conn.wager) || 0; 
               let targetFailed = true;
-              if(gameConfig.isTeamMode) { connections.forEach(tc => { if(playerStats[tc.playerName]?.teamId == conn.bountyTarget && tc.tempResult?.isCorrect) targetFailed = false; }); } 
-              else { let tc = connections.find(c => c.playerName == conn.bountyTarget); if (tc && tc.tempResult && tc.tempResult.isCorrect) targetFailed = false; }
+              if(gameConfig.isTeamMode) { Object.values(connectionsMap).forEach(tc => { if(playerStats[tc.playerName]?.teamId == conn.bountyTarget && tc.tempResult?.isCorrect) targetFailed = false; }); } 
+              else { let tc = connectionsMap[conn.bountyTarget]; if (tc && tc.tempResult && tc.tempResult.isCorrect) targetFailed = false; }
               if(targetFailed) { stats.score += wagerAmt; conn.send({type:'SKILL_SUCCESS', msg:`賞金獵取成功！+${wagerAmt}分`}); }
               else { stats.score -= wagerAmt; conn.send({type:'SKILL_SUCCESS', msg:`賞金獵取失敗！目標答對了，-${wagerAmt}分`}); }
             }
@@ -1422,7 +1493,7 @@
         teamsData.forEach(t => {
           let anyCorrect = false;
           t.players.forEach(p => { 
-             let c = connections.find(conn => conn.playerName === p);
+             let c = connectionsMap[p];
              if(c && c.tempResult && c.tempResult.isCorrect) anyCorrect = true; 
           });
           if(anyCorrect) { t.players.forEach(p => playerStats[p].isGhost = false); }
@@ -1498,13 +1569,11 @@
       }
     }
 
-    // 🌟 全新重構：支援分組排版與動畫升降的排行榜渲染
     function renderLeaderboard() {
       const container = document.getElementById('boardContainer'); 
       container.innerHTML = ''; 
 
       if (gameConfig.isTeamMode) {
-          // --- 上半部：分組總分排名 ---
           let teamRanks = teamsData.map(t => ({ ...t, score: getTeamScore(t.id) }));
           teamRanks.sort((a, b) => {
               if (a.isEliminated === b.isEliminated) return b.score - a.score;
@@ -1561,7 +1630,6 @@
               }
           });
 
-          // --- 下半部：各分組組員名次 ---
           let lowerDiv = document.createElement('div');
           lowerDiv.style.cssText = "flex: 1.5; display:flex; justify-content:center; gap:1.5vw; overflow-x:auto; padding-top: 1vh;";
 
@@ -1612,14 +1680,12 @@
           container.appendChild(upperDiv);
           container.appendChild(lowerDiv);
 
-          // 更新記憶體名次資料供下回合對比
           previousTeamRanks = {};
           teamRanks.forEach((t, idx) => previousTeamRanks[t.name] = { rank: idx, score: t.score });
           previousPlayerRanks = {};
           Object.keys(playerStats).forEach(pName => previousPlayerRanks[pName] = { score: playerStats[pName].score });
 
       } else {
-          // --- 個人戰模式維持單一列表 ---
           let rankedData = Object.keys(playerStats).map(pName => { return { name: pName, score: playerStats[pName].score, avatar: playerStats[pName].avatar, isEliminated: playerStats[pName].isEliminated, streak: playerStats[pName].streak, isGhost: playerStats[pName].isGhost }; }); 
           
           rankedData.sort((a, b) => {
