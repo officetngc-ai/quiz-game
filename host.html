@@ -10,12 +10,11 @@
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&display=swap" rel="stylesheet">
   
-  <!-- 🚨 Firebase SDK -->
+  <!-- 🚨 Firebase SDK 引入 -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
     import { getDatabase, ref, set, push, onChildAdded, onValue, remove } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-database.js";
 
-    // 🔴 請在此貼上您的 Firebase Config 🔴
     const firebaseConfig = {
       apiKey: "AIzaSyDSo4UrteWJKxZrVUA8B3MG1ewgyvhL6gw",
       authDomain: "qagame-50bb6.firebaseapp.com",
@@ -29,12 +28,7 @@
 
     const app = initializeApp(firebaseConfig);
     window.db = getDatabase(app);
-    window.ref = ref; 
-    window.set = set; 
-    window.push = push; 
-    window.onChildAdded = onChildAdded; 
-    window.onValue = onValue; 
-    window.remove = remove;
+    window.ref = ref; window.set = set; window.push = push; window.onChildAdded = onChildAdded; window.onValue = onValue; window.remove = remove;
     window.firebaseReady = true;
   </script>
 
@@ -42,22 +36,7 @@
 
   <style>
     /* ========== 全域無卷軸與響應式配置 ========== */
-    body { 
-      font-family: 'Nunito', sans-serif; 
-      text-align: center; 
-      margin: 0; 
-      padding: 2vh 2vw; 
-      color: #fff; 
-      overflow: hidden; 
-      height: 100vh; 
-      box-sizing: border-box; 
-      transition: background 0.5s; 
-      background-size: 300% 300%; 
-      display: flex; 
-      flex-direction: column; 
-      justify-content: center; 
-      align-items: center; 
-    }
+    body { font-family: 'Nunito', sans-serif; text-align: center; margin: 0; padding: 2vh 2vw; color: #fff; overflow: hidden; height: 100vh; box-sizing: border-box; transition: background 0.5s; background-size: 300% 300%; display: flex; flex-direction: column; justify-content: center; align-items: center; }
     
     .bg-setup { background-image: linear-gradient(135deg, #667eea, #764ba2); }
     .bg-lobby { background-image: linear-gradient(45deg, #ff9a9e, #fecfef, #a18cd1, #fbc2eb); animation: fluidBg 8s ease infinite; }
@@ -152,45 +131,11 @@
     .match-badge { position: absolute; top: -1.5vh; left: -1.5vh; background: #e74c3c; color: white; width: 6vh; height: 6vh; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3.5vh; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.3); z-index: 5;}
 
     /* 🚨 修正：限制選項網格自動斷行，列高均分 */
-    #optionsContainer { 
-      display: grid; 
-      gap: 1.5vh 1.5vw; 
-      margin-top: 1.5vh; 
-      flex: 1; 
-      min-height: 0; 
-      width: 100%; 
-      box-sizing: border-box; 
-      grid-auto-rows: minmax(0, 1fr); 
-      overflow: hidden;
-    }
-    
-    .option { 
-      width: 100%; height: 100%; padding: 1vh 1vw; 
-      font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; 
-      border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); 
-      display: flex; align-items: center; justify-content: center; gap: 1vw; 
-      box-sizing: border-box; margin: 0; 
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-      transform: scale(0.98); 
-      container-type: inline-size; 
-      overflow: hidden;
-    }
+    #optionsContainer { display: grid; gap: 1.5vh 1.5vw; margin-top: 1.5vh; flex: 1; min-height: 0; width: 100%; box-sizing: border-box; grid-auto-rows: minmax(0, 1fr); overflow: hidden;}
+    .option { width: 100%; height: 100%; padding: 1vh 1vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.98); container-type: inline-size; overflow: hidden;}
 
-    /* 🚨 修正：允許文字自然斷行，容器查詢適配大小 */
-    .opt-text {
-      font-size: clamp(14px, 8cqw, 45px); 
-      font-weight: 900; 
-      line-height: 1.2; 
-      word-break: break-word; 
-      white-space: normal; 
-      text-align: center; 
-      text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); 
-      display: -webkit-box; 
-      -webkit-box-orient: vertical; 
-      -webkit-line-clamp: 4; 
-      overflow: hidden; 
-      width: 100%;
-    }
+    /* 🚨 修正：允許文字自然斷行，超過 4 行隱藏 */
+    .opt-text {font-size: clamp(14px, 10cqw, 45px); font-weight: 900; line-height: 1.15; word-break: keep-all; white-space: normal; text-align: center; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; width: 100%;}
     
     .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1vh 0 #b32a18;} 
     .color-1 { background: linear-gradient(135deg, #0072ff, #00c6ff); box-shadow: 0 1vh 0 #0056b3;} 
@@ -302,40 +247,20 @@
     <div style="display:flex; gap:2vw; text-align:left; flex: 1; min-height: 0; overflow: hidden;">
       <div style="flex:1; display:flex; flex-direction:column; justify-content:center;">
         <h3 style="margin:0 0 1vh 0; color:#e67e22; font-size: 3vh;">👥 基礎賽制設定</h3>
-        <div class="setup-row">
-          <span>模式：</span>
-          <select id="cfgMode" class="setup-select" onchange="toggleTeamInputs()">
-            <option value="individual">👑 個人戰 (不分組)</option>
-            <option value="teams" selected>🛡️ 聯盟對抗</option>
-          </select>
-        </div>
+        <div class="setup-row"><span>模式：</span><select id="cfgMode" class="setup-select" onchange="toggleTeamInputs()"><option value="individual">👑 個人戰 (不分組)</option><option value="teams" selected>🛡️ 聯盟對抗</option></select></div>
         <div id="teamOptionsBox">
-          <div class="setup-row">
-            <span>分組數：</span>
-            <input type="number" id="cfgTeams" class="setup-input" value="4" min="2" style="width: 6vw;">
-          </div>
-          <div class="setup-row">
-            <span>每隊人數：</span>
-            <input type="number" id="cfgMax" class="setup-input" value="10" min="1" style="width: 6vw;">
-          </div>
+          <div class="setup-row"><span>分組數：</span><input type="number" id="cfgTeams" class="setup-input" value="4" min="2" style="width: 6vw;"></div>
+          <div class="setup-row"><span>每隊人數：</span><input type="number" id="cfgMax" class="setup-input" value="10" min="1" style="width: 6vw;"></div>
           <div class="setup-row" style="background: rgba(155, 89, 182, 0.2); border-left: 0.5vw solid #8e44ad;">
-            <span>🌀 大風吹 (第幾題後，0為關閉)：</span>
-            <input type="number" id="cfgShuffle" class="setup-input" value="0" min="0" style="width: 6vw; text-align:center;">
+            <span>🌀 大風吹 (第幾題後，0為關閉)：</span><input type="number" id="cfgShuffle" class="setup-input" value="0" min="0" style="width: 6vw; text-align:center;">
           </div>
         </div>
-        <div class="setup-row">
-          <span>等候秒數：</span>
-          <input type="number" id="cfgTime" class="setup-input" value="60" min="10" style="width: 6vw;">
-        </div>
+        <div class="setup-row"><span>等候秒數：</span><input type="number" id="cfgTime" class="setup-input" value="60" min="10" style="width: 6vw;"></div>
         <div class="setup-row">
           <span>🏆 條件：</span>
           <select id="cfgWin" class="setup-select" style="font-size: clamp(12px, 1.8vh, 18px);">
-            <option value="1">1. 總積分最高</option>
-            <option value="2">2. 總答對數最高</option>
-            <option value="3">3. 隊員平均分最高</option>
-            <option value="4">4. 隊員平均答對數</option>
-            <option value="5">5. 閃電成功數最高</option>
-            <option value="6">6. 閃電搶分最高</option>
+            <option value="1">1. 總積分最高</option><option value="2">2. 總答對數最高</option><option value="3">3. 隊員平均分最高</option>
+            <option value="4">4. 隊員平均答對數</option><option value="5">5. 閃電成功數最高</option><option value="6">6. 閃電搶分最高</option>
           </select>
         </div>
       </div>
@@ -412,7 +337,7 @@
     <button class="ctrl-btn" onclick="showTotalLeaderboard()" style="flex-shrink:0;">查看總積分 ➡️</button>
   </div>
 
-  <!-- 🌟 排行榜容器 -->
+  <!-- 🌟 分組排名與單人排名共用的排行榜容器 -->
   <div id="leaderboard" class="glass-panel" style="display:none; padding: 2vh 3vw;">
     <h3 style="font-size: 6vh; margin-top:0; margin-bottom:1vh; color:#4a3472; flex-shrink:0;">🏆 總積分戰況 🏆</h3>
     <div id="boardContainer" style="flex: 1; display: flex; flex-direction: column; width: 100%; min-height: 0; gap: 1vh;"></div>
@@ -446,15 +371,12 @@
 
     let currentBGM = null;
 
-    // 🌟 全域計分紀錄體系
+    // 🌟 全域計分紀錄體系 (供跑馬表與名次升降計算使用)
     let previousTeamRanks = {};
     let previousPlayerRanks = {};
 
     function initAudio() { 
-      if(!audioCtx) { 
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
-        if(audioCtx.state === 'suspended') audioCtx.resume(); 
-      } 
+      if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if(audioCtx.state === 'suspended') audioCtx.resume(); } 
       
       bgmLobby = document.getElementById('bgmLobbyObj'); 
       bgmNormal = document.getElementById('bgmNormalObj');
@@ -482,6 +404,7 @@
 
     function startPartyBGM() {
         stopBGM(); 
+        
         if (!bgmNormal) return;
         bgmNormal.volume = 0.3;
         currentBGM = bgmNormal;
@@ -536,10 +459,8 @@
       osc.frequency.setValueAtTime(freq, audioCtx.currentTime); 
       gain.gain.setValueAtTime(vol, audioCtx.currentTime); 
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration); 
-      osc.connect(gain); 
-      gain.connect(audioCtx.destination); 
-      osc.start(); 
-      osc.stop(audioCtx.currentTime + duration); 
+      osc.connect(gain); gain.connect(audioCtx.destination); 
+      osc.start(); osc.stop(audioCtx.currentTime + duration); 
     }
     function playJoin() { initAudio(); playTone(600, 'sine', 0.1); setTimeout(()=>playTone(800, 'sine', 0.15), 100); } 
     function playStart() { initAudio(); playTone(523, 'triangle', 0.1); setTimeout(() => playTone(659, 'triangle', 0.1), 150); setTimeout(() => playTone(784, 'triangle', 0.4), 300); }
@@ -583,6 +504,7 @@
     let currentMatchups = []; 
     
     const shapeList = ['▲','◆','●','■','★','✚','✦','✖','▼','⬣'];
+
     const roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
 
     function createPlayerTagElement(name, avatar, idStr = "") {
@@ -648,7 +570,6 @@
     // 🚨 Firebase 廣播指令給所有玩家
     function broadcast(messageObj, targetName = null) { 
       if(!window.firebaseReady) return;
-      
       if (targetName) {
          sendToPlayer(targetName, messageObj);
          return;
@@ -665,10 +586,8 @@
     function initLobby() {
       if (!window.firebaseReady) return alert("Firebase 尚未載入完成，請確認金鑰設定是否正確。");
 
-      if(!audioCtx) { 
-        audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
-        if(audioCtx.state === 'suspended') audioCtx.resume(); 
-      }
+      if(!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      if(audioCtx.state === 'suspended') audioCtx.resume();
       
       let audios = [
           document.getElementById('bgmLobbyObj'), document.getElementById('bgmNormalObj'), 
@@ -742,7 +661,6 @@
 
       window.remove(window.ref(window.db, `rooms/${roomCode}`));
       
-      // 🚨 監聽 Firebase 傳來的玩家訊息
       window.onChildAdded(window.ref(window.db, `rooms/${roomCode}/playerMsgs`), (snapshot) => {
         const data = snapshot.val();
         if(!data) return;
@@ -1031,11 +949,13 @@
         }
       }
 
+      // 迷霧模式：越晚答分數越低
       if (qData.mode.includes('fog') && gameConfig.useMedia && isCorrect) {
         earnedScore = Math.floor(earnedScore * ((maxTimeMs - timeTaken) / maxTimeMs));
         if(earnedScore < 100) earnedScore = 100;
       }
 
+      // 搶答模式：前 3 秒盲猜答錯的極限懲罰
       if ((qData.mode.includes('fast_single') || qData.mode.includes('fast_rank')) && gameConfig.useExtreme && !isCorrect && timeTaken < 3000) {
         earnedScore = -300;
       }
@@ -1075,11 +995,7 @@
 
     function triggerTeamShuffle() {
       playShuffleSound();
-      document.getElementById('questionBox').style.display = 'none'; 
-      document.getElementById('leaderboard').style.display = 'none'; 
-      document.getElementById('roundRanking').style.display = 'none'; 
-      document.getElementById('nextBtn').style.display = 'none'; 
-      document.getElementById('nextBtnLeader').style.display = 'none';
+      document.getElementById('questionBox').style.display = 'none'; document.getElementById('leaderboard').style.display = 'none'; document.getElementById('roundRanking').style.display = 'none'; document.getElementById('nextBtn').style.display = 'none'; document.getElementById('nextBtnLeader').style.display = 'none';
 
       document.body.className = "bg-shuffle";
       const warning = document.getElementById('eventWarning'); warning.style.display = 'flex';
@@ -1265,15 +1181,16 @@
           const shape = shapeList[i % shapeList.length];
           const colorClass = `color-${i % 8}`;
           
-          let isImage = optText.trim().startsWith('http');
-          let contentHtml = isImage 
-              ? `<img src="${optText.trim()}" style="max-width:100%; max-height:15vh; object-fit:contain; border-radius:1.5vh; box-shadow:0 0.5vh 1.5vh rgba(0,0,0,0.3);">` 
+          let isImg = optText.trim().startsWith('http');
+          
+          let contentHtml = isImg 
+              ? `<img src="${optText.trim()}" style="max-width: 100%; max-height: 15vh; object-fit: contain; border-radius: 1.5vh; box-shadow: 0 0.5vh 1.5vh rgba(0,0,0,0.3);">` 
               : optText;
 
           optBox.innerHTML += `
           <div class="option ${colorClass} floating-opt" id="opt${i}">
               <span class="shape">${shape}</span>
-              <span class="opt-text" style="${isImage ? 'display:flex; justify-content:center; align-items:center; width:100%; height:100%; padding: 0;' : ''}">
+              <span class="opt-text" style="${isImg ? 'display:flex; justify-content:center; align-items:center; width:100%; height:100%; padding: 0;' : ''}">
                   ${contentHtml}
               </span>
           </div>`;
@@ -1643,7 +1560,7 @@
       document.getElementById('leaderboard').style.display = 'flex'; 
       renderLeaderboard(); 
       document.getElementById('nextBtnLeader').style.display = 'inline-block'; 
-      if (currentBGM !== bgmRound) {
+      if (bgmRound && bgmRound.paused) {
          playRoundBGM();
       }
     }
@@ -1835,21 +1752,14 @@
       playPodiumBGM(); 
       playWin(); 
       document.body.className = "bg-podium";
-      document.getElementById('questionBox').style.display = 'none'; 
-      document.getElementById('leaderboard').style.display = 'none';
+      document.getElementById('questionBox').style.display = 'none'; document.getElementById('leaderboard').style.display = 'none';
       
-      let finalData = []; 
-      let titleText = "";
+      let finalData = []; let titleText = "";
 
       if (gameConfig.isTeamMode) {
         finalData = teamsData.map(t => {
           let tScore=0, tCorrect=0, tFastWin=0, tFastScore=0;
-          t.players.forEach(p => { 
-            tScore += playerStats[p].score; 
-            tCorrect += playerStats[p].correctCount; 
-            tFastWin += playerStats[p].fastWins; 
-            tFastScore += playerStats[p].fastScore; 
-          });
+          t.players.forEach(p => { tScore += playerStats[p].score; tCorrect += playerStats[p].correctCount; tFastWin += playerStats[p].fastWins; tFastScore += playerStats[p].fastScore; });
           let pCount = Math.max(1, t.players.length);
           return { name: t.name, metric: 0, display: "", raw: {tScore, tCorrect, tFastWin, tFastScore, pCount}, isEliminated: t.isEliminated };
         });
@@ -1864,9 +1774,7 @@
         });
       } else {
         titleText = "個人總積分冠軍";
-        finalData = Object.keys(playerStats).map(pName => { 
-          return { name: pName, metric: playerStats[pName].score, display: `${playerStats[pName].score} 分`, avatar: playerStats[pName].avatar, isEliminated: playerStats[pName].isEliminated }; 
-        });
+        finalData = Object.keys(playerStats).map(pName => { return { name: pName, metric: playerStats[pName].score, display: `${playerStats[pName].score} 分`, avatar: playerStats[pName].avatar, isEliminated: playerStats[pName].isEliminated }; });
       }
 
       finalData.sort((a, b) => {
@@ -1874,8 +1782,7 @@
           return a.isEliminated ? 1 : -1;
       });
 
-      document.getElementById('podiumTitle').innerText = `🏆 ${titleText} 🏆`; 
-      document.getElementById('podiumContainer').style.display = 'flex';
+      document.getElementById('podiumTitle').innerText = `🏆 ${titleText} 🏆`; document.getElementById('podiumContainer').style.display = 'flex';
       for(let i=0; i<3; i++) {
         const place = i+1;
         if(finalData[i] && finalData[i].metric > 0 && !finalData[i].isEliminated) { 
@@ -1883,10 +1790,7 @@
            document.getElementById(`name-${place}`).innerHTML = `${avatarHtml}${finalData[i].name}`; 
            document.getElementById(`score-${place}`).innerText = finalData[i].display; 
         } 
-        else { 
-           document.getElementById(`name-${place}`).innerText = "無"; 
-           document.getElementById(`score-${place}`).innerText = "-"; 
-        }
+        else { document.getElementById(`name-${place}`).innerText = "無"; document.getElementById(`score-${place}`).innerText = "-"; }
       }
       var duration = 15 * 1000; var end = Date.now() + duration;
       (function frame() {
