@@ -59,9 +59,20 @@
     @keyframes flashText { from { transform: scale(1); } to { transform: scale(1.1); color: #fff; } }
     @keyframes spinAndZoom { 0% { transform: scale(0.8) rotate(-5deg); } 100% { transform: scale(1.2) rotate(5deg); color: #fff;} }
 
-    #pauseOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; color: white; }
-    .pause-icon { font-size: 20vh; animation: pulseWin 1s infinite alternate; text-shadow: 0 1vh 3vh rgba(0,0,0,0.5); }
-    .pause-text { font-size: 10vh; font-weight: 900; margin: 2vh 0; letter-spacing: 0.5vw; color: #f1c40f; }
+    /* ========== 🚨 全域暫停畫面 (新增角落講解模式) ========== */
+    #pauseOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; color: white; transition: all 0.3s ease;}
+    #pauseContentWrapper { display: flex; flex-direction: column; align-items: center; transition: all 0.3s ease; }
+    
+    .pause-icon { font-size: 20vh; animation: pulseWin 1s infinite alternate; text-shadow: 0 1vh 3vh rgba(0,0,0,0.5); margin-bottom: 2vh;}
+    .pause-text { font-size: 10vh; font-weight: 900; margin: 0 0 2vh 0; letter-spacing: 0.5vw; color: #f1c40f; text-shadow: 0 0.5vh 1vh rgba(0,0,0,0.5);}
+    .pause-sub { font-size: 4vh; color: #f1c40f; font-weight: bold; }
+
+    /* 乾淨角落版 (講解模式專用) */
+    #pauseOverlay.corner-mode { background: transparent; backdrop-filter: none; justify-content: flex-start; align-items: flex-end; padding: 3vh 3vw; pointer-events: none;}
+    #pauseOverlay.corner-mode #pauseContentWrapper { flex-direction: row; background: rgba(0,0,0,0.85); padding: 1.5vh 3vw; border-radius: 5vh; border: 0.4vh solid #f1c40f; box-shadow: 0 1vh 3vh rgba(0,0,0,0.5); pointer-events: auto;}
+    #pauseOverlay.corner-mode .pause-icon { font-size: 6vh; margin: 0 1.5vw 0 0; animation: none; text-shadow: none; }
+    #pauseOverlay.corner-mode .pause-text { font-size: 3.5vh; margin: 0; letter-spacing: normal; color: #fff; text-shadow: none; }
+    #pauseOverlay.corner-mode .pause-sub { display: none; }
 
     /* ========== UI 面板 彈性適配 (防破版核心) ========== */
     .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 3vh 3vw; border-radius: 4vh; box-shadow: 0 2vh 5vh rgba(0,0,0,0.15), inset 0 0 0 0.5vh rgba(255,255,255,0.5); width: 95vw; height: 96vh; display: flex; flex-direction: column; justify-content: stretch; align-items: stretch; color: #333; animation: popUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-sizing: border-box; overflow: hidden; transition: box-shadow 0.3s, background-color 0.3s, border 0.3s; }
@@ -120,7 +131,6 @@
     #questionBox h2 { font-size: clamp(30px, 6vh, 60px); margin: 0 0 1vh 0; line-height: 1.3; flex-shrink: 0; color: #2c3e50; font-weight: 900; }
     .mode-badge { background: linear-gradient(45deg, #f093fb, #f5576c); color: white; padding: 1vh 2vw; border-radius: 3vh; font-size: clamp(16px, 3vh, 32px); vertical-align: middle; margin-left: 1vw; box-shadow: 0 0.5vh 0 #c0392b;}
     
-    /* 🚨 修正：圖片顯示 2/3 畫面佔比 */
     #qMedia { height: 45vh; max-width: 100%; object-fit: contain; border-radius: 2vh; display: none; margin: 1vh auto; box-shadow: 0 1vh 2vh rgba(0,0,0,0.2); border: 0.5vh solid white; flex: 0 1 auto; min-height: 0;}
     .fog-anim { animation: fogClear var(--fog-time) linear forwards; }
     @keyframes fogClear { 0% { filter: blur(3vh); } 100% { filter: blur(0); } }
@@ -130,14 +140,10 @@
     .match-prompt-item img { max-width: 100%; max-height: 12vh; border-radius: 1vh; object-fit: contain;}
     .match-badge { position: absolute; top: -1.5vh; left: -1.5vh; background: #e74c3c; color: white; width: 6vh; height: 6vh; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 3.5vh; box-shadow: 0 0.5vh 1vh rgba(0,0,0,0.3); z-index: 5;}
 
-    /* 🚨 修正：限制選項網格自動斷行，列高均分 */
     #optionsContainer { display: grid; gap: 1.5vh 1.5vw; margin-top: 1.5vh; flex: 1 1 auto; min-height: 25vh; width: 100%; box-sizing: border-box; grid-auto-rows: minmax(0, 1fr); overflow: hidden;}
-.option { width: 100%; height: 100%; padding: 1vh 1vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.98); container-type: inline-size; flex-wrap: nowrap; 
-    }
-    
-    /* 🌟 移除刪節號限制，改為隨按鈕寬度彈性縮放、自然換行並完整呈現 */
-    .opt-text { font-size: clamp(14px, 10cqw, 45px); font-weight: 900; line-height: 1.15; word-break: keep-all; white-space: normal; text-align: center; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); width: 100%; 
-    }
+    .option { width: 100%; height: 100%; padding: 1vh 1vw; font-size: clamp(16px, 3.5vh, 40px); font-weight: 900; color: white; border-radius: 3vh; box-shadow: 0 1vh 0 rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: center; gap: 1vw; box-sizing: border-box; margin: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform: scale(0.98); container-type: inline-size; flex-wrap: nowrap; }
+
+    .opt-text { font-size: clamp(14px, 10cqw, 45px); font-weight: 900; line-height: 1.15; word-break: keep-all; white-space: normal; text-align: center; text-shadow: 0 0.3vh 0.5vh rgba(0,0,0,0.3); width: 100%; }
     
     .color-0 { background: linear-gradient(135deg, #ff416c, #ff4b2b); box-shadow: 0 1vh 0 #b32a18;} 
     .color-1 { background: linear-gradient(135deg, #0072ff, #00c6ff); box-shadow: 0 1vh 0 #0056b3;} 
@@ -148,11 +154,7 @@
     .color-6 { background: linear-gradient(135deg, #2c3e50, #34495e); box-shadow: 0 1vh 0 #1a252f;}
     .color-7 { background: linear-gradient(135deg, #e84393, #fd79a8); box-shadow: 0 1vh 0 #b33971;}
 
-    @keyframes superBounce {
-      0% { transform: scale(0); opacity: 0; }
-      60% { transform: scale(1.02); opacity: 1; }
-      100% { transform: scale(0.98); opacity: 1; } 
-    }
+    @keyframes superBounce { 0% { transform: scale(0); opacity: 0; } 60% { transform: scale(1.02); opacity: 1; } 100% { transform: scale(0.98); opacity: 1; } }
 
     .floating-opt { animation: floatOpt 3s ease-in-out infinite; }
     @keyframes floatOpt { 0%, 100% { transform: scale(0.98) translateY(0px) rotate(0deg); } 33% { transform: scale(0.98) translateY(-0.8vh) rotate(1deg); } 66% { transform: scale(0.98) translateY(0.5vh) rotate(-1deg); } }
@@ -230,10 +232,13 @@
 </head>
 <body class="bg-setup">
   
+  <!-- 🚨 全域暫停畫面 (動態切換：中央大屏 vs 角落講解模式) -->
   <div id="pauseOverlay">
-    <div class="pause-icon">⏸️</div>
-    <div class="pause-text">遊戲暫停中</div>
-    <div style="font-size: 4vh; color: #f1c40f; font-weight: bold;">(再次按下空白鍵恢復遊戲)</div>
+    <div id="pauseContentWrapper">
+      <div class="pause-icon">⏸️</div>
+      <div class="pause-text">遊戲暫停中</div>
+      <div class="pause-sub">(再次按下空白鍵恢復遊戲)</div>
+    </div>
   </div>
 
   <div id="giantTimerOverlay">5</div>
@@ -480,14 +485,35 @@
       playTone(randomFreq, 'sine', 0.05, 0.08); 
     }
 
+    // 🚨 全域定格機制升級
     let isGlobalPaused = false;
+    let isRevealPhase = false; // 新增：用來判定是否處於公佈解答講解期
+
     document.addEventListener('keydown', (e) => {
         if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
         if (e.code === 'Space') {
             e.preventDefault(); 
             isGlobalPaused = !isGlobalPaused;
-            document.getElementById('pauseOverlay').style.display = isGlobalPaused ? 'flex' : 'none';
-            broadcast({ type: 'GAME_PAUSED', isPaused: isGlobalPaused });
+            
+            const pOverlay = document.getElementById('pauseOverlay');
+            const pWrapper = document.getElementById('pauseContentWrapper');
+            
+            if (isGlobalPaused) {
+                // 如果目前在公佈解答的講解階段，顯示安靜的角落模式
+                if (isRevealPhase) {
+                    pOverlay.classList.add('corner-mode');
+                    pWrapper.classList.add('corner-content');
+                } else {
+                    pOverlay.classList.remove('corner-mode');
+                    pWrapper.classList.remove('corner-content');
+                }
+                pOverlay.style.display = 'flex';
+            } else {
+                pOverlay.style.display = 'none';
+            }
+
+            // 將講解狀態一併傳給手機端
+            broadcast({ type: 'GAME_PAUSED', isPaused: isGlobalPaused, isRevealPhase: isRevealPhase });
         }
     });
 
@@ -569,7 +595,7 @@
       window.requestAnimationFrame(step);
     }
 
-    // 🚨 Firebase 廣播指令給所有玩家
+    // Firebase 廣播指令給所有玩家
     function broadcast(messageObj, targetName = null) { 
       if(!window.firebaseReady) return;
       if (targetName) {
@@ -995,6 +1021,7 @@
       startQuestionFlow();
     }
 
+    // 🚨 過場警告全域暫停支援
     function triggerTeamShuffle() {
       playShuffleSound();
       document.getElementById('questionBox').style.display = 'none'; document.getElementById('leaderboard').style.display = 'none'; document.getElementById('roundRanking').style.display = 'none'; document.getElementById('nextBtn').style.display = 'none'; document.getElementById('nextBtnLeader').style.display = 'none';
@@ -1016,10 +1043,19 @@
         tIdx = (tIdx + 1) % gameConfig.teamCount;
       });
 
-      setTimeout(() => { warning.style.display = 'none'; titleEl.className = "warning-text"; startQuestionFlow(); }, 5000);
+      let shuffTime = 50;
+      let shuffInt = setInterval(() => {
+          if(isGlobalPaused) return;
+          shuffTime--;
+          if(shuffTime <= 0) {
+              clearInterval(shuffInt);
+              warning.style.display = 'none'; titleEl.className = "warning-text"; startQuestionFlow();
+          }
+      }, 100);
     }
 
     function startQuestionFlow() {
+      isRevealPhase = false; // 確保重置為非講解模式
       const qData = questions[currentQIndex];
       if (!qData) { showTeamPodium(); return; }
 
@@ -1092,7 +1128,16 @@
         if (qData.mode.includes('fog')) subText += "\n👁️ 迷霧啟動：請小心觀察！";
         document.getElementById('warningSub').innerText = subText;
         playWarning(); startPartyBGM();
-        setTimeout(() => { warning.style.display = 'none'; showQuestionUI(qData, true); }, 3000); 
+
+        let fastTime = 30;
+        let fastInt = setInterval(() => {
+            if(isGlobalPaused) return;
+            fastTime--;
+            if(fastTime <= 0) {
+                clearInterval(fastInt);
+                warning.style.display = 'none'; showQuestionUI(qData, true);
+            }
+        }, 100);
       } else {
         document.body.className = "bg-question"; startPartyBGM(); showQuestionUI(qData, false);
       }
@@ -1183,16 +1228,16 @@
           const shape = shapeList[i % shapeList.length];
           const colorClass = `color-${i % 8}`;
           
-          let isImg = optText.trim().startsWith('http');
+          let isImage = optText.trim().startsWith('http');
           
-          let contentHtml = isImg 
+          let contentHtml = isImage 
               ? `<img src="${optText.trim()}" style="max-width: 100%; max-height: 15vh; object-fit: contain; border-radius: 1.5vh; box-shadow: 0 0.5vh 1.5vh rgba(0,0,0,0.3);">` 
               : optText;
 
           optBox.innerHTML += `
           <div class="option ${colorClass} floating-opt" id="opt${i}">
               <span class="shape">${shape}</span>
-              <span class="opt-text" style="${isImg ? 'display:flex; justify-content:center; align-items:center; width:100%; height:100%; padding: 0;' : ''}">
+              <span class="opt-text" style="${isImage ? 'display:flex; justify-content:center; align-items:center; width:100%; height:100%; padding: 0;' : ''}">
                   ${contentHtml}
               </span>
           </div>`;
@@ -1313,6 +1358,7 @@
       }, 1000);
     }
 
+    // 🚨 過場警告全域暫停支援
     function processElimination() {
         if (!gameConfig.useTournament) return;
         let isElimRound = ((currentQIndex + 1) % gameConfig.tournInterval === 0);
@@ -1328,7 +1374,15 @@
         subEl.innerText = "殘酷時刻！結算淘汰名單...";
         playWarning();
 
-        setTimeout(() => { warning.style.display = 'none'; }, 4000);
+        let elimWarnTime = 40;
+        let elimWarnInt = setInterval(() => {
+            if(isGlobalPaused) return;
+            elimWarnTime--;
+            if(elimWarnTime <= 0) {
+                clearInterval(elimWarnInt);
+                warning.style.display = 'none';
+            }
+        }, 100);
 
         if (!gameConfig.isTeamMode) {
             let activePlayers = Object.keys(playerStats).filter(p => !playerStats[p].isEliminated);
@@ -1499,25 +1553,49 @@
         });
       }
 
-      setTimeout(() => {
-        document.getElementById('questionBox').style.display = 'none';
-        
-        processElimination();
-        
-        let delay = (gameConfig.useTournament && ((currentQIndex + 1) % gameConfig.tournInterval === 0)) ? 4500 : 0;
+      // 🚨 解答發表專屬暫停控制器 (替換 setTimeout)
+      isRevealPhase = true; 
 
-      setTimeout(() => {
-            if (currentMode.includes('fast_single') || currentMode.includes('fast_rank')) {
-                showRoundRanking(currentMode);
-            } else {
-                document.getElementById('leaderboard').style.display = 'flex'; 
-                renderLeaderboard(); 
-                document.getElementById('nextBtnLeader').style.display = 'inline-block'; 
-                playRoundBGM(); 
-            }
-        }, delay);
+      let waitTime = 40; 
+      let revealPhaseInterval = setInterval(() => {
+        if (isGlobalPaused) return; 
+        
+        waitTime--;
+        if (waitTime <= 0) {
+          clearInterval(revealPhaseInterval);
+          isRevealPhase = false; 
+          
+          document.getElementById('questionBox').style.display = 'none';
+          processElimination();
+          
+          let delay = (gameConfig.useTournament && ((currentQIndex + 1) % gameConfig.tournInterval === 0)) ? 45 : 0; 
 
-      }, 4000);
+          if (delay > 0) {
+              let elimWaitTime = delay;
+              let elimInterval = setInterval(() => {
+                  if (isGlobalPaused) return;
+                  elimWaitTime--;
+                  if (elimWaitTime <= 0) {
+                      clearInterval(elimInterval);
+                      proceedToLeaderboard();
+                  }
+              }, 100);
+          } else {
+              proceedToLeaderboard();
+          }
+        }
+      }, 100);
+
+      function proceedToLeaderboard() {
+          if (currentMode.includes('fast_single') || currentMode.includes('fast_rank')) {
+              showRoundRanking(currentMode);
+          } else {
+              document.getElementById('leaderboard').style.display = 'flex'; 
+              renderLeaderboard(); 
+              document.getElementById('nextBtnLeader').style.display = 'inline-block'; 
+              playRoundBGM(); 
+          }
+      }
     }
 
     function showRoundRanking(mode) {
