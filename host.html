@@ -59,32 +59,10 @@
     @keyframes flashText { from { transform: scale(1); } to { transform: scale(1.1); color: #fff; } }
     @keyframes spinAndZoom { 0% { transform: scale(0.8) rotate(-5deg); } 100% { transform: scale(1.2) rotate(5deg); color: #fff;} }
 
-#pauseOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; color: white; transition: background 0.3s, backdrop-filter 0.3s;}
-    
-    .pause-content-main { display: flex; flex-direction: column; align-items: center; }
+    #pauseOverlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; color: white; }
     .pause-icon { font-size: 20vh; animation: pulseWin 1s infinite alternate; text-shadow: 0 1vh 3vh rgba(0,0,0,0.5); }
     .pause-text { font-size: 10vh; font-weight: 900; margin: 2vh 0; letter-spacing: 0.5vw; color: #f1c40f; }
 
-    /* 🌟 新增：乾淨角落模式 (透明背景、移至右上角) */
-    #pauseOverlay.corner-mode {
-        background: transparent;
-        backdrop-filter: none;
-        justify-content: flex-start;
-        align-items: flex-end; 
-        padding: 3vh 3vw;
-        pointer-events: none; /* 不阻擋滑鼠操作 */
-    }
-    #pauseOverlay.corner-mode .pause-content-main { display: none; }
-    #pauseOverlay.corner-mode .pause-content-corner {
-        display: flex; align-items: center; gap: 1vw;
-        background: rgba(0,0,0,0.85);
-        border: 0.4vh solid #f1c40f;
-        padding: 1.5vh 3vw; border-radius: 2vh;
-        font-size: 4vh; font-weight: 900; color: #f1c40f;
-        box-shadow: 0 1vh 2vh rgba(0,0,0,0.3);
-        animation: pulseWin 1s infinite alternate;
-    }
-    
     /* ========== UI 面板 彈性適配 (防破版核心) ========== */
     .glass-panel { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); padding: 3vh 3vw; border-radius: 4vh; box-shadow: 0 2vh 5vh rgba(0,0,0,0.15), inset 0 0 0 0.5vh rgba(255,255,255,0.5); width: 95vw; height: 96vh; display: flex; flex-direction: column; justify-content: stretch; align-items: stretch; color: #333; animation: popUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-sizing: border-box; overflow: hidden; transition: box-shadow 0.3s, background-color 0.3s, border 0.3s; }
     @keyframes popUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
@@ -252,17 +230,10 @@
 </head>
 <body class="bg-setup">
   
-<div id="pauseOverlay">
-    <!-- 預設的全畫面巨大暫停 -->
-    <div class="pause-content-main">
-      <div class="pause-icon">⏸️</div>
-      <div class="pause-text">遊戲暫停中</div>
-      <div style="font-size: 4vh; color: #f1c40f; font-weight: bold;">(再次按下空白鍵恢復遊戲)</div>
-    </div>
-    <!-- 講解答案用的乾淨角落模式 -->
-    <div class="pause-content-corner" style="display: none;">
-      ⏸️ 暫停講解中...
-    </div>
+  <div id="pauseOverlay">
+    <div class="pause-icon">⏸️</div>
+    <div class="pause-text">遊戲暫停中</div>
+    <div style="font-size: 4vh; color: #f1c40f; font-weight: bold;">(再次按下空白鍵恢復遊戲)</div>
   </div>
 
   <div id="giantTimerOverlay">5</div>
@@ -515,19 +486,7 @@
         if (e.code === 'Space') {
             e.preventDefault(); 
             isGlobalPaused = !isGlobalPaused;
-            
-            const overlay = document.getElementById('pauseOverlay');
-            if (isGlobalPaused) {
-                // 🌟 判斷：如果目前是「公佈答案」畫面，則啟用角落透明模式
-                if (document.body.className.includes("bg-reveal")) {
-                    overlay.classList.add("corner-mode");
-                } else {
-                    overlay.classList.remove("corner-mode");
-                }
-                overlay.style.display = 'flex';
-            } else {
-                overlay.style.display = 'none';
-            }
+            document.getElementById('pauseOverlay').style.display = isGlobalPaused ? 'flex' : 'none';
             broadcast({ type: 'GAME_PAUSED', isPaused: isGlobalPaused });
         }
     });
@@ -1369,15 +1328,7 @@
         subEl.innerText = "殘酷時刻！結算淘汰名單...";
         playWarning();
 
-        let elimWarnTime = 4;
-        let eWarnInt = setInterval(() => {
-            if (isGlobalPaused) return;
-            elimWarnTime--;
-            if (elimWarnTime <= 0) {
-                clearInterval(eWarnInt);
-                warning.style.display = 'none';
-            }
-        }, 1000);
+        setTimeout(() => { warning.style.display = 'none'; }, 4000);
 
         if (!gameConfig.isTeamMode) {
             let activePlayers = Object.keys(playerStats).filter(p => !playerStats[p].isEliminated);
@@ -1549,38 +1500,24 @@
       }
 
       setTimeout(() => {
-// 🌟 將 setTimeout 改為 setInterval，並結合 isGlobalPaused 來達成「時間凍結」
-      let revealWaitTime = 3;
-      let revealInt = setInterval(() => {
-        if (isGlobalPaused) return; // 如果主持人按暫停，就凍結時間不往下走
+        document.getElementById('questionBox').style.display = 'none';
         
-        revealWaitTime--;
-        if (revealWaitTime <= 0) {
-          clearInterval(revealInt);
-          
-          document.getElementById('questionBox').style.display = 'none';
-          processElimination();
-          
-          let delaySeconds = (gameConfig.useTournament && ((currentQIndex + 1) % gameConfig.tournInterval === 0)) ? 4 : 0;
-          
-          let delayInt = setInterval(() => {
-              if (isGlobalPaused) return; // 如果有淘汰動畫，期間也能暫停
-              
-              delaySeconds--;
-              if (delaySeconds <= 0) {
-                  clearInterval(delayInt);
-                  if (currentMode.includes('fast_single') || currentMode.includes('fast_rank')) {
-                      showRoundRanking(currentMode);
-                  } else {
-                      document.getElementById('leaderboard').style.display = 'flex'; 
-                      renderLeaderboard(); 
-                      document.getElementById('nextBtnLeader').style.display = 'inline-block'; 
-                      playRoundBGM(); 
-                  }
-              }
-          }, 1000);
-        }
-      }, 1000);
+        processElimination();
+        
+        let delay = (gameConfig.useTournament && ((currentQIndex + 1) % gameConfig.tournInterval === 0)) ? 4500 : 0;
+
+      setTimeout(() => {
+            if (currentMode.includes('fast_single') || currentMode.includes('fast_rank')) {
+                showRoundRanking(currentMode);
+            } else {
+                document.getElementById('leaderboard').style.display = 'flex'; 
+                renderLeaderboard(); 
+                document.getElementById('nextBtnLeader').style.display = 'inline-block'; 
+                playRoundBGM(); 
+            }
+        }, delay);
+
+      }, 4000);
     }
 
     function showRoundRanking(mode) {
